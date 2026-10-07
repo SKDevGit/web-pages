@@ -20,6 +20,7 @@
 <span class="step">Part 1 · Step 2 of 3</span>
 <h2>See what a model produces</h2>
 <p>A language model doesn’t produce one answer. It produces odds for many possible endings. These percentages are illustrative, set by hand for this exercise.</p>
+<p>Click <b>Reveal the odds</b> to see them. Then click <b>Draw a random ending</b> a few times: each click picks one ending according to those odds, so you will often get a different one.</p>
 <div class="widget">
   <div id="pred-bars"></div>
   <div class="row"><button class="btn primary" id="pred-reveal">Reveal the odds</button><button class="btn" id="pred-draw">Draw a random ending</button></div>
@@ -39,7 +40,7 @@
 chrome(0);
 const CONT = [["it was damaged", 22], ["it didn’t fit", 15], ["it arrived late", 13], ["it wasn’t what they expected", 11], ["it stopped working", 10], ["they changed their mind", 9], ["they found a lower price", 6], ["the size was wrong", 5], ["it was the wrong color", 4], ["they received a duplicate", 3], ["they were unhappy with the service", 2]];
 let revealed = 0, timer = null;
-function renderBars() { const b = clear($("#pred-bars")); if (!revealed) { b.append(h("div", { class: "empty", text: "Hidden until you reveal. Write your own ending first." })); return; } b.append(bars(CONT.slice(0, revealed).map(([l, p]) => ({ label: l, p: p / 100 })), { max: 0.25 })); }
+function renderBars() { const b = clear($("#pred-bars")); if (!revealed) { b.append(h("div", { class: "empty", text: "Click “Reveal the odds” to see how a model would spread its chances across possible endings." })); return; } b.append(bars(CONT.slice(0, revealed).map(([l, p]) => ({ label: l, p: p / 100 })), { max: 0.25 })); const mine = $("#pred-in").value.trim(); if (mine && revealed >= CONT.length) b.append(h("p", { class: "hint", text: "Your ending was “" + mine + "”. Is it close to one of these? Different wording can mean the same thing." })); }
 $("#pred-reveal").onclick = () => { clearInterval(timer); revealed = 0; renderBars(); timer = setInterval(() => { revealed++; renderBars(); if (revealed >= CONT.length) clearInterval(timer); }, 400); };
 $("#pred-draw").onclick = () => { let r = Math.random() * 100, c = 0, pick = CONT[0][0]; for (const [l, p] of CONT) { c += p; if (r < c) { pick = l; break; } } const w = $("#pred-draws"); w.prepend(h("span", { text: pick })); while (w.children.length > 12) w.lastChild.remove(); };
 renderBars();

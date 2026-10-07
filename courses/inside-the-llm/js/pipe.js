@@ -36,22 +36,25 @@ function pipeline(sel, kind) {
       const badges = [];
       if (here) badges.push(h("span", { class: "pb here", text: train ? "You are here" : "Steps below" }));
       if (s.frozen) badges.push(h("span", { class: "pb frozen", text: "Model frozen" }));
+      if (emph.includes(i)) badges.push(h("span", { class: "pb emph", text: "Shapes this most" }));
       if (S.ov === 1 && s.risk) badges.push(h("span", { class: "pb risk", text: "Risk" }));
       if (S.ov === 2) badges.push(h("span", { class: "pb " + (s.own ? "own" : "vendor"), text: s.own ? "You can influence" : "Vendor" }));
-      grid.append(h("button", { class: "pcell" + (i === S.sel ? " sel" : "") + (emph.includes(i) ? " emph" : ""), onclick: () => { S.sel = i; draw(); } }, h("small", { text: i + 1 }), h("b", { text: s.t }), h("span", { class: "pbs" }, ...badges)));
+      grid.append(h("button", { class: "pcell" + (i === S.sel ? " sel" : "") + (emph.includes(i) ? " emph" : ""), onclick: () => { S.sel = i; S.out = -1; draw(); } }, h("small", { text: i + 1 }), h("b", { text: s.t }), h("span", { class: "pbs" }, ...badges)));
     });
     root.append(grid);
-    if (train) {
-      const row = h("div", { class: "row", style: { margin: "6px 0 2px" } }, h("span", { class: "hint", text: "The result is a useful product. See what shapes each kind:" }));
-      TRAIN_OUT.forEach((o, k) => row.append(h("button", { class: "btn" + (S.out === k ? " on" : ""), onclick: () => { S.out = S.out === k ? -1 : k; S.sel = 7; draw(); } }, o[0])));
-      root.append(row);
-      if (S.out >= 0) root.append(h("div", { class: "note" }, h("b", { text: TRAIN_OUT[S.out][0] + ": " }), TRAIN_OUT[S.out][2], " The most important stages are shaded."));
-    }
     const s = st[S.sel], d = h("div", { class: "mini", style: { marginTop: "10px" } }, cell("What happens", s.what), cell("Example", s.ex), cell("Why it matters", s.biz));
     if (S.ov === 1 && s.risk) d.append(cell("Where risk comes in", s.risk));
     if (S.ov === 2) d.append(cell("What you can change", s.ctl));
     root.append(h("div", { class: "label", style: { marginTop: "12px" }, text: "Stage " + (S.sel + 1) + ": " + s.t }), d);
-    const ov = h("div", { class: "row", style: { marginTop: "10px" } }, h("span", { class: "hint", text: "Show:" }), h("div", { class: "seg3" }, ...["Plain view", "Where risks come from", "What my business can change"].map((x, k) => h("button", { class: S.ov === k ? "on" : "", onclick: () => { S.ov = k; draw(); } }, x))));
+    if (train) {
+      const box = h("div", { class: "resbox" }, h("div", { class: "label", text: "The result is a useful product" }), h("p", { class: "hint", style: { margin: "2px 0 8px" }, text: "Choose a kind to see which stages shape it most." }));
+      const g = h("div", { class: "resgrid" });
+      TRAIN_OUT.forEach((o, k) => g.append(h("button", { class: "btn" + (S.out === k ? " on" : ""), onclick: () => { S.out = S.out === k ? -1 : k; draw(); } }, o[0])));
+      box.append(g);
+      if (S.out >= 0) box.append(h("div", { class: "note", style: { marginTop: "8px" } }, h("b", { text: TRAIN_OUT[S.out][0] + ": " }), TRAIN_OUT[S.out][2], " The stages that shape it most are marked above. ", h("button", { class: "btn", style: { marginLeft: "6px" }, onclick: () => { S.out = -1; draw(); } }, "Clear")));
+      root.append(box);
+    }
+    const ov = h("div", { class: "row", style: { marginTop: "10px" } }, h("span", { class: "hint", text: "Show:" }), h("div", { class: "seg3" }, ...["Plain view", "Where risks come from", "What my business can change"].map((x, k) => h("button", { class: S.ov === k ? "on" : "", onclick: () => { S.ov = k; S.out = -1; draw(); } }, x))));
     root.insertBefore(ov, grid);
   }
   draw();

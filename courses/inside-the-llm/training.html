@@ -32,13 +32,14 @@
 
 <span class="step">Step 4 of 6</span>
 <h2>Adjust the numbers</h2>
-<p>The model nudges its parameters so that, next time it sees this context, the right word gets a little more chance. The nudge is small on purpose. Press it a few times and watch the chance climb.</p>
+<p>The model nudges its parameters so that, for this same context, the real word gets a little more chance. Each nudge is small on purpose, and training repeats it many times so the changes add up. The slider sets how big each nudge is: a bigger size moves the chance more in a single press, a smaller size moves it less. Press the button a few times and watch the chance climb.</p>
 <div class="widget" id="x4"></div>
 <div id="q4"></div>
 
 <span class="step">Step 5 of 6</span>
 <h2>Repeat</h2>
 <p>One example teaches the model almost nothing. Training is this loop run over and over on different sentences, so the nudges add up. Run it in bulk and watch the error score fall.</p>
+<p>Training repeats this loop over many different examples, and stops when the average error stops improving or the budget runs out. It never reaches zero, because many endings are reasonable.</p>
 <div class="widget" id="x5"></div>
 <div id="q5"></div>
 
@@ -96,18 +97,26 @@ function r2() {
   x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.myGuess = sel.value; S.guessed = true; renderAll(); } }, "Lock in my guess and show the model’s"), h("button", { class: "btn", onclick: fresh }, "Start from an untrained model")));
 }
 function r3() {
-  const x = clear($("#x3")); x.append(h("div", { class: "label", text: "The error score" }));
+  const x = clear($("#x3")); x.append(h("div", { class: "label", text: "Reveal the word and read the score" }), h("p", { class: "hint", style: { margin: "0 0 8px" }, text: "The error score measures surprise. It is 0 when the model gave the right word a 100% chance, and it grows as that chance shrinks." }));
   if (!S.cur || !S.guessed) { x.append(need("Make a guess in step 2 first.")); }
   else {
     x.append(sentEl(S.revealed));
-    if (S.revealed) { const p = S.before[S.cur.j]; x.append(bars(topRows(S.before, 5, S.cur.j, null, S.cur.j)), h("div", { class: "stats" }, h("span", null, h("b", { text: pct(p) }), "chance given to “" + dispW(S.cur.j) + "”"), h("span", null, h("b", { text: (-Math.log(p)).toFixed(2) }), "error score"))); }
-    x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.revealed = true; renderAll(); } }, "Reveal the real word")));
+    x.append(h("p", { class: "hint", text: "Shaded red: the word the model is given. Green: the real next word, shown after you reveal it." }));
+    if (!S.revealed) x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.revealed = true; renderAll(); } }, "Reveal the real word")));
+    if (S.revealed) {
+      const p = S.before[S.cur.j], sc = -Math.log(p), w = dispW(S.cur.j);
+      const lv = sc < 0.7 ? ["good", "Low score: the model was fairly sure"] : sc < 2 ? ["info", "Medium score: the model gave it some chance"] : ["warn", "High score: the model was surprised"];
+      x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "The model’s chances for the next word" }), bars(topRows(S.before, 5, S.cur.j, null, S.cur.j)), h("p", { class: "hint", text: "The highlighted bar is the real word." }),
+        h("div", { class: "note" }, h("p", { style: { margin: "0 0 6px" } }, "The real next word was “" + w + "”. The model gave it " + pct(p) + ", so the error score is ", h("b", { text: sc.toFixed(2) }), "*."), h("span", { class: "pill " + lv[0], text: lv[1] }), h("div", { class: "track", style: { marginTop: "10px" } }, h("i", { style: { width: Math.min(100, sc / 5 * 100) + "%" } })), h("div", { class: "hint", style: { display: "flex", justifyContent: "space-between" } }, h("span", { text: "0: sure and right" }), h("span", { text: "5 or more: very surprised" }))));
+    }
   }
   const out = h("b", { text: "" }), sl = h("input", { type: "range", min: 1, max: 99, value: 20, id: "p-sl", "aria-label": "Chance given to the right word" });
   const upd = () => { const p = sl.value / 100; out.textContent = (-Math.log(p)).toFixed(2); lab.textContent = sl.value + "%"; };
   const lab = h("b", { text: "" });
   sl.oninput = upd;
-  x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "Try it: how the score behaves" }), h("label", { class: "field", for: "p-sl" }, h("span", null, "If the model had given the right word a chance of ", lab), sl), h("p", { class: "hint" }, "The error score would be ", out, ". Higher confidence in the right word means a lower score."));
+  x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "Try it: slide the chance, watch the score" }), h("label", { class: "field", for: "p-sl" }, h("span", null, "If the model had given the right word a chance of ", lab), sl), h("p", { class: "hint" }, "The error score* would be ", out, ". Higher confidence in the right word means a lower score."));
+  const pr = S.cur && S.guessed && S.revealed ? S.before[S.cur.j] : null;
+  x.append(h("p", { class: "hint", style: { marginTop: "12px", borderTop: "1px solid var(--line)", paddingTop: "8px" } }, "* How it is calculated: the error score is −ln(chance), the negative natural logarithm of the chance the model gave the real word." + (pr ? " In the example above: −ln(" + (+pr.toFixed(4)) + ") = " + (-Math.log(pr)).toFixed(2) + "." : "")));
   upd();
 }
 function r4() {
@@ -120,6 +129,7 @@ function r4() {
   const lab = h("b", { text: S.lr.toFixed(2) }), sl = h("input", { type: "range", min: 0.05, max: 1.5, step: 0.05, value: S.lr, id: "lr-sl" });
   sl.oninput = () => { S.lr = parseFloat(sl.value); lab.textContent = S.lr.toFixed(2); };
   x.append(h("label", { class: "field", for: "lr-sl" }, h("span", null, "Size of each nudge: ", lab), sl), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { M.apply(S.cur.i, S.cur.j, S.lr); saveModel(M); S.nudged = true; renderAll(); } }, "Nudge the numbers")));
+  x.append(h("p", { class: "hint", text: "Size of each nudge (also called the learning rate) is how far the numbers move in one press. Too large and the model overshoots, favouring this word and getting other contexts wrong. Too small and it needs many more nudges. Try a small size, then a large one, on the same example." }));
 }
 function r5() {
   const x = clear($("#x5")); x.append(h("div", { class: "label", text: "Many examples" }));
@@ -129,8 +139,15 @@ function r5() {
   x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: train(25) }, "Train on 25 examples"), h("button", { class: "btn", onclick: train(500) }, "Train on 500"), h("button", { class: "btn", onclick: fresh }, "Start over")));
   const sel = h("select", { id: "ask-sel", onchange: e => { S.ask = e.target.value; r5(); } }); VOCAB.forEach((w, k) => { if (k && w !== ".") sel.append(h("option", { value: w, text: w, selected: w === S.ask })); });
   const unif = new Array(V).fill(1 / (V - 1)); unif[0] = 0;
-  x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "Ask the model" }), h("label", { class: "field", for: "ask-sel" }, "After the word", sel),
-    h("div", null, h("p", { class: "hint", text: "Before any training" }), bars(topRows(unif, 4))), h("div", null, h("p", { class: "hint", text: "Now" }), bars(topRows(M.probs(VI[S.ask]), 4))));
+  const now = M.probs(VI[S.ask]), idx = now.map((v, k) => k).filter(k => k !== 0).sort((a, b) => now[b] - now[a]).slice(0, 5);
+  x.append(h("div", { class: "label", style: { marginTop: "14px" }, text: "Ask the model: what comes next?" }),
+    h("p", { style: { margin: "0 0 8px" }, text: "Once training has run, what the model learned is stored in its parameters. You can ask it a question at any time: given this word, what chance does each possible next word get? Looking up those chances is exactly what the model does when it writes (Part 4). Compare the answer before and after training." }),
+    h("label", { class: "field", for: "ask-sel" }, "After the word", sel));
+  if (!M.steps) x.append(h("div", { class: "empty", text: "The model has not been trained yet, so every word has the same small chance. Press “Train on 25 examples” above, then look at the chances again." }));
+  x.append(h("p", { class: "hint", style: { marginTop: "8px" }, text: "Bars: chances after training on " + M.steps.toLocaleString() + " examples. Black ticks: the chances before any training (all equal)." }), bars(topRows(now, 5, undefined, unif)));
+  const tb = h("table", { class: "cmpt" }, h("tr", null, ...["Next word", "Before training", "After training", "Change"].map(t => h("th", { text: t }))));
+  idx.forEach(k => { const b0 = unif[k], a1 = now[k], d = a1 - b0; tb.append(h("tr", null, h("td", { style: { fontWeight: 600 }, text: dispW(k) }), h("td", { text: pct(b0) }), h("td", { text: pct(a1) }), h("td", { text: (d >= 0 ? "+" : "") + (d * 100).toFixed(1) + " points" }))); });
+  x.append(h("div", { style: { overflow: "auto" } }, tb));
 }
 function renderAll() { r1(); r2(); r3(); r4(); r5(); }
 renderAll();

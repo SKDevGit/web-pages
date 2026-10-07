@@ -24,7 +24,7 @@ function lossChart(M, floor) {
   const n = M.losses.length, X = k => l + (k / Math.max(59, n - 1)) * iw, Y = v => t + ih - Math.min(v, maxY) / maxY * ih;
   let s = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Error score over training steps">';
   [0, 1, 2, 3].forEach(v => { s += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="' + cssv("--line") + '"/><text x="' + (l - 6) + '" y="' + (Y(v) + 3) + '" text-anchor="end">' + v + "</text>"; });
-  s += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + Y(floor) + '" y2="' + Y(floor) + '" stroke="' + cssv("--good") + '" stroke-dasharray="4 3"/><text x="' + (W - r) + '" y="' + (Y(floor) - 4) + '" text-anchor="end">lowest this model can reach</text>';
+  s += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + Y(floor) + '" y2="' + Y(floor) + '" stroke="' + cssv("--good") + '" stroke-dasharray="4 3"/><text x="' + (W - r - 14) + '" y="' + (Y(floor) - 4) + '" text-anchor="end">lowest this model can reach</text>';
   s += '<text x="' + l + '" y="' + (H - 6) + '">step 1</text><text x="' + (W - r) + '" y="' + (H - 6) + '" text-anchor="end">step ' + Math.max(60, n) + "</text>";
   if (n > 1) {
     const pts = [], q = []; let run = 0;

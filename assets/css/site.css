@@ -245,11 +245,17 @@ table.cmpt{border-collapse:collapse;width:100%;font-size:.88rem;margin-bottom:10
 .pcell b{font-size:.88rem;line-height:1.25}
 .pcell:hover{border-color:var(--accent)}
 .pcell.sel{border-color:var(--accent);background:var(--accent-soft)}
-.pcell.emph{box-shadow:inset 0 0 0 2px var(--good)}
+.pcell.emph{border-color:var(--good);background:var(--good-soft)}
 .pbs{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
 .pb{font:500 .64rem var(--f-mono);border-radius:999px;padding:1px 7px;background:var(--soft);color:var(--muted)}
 .pb.here{background:var(--accent);color:var(--surface)}
 .pb.frozen{background:var(--ink);color:var(--surface)}
 .pb.risk{background:var(--bad-soft);color:var(--bad)}
+.pb.emph{background:var(--good);color:var(--surface)}
 .pb.own{background:var(--good-soft);color:var(--good)}
 .side .all{font:500 .72rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:0 8px}.side .all:hover{color:var(--accent)}
+
+.resbox{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.resgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.resgrid .btn{width:100%}
+@media(max-width:520px){.resgrid{grid-template-columns:1fr}}
