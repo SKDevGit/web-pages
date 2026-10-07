@@ -4,11 +4,11 @@
 <header id="site-head"></header>
 <main class="col">
 <h1>Cost, choice and where to start</h1>
-<p class="meta">3 exercises</p>
-<p class="lede">Three practical questions come up in every adoption discussion: which model, at what cost, and for which job first. This page gives you a simple way to think about each.</p>
-<div class="learn"><b>By the end you can</b>choose a model size for a task, tell the main kinds of model apart, and rank candidate use cases.</div>
+<p class="meta">4 exercises</p>
+<p class="lede">Practical questions come up in every adoption discussion: which kind of model, how big, how it is offered, and for which job first. This page gives you a simple way to think about each.</p>
+<div class="learn"><b>By the end you can</b>choose a model size for a task, name the main kinds of model and what each predicts, tell how models are offered, and rank candidate use cases.</div>
 
-<span class="step">Step 1 of 3</span>
+<span class="step">Step 1 of 4</span>
 <h2>Pick the smallest model that is good enough</h2>
 <p>Bigger models are more capable, but cost more and respond more slowly. Choose how hard the task is, and see which sizes handle it.</p>
 <div class="widget">
@@ -19,9 +19,19 @@
 </div>
 <div id="q1"></div>
 
-<span class="step">Step 2 of 3</span>
-<h2>The landscape of models</h2>
-<p>Models differ in who runs them, what they can read, and what they are built for. Choose a kind to compare.</p>
+<span class="step">Step 2 of 4</span>
+<h2>Kinds of models: what each one predicts</h2>
+<p>Everything so far used a text model, but the same idea works on other kinds of data. Every model predicts the next piece of its own kind of data. Choose a kind to see what it reads, what it predicts, and where a business might use it.</p>
+<div class="widget">
+  <div class="chips" id="bk-chips"></div>
+  <div class="mini" id="bk-out"></div>
+  <p class="hint">Maturity is a rough guide and moves fast. Check current products before you plan around any of these.</p>
+</div>
+<div id="qk"></div>
+
+<span class="step">Step 3 of 4</span>
+<h2>How models are offered</h2>
+<p>Models also differ in who runs them and what they are tuned for. Choose an option to compare.</p>
 <div class="widget">
   <div class="chips" id="b2-chips"></div>
   <div class="mini" id="b2-out"></div>
@@ -31,12 +41,13 @@
 </div>
 <div id="q2"></div>
 
-<span class="step">Step 3 of 3</span>
+<span class="step">Step 4 of 4</span>
 <h2>Where to start</h2>
-<p>Good first projects have high volume, low risk, and answers that are easy to check. Switch each criterion on or off to see how the use cases rank.</p>
+<p>Good first projects are ones the model does well (high capability), carry low risk, and have answers that are easy to check. Switch each criterion on or off to see how the use cases rank.</p>
 <div class="widget">
   <div class="stack" id="b3-list"></div>
-  <p class="hint">Starting values are suggestions. Change them to match your own business.</p>
+  <div class="note" id="b3-top"></div>
+  <p class="hint">Each task is scored on its own. Clicking a button changes only that task. Starting values are suggestions. Change them to match your own business.</p>
 </div>
 <div id="q3"></div>
 
@@ -57,7 +68,12 @@ seg("#b1-seg", TK.map(t => t[0]), 0, k => {
 });
 $("#q1").append(quick("A company labels 100,000 support emails a day. What is the sensible choice?", ["A small model, if it labels accurately enough", "The largest model available", "No model"], 0, "Cost and delay multiply with volume. Choose the smallest model that passes your accuracy test."));
 // 2
-const KD = [["Hosted by a vendor", "You use it over the internet, and the provider runs it.", "Quick start, strong models, little setup.", "Your data goes to the vendor. Prices and terms are theirs."], ["Open weights", "The parameters are published, so you can run it yourself.", "More control over data and customisation.", "You need the people and hardware to run it."], ["Multimodal", "Reads and sometimes writes images, audio or video as well as text.", "Read invoices, charts, photos and speech.", "Costs and risks differ by format. Check each."], ["Specialised", "Tuned for one area, such as code, law or medicine.", "Better on its home turf.", "Narrower, and still needs review."]];
+const KM = [["Text (language)", "Text and code, as tokens.", "The next token.", "Drafting replies, summarizing, answering questions, writing code.", "Mature"], ["Audio and speech", "Sound, cut into short chunks.", "The next sound chunk, or the words being spoken.", "Transcribing support calls, voice assistants, reading text aloud.", "Mature"], ["Images and video", "Pictures, split into small patches, and frames over time.", "The next patch or frame, or a picture from a description.", "Product images, ads, reading invoices and photos, inspecting goods.", "Maturing"], ["Multimodal", "Text, images, audio and sometimes video together.", "The next token, whichever kind of data the answer needs.", "Ask a question about a photo, a chart or a recorded meeting.", "Maturing"], ["Time series", "Numbers over time, such as sales, prices or sensor readings.", "The next values in the series.", "Forecasting demand, returns volume, cash flow or equipment failure.", "Growing"], ["Physical (robotics)", "Camera and sensor readings, plus an instruction.", "The next action, such as move, grasp or turn.", "Warehouse picking, inspection, delivery, factory tasks.", "Early"]];
+const KMC = { Mature: "good", Maturing: "info", Growing: "info", Early: "warn" };
+KM.forEach((k, i) => $("#bk-chips").append(h("button", { class: "btn" + (i === 0 ? " on" : ""), onclick: e => { document.querySelectorAll("#bk-chips button").forEach(b => b.classList.remove("on")); e.currentTarget.classList.add("on"); showK(i); } }, k[0])));
+function showK(i) { const k = KM[i]; clear($("#bk-out")).append(cell("What it reads", k[1]), cell("What it predicts next", k[2]), cell("Business use", k[3]), cell("Maturity", k[4])); } showK(0);
+$("#qk").append(quick("A retailer wants to forecast next month’s weekly returns from its past sales numbers. Which kind of model fits?", ["A time series model", "A text model, because returns are about customers", "An audio model"], 0, "The data is numbers over time, so the model should predict the next numbers in the series. A text model can discuss the forecast, but it is not built to produce it."));
+const KD = [["Hosted by a vendor", "You use it over the internet, and the provider runs it.", "Quick start, strong models, little setup.", "Your data goes to the vendor. Prices and terms are theirs."], ["Open weights", "The parameters are published, so you can run it yourself.", "More control over data and customisation.", "You need the people and hardware to run it."], ["Specialised", "Tuned for one area, such as code, law or medicine.", "Better on its home turf.", "Narrower, and still needs review."]];
 KD.forEach((k, i) => $("#b2-chips").append(h("button", { class: "btn" + (i === 0 ? " on" : ""), onclick: e => { document.querySelectorAll("#b2-chips button").forEach(b => b.classList.remove("on")); e.currentTarget.classList.add("on"); show(i); } }, k[0])));
 function show(i) { const k = KD[i]; clear($("#b2-out")).append(cell("What it is", k[1]), cell("Good for", k[2]), cell("Watch out for", k[3])); } show(0);
 const TL = [["2017", "The transformer design is introduced, built around attention."], ["2020", "Models grow much larger, trained on far more text. Their general ability surprises researchers."], ["2022", "Chat assistants make the technology available to everyone."], ["2023", "Models begin to handle images and sound, and to call tools."], ["Now", "Agents take multi-step actions, and companies embed models in their own products."]];
@@ -65,11 +81,12 @@ TL.forEach((t, i) => $("#b2-time").append(h("button", { class: i === 0 ? "on" : 
 $("#b2-tmsg").textContent = TL[0][1];
 $("#q2").append(quick("Why might a bank choose an open-weights model it runs itself?", ["To keep sensitive data inside its own systems", "Because it is always smarter", "Because it needs no staff"], 0, "Running a model yourself gives control over data and customisation. In return, you take on the work of running it."));
 // 3
-const UC = [["Sort incoming support emails", [1, 1, 1]], ["Draft replies for agents to review", [1, 1, 1]], ["Summarize weekly meeting notes", [0, 1, 1]], ["Approve refunds automatically", [1, 0, 0]], ["Write legal advice for clients", [0, 0, 0]], ["Extract fields from invoices", [1, 1, 1]]];
-const CR3 = ["High volume", "Low risk", "Easy to check"];
+const UC = [["Sort incoming support emails", [1, 1, 1]], ["Draft replies for agents to review", [1, 1, 1]], ["Summarize weekly meeting notes", [1, 1, 0]], ["Approve refunds automatically", [1, 0, 0]], ["Write legal advice for clients", [0, 0, 0]], ["Extract fields from invoices", [1, 1, 1]]];
+const CR3 = ["High capability", "Low risk", "Easy to check"];
 function r3() {
-  const l = clear($("#b3-list")), rows = UC.map((u, i) => [u, i, u[1].reduce((a, b) => a + b, 0)]).sort((a, b) => b[2] - a[2] || a[1] - b[1]);
-  rows.forEach(([u, i, sc]) => l.append(h("div", { class: "row", style: { alignItems: "center" } }, h("span", { style: { flex: 1, minWidth: "13rem" }, text: u[0] }), h("span", { class: "pill " + (sc === 3 ? "good" : sc === 2 ? "info" : "warn"), style: { minWidth: "5.5rem", textAlign: "center" }, text: sc === 3 ? "Start here" : sc === 2 ? "Maybe" : "Later" }), ...CR3.map((c, k) => h("button", { class: "btn" + (u[1][k] ? " on" : ""), onclick: () => { u[1][k] = u[1][k] ? 0 : 1; r3(); } }, c)))));
+  const l = clear($("#b3-list")), rows = UC.map((u, i) => [u, i, u[1].reduce((a, b) => a + b, 0)]);
+  rows.forEach(([u, i, sc]) => l.append(h("div", { style: { padding: "10px 0", borderBottom: "1px solid var(--line)" } }, h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", marginBottom: "8px" } }, h("span", { style: { fontWeight: 500 }, text: u[0] }), h("span", { class: "pill " + (sc === 3 ? "good" : sc === 2 ? "info" : "warn"), style: { minWidth: "5.5rem", textAlign: "center", flex: "none" }, text: sc === 3 ? "Start here" : sc === 2 ? "Maybe" : "Later" })), h("div", { style: { display: "flex", flexWrap: "nowrap", gap: "6px" } }, ...CR3.map((c, k) => h("button", { class: "btn" + (u[1][k] ? " on" : ""), style: { whiteSpace: "nowrap", padding: "5px 9px", fontSize: ".82rem" }, onclick: () => { u[1][k] = u[1][k] ? 0 : 1; r3(); } }, c))))));
+  const best = UC.filter(u => u[1].reduce((a, b) => a + b, 0) === Math.max(...UC.map(x => x[1].reduce((a, b) => a + b, 0)))).map(u => u[0]); $("#b3-top").textContent = "Strongest first projects right now: " + best.join("; ") + ".";
 }
 r3();
 $("#q3").append(quick("Which first project is best?", ["Drafting replies that an agent reviews before sending", "Sending refunds with no human check", "Giving legal advice to clients"], 0, "It is frequent, forgiving and easy to review. A person catches mistakes before they reach a customer."));
