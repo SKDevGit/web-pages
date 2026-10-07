@@ -69,6 +69,7 @@ function chrome(i) {
   if (i === 0) pg.append(h("a", { href: "index.html" }, h("small", { text: "Previous" }), h("b", { text: "Home" })));
   if (i > 0) pg.append(h("a", { href: PAGES[i - 1][0] }, h("small", { text: "Previous" }), h("b", { text: PAGES[i - 1][1] })));
   if (i < PAGES.length - 1) pg.append(h("a", { class: "nx", href: PAGES[i + 1][0] }, h("small", { text: "Next" }), h("b", { text: PAGES[i + 1][1] })));
+  pg.append(h("p", { class: "copy", text: "\u00a9 2026 Srikanth KS. All rights reserved." }));
   sidebar(i);
 }
 
