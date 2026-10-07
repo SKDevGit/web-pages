@@ -3,8 +3,8 @@ const TRAIN_STAGES = [
   { t: "Collect text", what: "Gather very large amounts of text from the web, books, code and licensed sources.", ex: "Support emails, policy pages, forum answers, product manuals.", biz: "What goes in decides what the model knows and how it sounds. Sources also raise data-rights questions.", risk: "Bias, copyright and privacy problems start here.", ctl: "Vendor’s choice. Yours is choosing which model to use.", own: false },
   { t: "Clean and filter", what: "Remove duplicates, broken text, low-quality pages, personal details and harmful material.", ex: "Drop the 500 copies of the same refund policy found on different sites.", biz: "Quality in, quality out. Cleaning shapes behaviour, but it never makes the data perfect.", risk: "Gaps and leftovers remain, so errors and bias can survive.", ctl: "Vendor’s choice.", own: false },
   { t: "Tokenize", what: "Split the cleaned text into tokens and turn them into ID numbers (Part 2).", ex: "“refund” becomes one token. “4821” may become several.", biz: "Tokens are the unit of cost and of the context window.", risk: null, ctl: "Vendor’s choice.", own: false },
-  { t: "Pre-train", what: "The model guesses the next token across all the text, again and again, and its parameters are adjusted (the exercises on this page).", ex: "Guess the word after “The customer returned the product because…”.", biz: "By far the most expensive stage, so few firms do it. General language ability, and the knowledge cutoff, come from here.", risk: "It learns patterns, not verified facts. That is the root of hallucination, and its knowledge stops at the cutoff.", ctl: "Vendor’s choice.", own: false },
-  { t: "Fine-tune on examples", what: "Further training on example requests paired with good answers, so the model follows instructions (step 6 below).", ex: "“Write a polite reply declining a late return”, paired with a good reply.", biz: "Much cheaper than pre-training. It shapes style and format, and firms can do it with their own examples.", risk: "Narrow examples can narrow or skew behaviour.", ctl: "Possible for your firm, if you have enough good examples (Part 8).", own: true },
+  { t: "Pre-train", what: "The model guesses the next token across all the text, again and again, and its parameters are adjusted (Stage 1 below).", ex: "Guess the word after “The customer returned the product because…”.", biz: "By far the most expensive stage, so few firms do it. General language ability, and the knowledge cutoff, come from here.", risk: "It learns patterns, not verified facts. That is the root of hallucination, and its knowledge stops at the cutoff.", ctl: "Vendor’s choice.", own: false },
+  { t: "Fine-tune on examples", what: "Further training on example requests paired with good answers, so the model follows instructions (Stage 2 below).", ex: "“Write a polite reply declining a late return”, paired with a good reply.", biz: "Much cheaper than pre-training. It shapes style and format, and firms can do it with their own examples.", risk: "Narrow examples can narrow or skew behaviour.", ctl: "Possible for your firm, if you have enough good examples (Part 8).", own: true },
   { t: "Learn from feedback", what: "People rank answers, and the model is adjusted toward the ones they prefer.", ex: "Raters prefer the polite, accurate reply to the curt one.", biz: "Makes the tool helpful, polite and careful. It reflects its raters’ judgement.", risk: "Reflects what raters preferred, which can carry bias or lean toward pleasing the user.", ctl: "Vendor’s choice.", own: false },
   { t: "Test and release", what: "Check quality and safety, then freeze the parameters and publish a version.", ex: "Run thousands of test requests, including tricky and harmful ones.", biz: "The model is now a fixed file. It does not learn from your chats. New versions arrive when the vendor trains again.", risk: "Tests cannot catch everything, and the knowledge date is now fixed.", ctl: "Pick a version, and run your own tests on your tasks.", own: true, frozen: true },
   { t: "Package as a product", what: "Wrap the model with instructions, an interface, safety checks and sometimes tools.", ex: "A chat window with a system prompt, an editor plug-in, an agent with an order-lookup tool.", biz: "Much of what makes a tool useful at work is built around the model, not inside it.", risk: "Weak checks, or too many permissions, turn errors into actions.", ctl: "Yours when you build or configure a product: instructions, tools, approvals.", own: true }
@@ -26,7 +26,7 @@ const INFER_STAGES = [
 function pipeline(sel, kind) {
   const train = kind === "train", st = train ? TRAIN_STAGES : INFER_STAGES, root = $(sel);
   const S = { sel: train ? 3 : 4, ov: 0, out: -1 };
-  const HERE = train ? [3] : null;
+  const HERE = train ? [3, 4, 5, 6, 7] : null;
   function draw() {
     clear(root);
     const emph = S.out >= 0 ? TRAIN_OUT[S.out][1] : [];
@@ -34,7 +34,7 @@ function pipeline(sel, kind) {
     st.forEach((s, i) => {
       const here = train ? HERE.includes(i) : !!s.here;
       const badges = [];
-      if (here) badges.push(h("span", { class: "pb here", text: train ? "You are here" : "Steps below" }));
+      if (here) badges.push(h("span", { class: "pb here", text: train ? "Exercise below" : "Steps below" }));
       if (s.frozen) badges.push(h("span", { class: "pb frozen", text: "Model frozen" }));
       if (emph.includes(i)) badges.push(h("span", { class: "pb emph", text: "Shapes this most" }));
       if (S.ov === 1 && s.risk) badges.push(h("span", { class: "pb risk", text: "Risk" }));

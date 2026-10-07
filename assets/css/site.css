@@ -240,13 +240,14 @@ table.cmpt{border-collapse:collapse;width:100%;font-size:.88rem;margin-bottom:10
 .learned{background:var(--good-soft);border-radius:8px;padding:10px 14px;font-size:.92rem}.learned b{display:block;font:500 .7rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--good);margin-bottom:2px}
 
 .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:8px;margin:10px 0}
-.pcell{position:relative;text-align:left;display:grid;gap:2px;align-content:start;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 11px;color:var(--ink);min-height:84px}
+.pcell{position:relative;text-align:left;display:grid;gap:2px;grid-template-rows:auto auto 1fr;align-content:stretch;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 11px;color:var(--ink);min-height:122px}
 .pcell small{font:500 .7rem var(--f-mono);color:var(--muted)}
 .pcell b{font-size:.88rem;line-height:1.25}
 .pcell:hover{border-color:var(--accent)}
 .pcell.sel{border-color:var(--accent);background:var(--accent-soft)}
 .pcell.emph{border-color:var(--good);background:var(--good-soft)}
-.pbs{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.pbs{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:3px;margin-top:6px}
+.pbs .pb{white-space:nowrap}
 .pb{font:500 .64rem var(--f-mono);border-radius:999px;padding:1px 7px;background:var(--soft);color:var(--muted)}
 .pb.here{background:var(--accent);color:var(--surface)}
 .pb.frozen{background:var(--ink);color:var(--surface)}
@@ -259,3 +260,5 @@ table.cmpt{border-collapse:collapse;width:100%;font-size:.88rem;margin-bottom:10
 .resgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .resgrid .btn{width:100%}
 @media(max-width:520px){.resgrid{grid-template-columns:1fr}}
+
+.stagebar{margin:34px 0 6px;padding:12px 16px;border-left:4px solid var(--accent);background:var(--soft);border-radius:0 8px 8px 0}.stagebar span{font:500 .72rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}.stagebar b{display:block;font:600 1.25rem var(--f-serif);margin:2px 0}.stagebar p{margin:0;font-size:.92rem;color:var(--muted)}
