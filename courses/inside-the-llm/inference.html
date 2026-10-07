@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>How inference works</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css"></head><body>
+<header id="site-head"></header>
+<main class="col">
+<h1>How inference works</h1>
+<p class="meta">6 steps</p>
+<p class="lede">Inference is what happens each time you send a model a prompt. The learned parameters are already fixed. The model reads your text, works out odds for the next word, picks one, and goes around again. You’ll follow one prompt through every step, from receiving it to picking the next word.</p>
+<div class="learn"><b>By the end you can</b>list the steps from prompt to next word, explain why a model can give different answers to the same prompt, and say which part of the process you control.</div>
+<div id="status" class="note" style="margin-top:20px"></div>
+
+<h2>The big picture</h2>
+<p>This is what happens after the model is finished and packaged into a product. The parameters are frozen, so nothing here changes the model. The steps below follow the highlighted stages. Click any box for detail.</p>
+<div class="widget" id="pipe"></div>
+
+<span class="step" id="s1">Step 1 of 6</span>
+<h2>Receive the prompt</h2>
+<p>The model is handed text. That is its entire view of the world: your prompt, plus any words it has already written. Choose the prompt you’ll follow through the rest of this page.</p>
+<div class="widget" id="x1"></div>
+<div id="q1"></div>
+
+<span class="step" id="s2">Step 2 of 6</span>
+<h2>Split into tokens</h2>
+<p>The text is cut into small pieces called tokens. Common words are usually one token. Rarer words are cut into several pieces.</p>
+<div class="widget" id="x2"></div>
+<div id="q2"></div>
+
+<span class="step" id="s3">Step 3 of 6</span>
+<h2>Turn tokens into numbers</h2>
+<p>Each token is swapped for an ID number from the model’s vocabulary. The model’s calculations only work on numbers, so from here on it never sees words again.</p>
+<div class="widget" id="x3"></div>
+<div id="q3"></div>
+
+<span class="step" id="s4">Step 4 of 6</span>
+<h2>Look at the context</h2>
+<p>Next the model decides which tokens matter for the next word. This is called attention. The tiny model here only looks at the last token. Large models weigh the whole prompt, as you’ll see in part 5.</p>
+<div class="widget" id="x4"></div>
+<div id="q4"></div>
+
+<span class="step" id="s5">Step 5 of 6</span>
+<h2>Score every next word</h2>
+<p>Using what training taught it, the model gives every word in its vocabulary a percentage chance of coming next. These are the numbers you shaped on the training page.</p>
+<div class="widget" id="x5"></div>
+<div id="q5"></div>
+
+<span class="step" id="s6">Step 6 of 6</span>
+<h2>Pick the next word</h2>
+<p>The model doesn’t always take the top word. It rolls weighted dice, so likelier words win more often. Temperature controls how adventurous the roll is: at 0 it always takes the top word. The picked word is added to the prompt, and the model goes around again.</p>
+<div class="widget" id="x6"></div>
+<div id="q6"></div>
+
+<h2>Why the answers differ</h2>
+<p>Because of the dice in step 6, the same prompt can produce different replies. Run it ten times at the temperature you chose and see how much they vary.</p>
+<div class="widget" id="x8"></div>
+<div id="q8"></div>
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script><script src="js/pipe.js"></script>
+<script>
+chrome(3);
+const M = loadModel(new Tiny());
+const S = { prompt: "the customer returned the product because", gen: [], T: 1, picked: null, r: null, rev: {} };
+const pw = () => S.prompt.split(" ");
+const words = () => pw().concat(S.gen);
+const last = () => { const w = words(); return w[w.length - 1]; };
+const done = () => last() === "." || words().length >= 18;
+function nextDist(l) { const p = M.probs(VI[l]); p[0] = 0; const z = p.reduce((a, b) => a + b, 0); return p.map(x => x / z); }
+function dist(T) { const p1 = nextDist(last()), pT = applyTemp(p1, T); return { p1, pT, order: pT.map((x, k) => k).sort((a, b) => pT[b] - pT[a]) }; }
+function strip() { const n0 = pw().length, s = h("div", { class: "strip" }); words().forEach((w, i) => s.append(h("span", { class: "w" + (i >= n0 ? " g" : ""), text: w }))); if (!done()) s.append(h("span", { class: "cursor" })); return s; }
+const promptLine = () => h("div", { class: "stack", style: { gap: "4px" } }, h("div", { class: "label", text: "Your prompt" }), strip());
+const finished = () => h("div", { class: "empty", text: last() === "." ? "The reply ended with a full stop, so there is no next word. Press Start over in step 6." : "Length limit reached. Press Start over in step 6." });
+const go = (n, label) => h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.rev[n] = true; renderAll(); } }, S.rev[n] ? "Show again" : label));
+function status() {
+  const st = clear($("#status"));
+  if (M.steps >= 200) st.append("This page uses the model you trained: " + M.steps.toLocaleString() + " examples.");
+  else st.append("This model has barely been trained (" + M.steps + " examples), so its odds are close to random. ", h("a", { href: "training.html", text: "Train it first" }), " or ", h("button", { class: "btn", onclick: () => { M.train(2000, 0.5); saveModel(M); renderAll(); } }, "use a pre-trained model"), ".");
+}
+function reset(p) { if (p != null) S.prompt = p; S.gen = []; S.picked = null; S.rev = {}; renderAll(); }
+function r1() {
+  const x = clear($("#x1")); x.append(h("div", { class: "label", text: "Choose a prompt" }));
+  const row = h("div", { class: "row" });
+  ["the customer returned the product because", "the customer asked for", "the support team"].forEach(t => row.append(h("button", { class: "btn", style: S.prompt === t ? { borderColor: "var(--accent)", background: "var(--accent-soft)" } : {}, onclick: () => reset(t) }, t)));
+  x.append(row, promptLine(), h("p", { class: "hint", text: "Grey is your prompt. Orange is anything the model has already added." }));
+}
+function r2() {
+  const x = clear($("#x2")); x.append(h("div", { class: "label", text: "Tokens" }), promptLine(), go(2, "Split into tokens"));
+  if (S.rev[2]) { const t = tokenize(words().join(" ")), b = tokChips(t); [...b.children].forEach((c, i) => { c.classList.add("pop"); c.style.animationDelay = i * 90 + "ms"; }); x.append(b, h("p", { class: "hint", text: t.length + " tokens. A dot marks a space that belongs to the token after it." })); }
+}
+function r3() {
+  const x = clear($("#x3")); x.append(h("div", { class: "label", text: "Words to numbers" }), promptLine(), go(3, "Turn tokens into numbers"));
+  if (S.rev[3]) { const w = words(), q = a => "[ " + a.join(", ") + " ]"; x.append(h("div", { class: "code", text: "text:     \"" + w.join(" ") + "\"\ntokens:   " + q(w.map(t => '"' + t + '"')) + "\nnumbers:  " + q(w.map(t => VI[t])) }), tokChips(w.map(t => ({ t, id: "#" + VI[t] }))), h("p", { class: "hint", text: "These IDs belong to this demo model’s own small vocabulary." })); }
+}
+function r4() {
+  const x = clear($("#x4")); x.append(h("div", { class: "label", text: "Attention on the last token" }), promptLine(), go(4, "Show where the model looks"));
+  if (S.rev[4]) { const w = words(), n = w.length; x.append(bars(w.map((t, i) => ({ label: t, p: i === n - 1 ? 1 : 0, cls: i === n - 1 ? "hit" : "" })), { max: 1 }), h("p", { class: "hint", text: "All of this tiny model’s attention goes to the last token." })); }
+}
+function r5() {
+  const x = clear($("#x5")); x.append(h("div", { class: "label", text: "Odds for the next word" }), promptLine());
+  if (done()) { x.append(finished()); return; }
+  x.append(go(5, "Score every next word"));
+  if (S.rev[5]) { const { p1, order } = dist(1); x.append(h("p", { class: "hint", text: "After “" + dispW(VI[last()]) + "”" }), bars(order.slice(0, 8).map(k => ({ label: dispW(k), p: p1[k] }))), h("p", { class: "hint", text: "Every word in the vocabulary gets a chance. The rest share what is left." })); }
+}
+function r6() {
+  const x = clear($("#x6")); x.append(h("div", { class: "label", text: "Weighted dice" }), promptLine());
+  if (done()) x.append(finished());
+  else {
+    const { p1, pT, order } = dist(S.T), pick = S.picked;
+    const lab = h("b", { text: S.T.toFixed(1) }), sl = h("input", { type: "range", min: 0, max: 2, step: 0.1, value: S.T, id: "tm", "aria-label": "Temperature" });
+    sl.oninput = () => { S.T = parseFloat(sl.value); S.picked = null; r6(); r8(); };
+    x.append(h("label", { class: "field", for: "tm" }, h("span", null, "Temperature: ", lab, " (0 always takes the top word)"), sl));
+    const top = order.slice(0, 8); if (pick != null && !top.includes(pick)) top.push(pick);
+    x.append(bars(top.map(k => ({ label: dispW(k), p: pT[k], ghost: p1[k], cls: k === pick ? "hit" : "" })), { max: Math.max(pT[order[0]], p1[order[0]]) }));
+    const dart = h("div", { class: "dart", "aria-hidden": "true" }); let acc = 0;
+    order.slice(0, 8).forEach((k, i) => { acc += pT[k]; dart.append(h("div", { title: dispW(k) + " " + pct(pT[k]), style: { width: pT[k] * 100 + "%", opacity: i % 2 ? 0.6 : 1, background: k === pick ? "var(--good)" : "var(--accent)" } })); });
+    if (acc < 0.999) dart.append(h("div", { style: { width: (1 - acc) * 100 + "%", background: "var(--muted)", opacity: 0.35 } }));
+    if (pick != null && S.r != null) dart.append(h("div", { class: "m", style: { left: S.r * 100 + "%" } }));
+    x.append(dart);
+    if (pick == null) x.append(h("p", { class: "hint", text: "Each slice is a word, sized by its odds. Black ticks show the odds at temperature 1." }), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { const r = Math.random(); let c = 0, p = order[0]; if (S.T >= 0.05) for (const k of order) { c += pT[k]; if (r < c) { p = k; break; } } S.picked = p; S.r = S.T >= 0.05 ? r : null; r6(); } }, "Roll the dice")));
+    else x.append(h("p", { class: "hint", text: S.r != null ? "The random number " + S.r.toFixed(2) + " landed in the slice for “" + dispW(pick) + "”." : "At temperature 0 the top word always wins: “" + dispW(pick) + "”." }), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.gen.push(VOCAB[pick]); S.picked = null; S.rev = {}; renderAll(); $("#s1").scrollIntoView({ behavior: "smooth" }); } }, "Add “" + dispW(pick) + "” and start again from step 1")));
+  }
+  x.append(h("div", { class: "row" }, h("button", { class: "btn", disabled: done(), onclick: () => { let n = 0; while (!done() && n++ < 20) { const d = dist(S.T), r = Math.random(); let c = 0, p = d.order[0]; if (S.T >= 0.05) for (const k of d.order) { c += d.pT[k]; if (r < c) { p = k; break; } } S.gen.push(VOCAB[p]); } S.picked = null; renderAll(); } }, "Write the whole reply"), h("button", { class: "btn", onclick: () => reset() }, "Start over")));
+}
+function r8() {
+  const x = clear($("#x8")); x.append(h("div", { class: "label", text: "Ten runs of the same prompt" }));
+  const out = h("div", { class: "out-list" });
+  x.append(h("p", { class: "hint", text: "Uses the prompt from step 1 and the temperature from step 6 (now " + S.T.toFixed(1) + ")." }), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => {
+    const runs = {}; for (let k = 0; k < 10; k++) { const s = generate(M, pw(), S.T).join(" "); runs[s] = (runs[s] || 0) + 1; }
+    const ent = Object.entries(runs).sort((a, b) => b[1] - a[1]); clear(out).append(h("p", { class: "hint", text: ent.length + " different " + (ent.length === 1 ? "reply" : "replies") + " out of 10" })); ent.forEach(([s, n]) => out.append(h("div", null, h("b", { text: "×" + n }), h("span", { text: s }))));
+  } }, "Run it 10 times")), out);
+}
+function renderAll() { status(); r1(); r2(); r3(); r4(); r5(); r6(); r8(); }
+renderAll();
+$("#q1").append(quick("Apart from this text, what does the model know about the customer’s situation?", ["Their order history", "Nothing. The text is all it has.", "How they are feeling"], 1, "Anything you want the model to use has to be in the prompt. This is why context matters so much."));
+$("#q2").append(quick("Are tokens always whole words?", ["Yes, always", "No. Rare words and numbers are often split into pieces.", "No. They are always single letters"], 1, "Common words are often one token, while rarer words and long numbers break into several."));
+$("#q3").append(quick("Why are tokens turned into numbers?", ["The model’s calculations only work on numbers", "To make the text shorter", "To keep it secret"], 0, "Everything the model does is arithmetic, so text has to become numbers first."));
+$("#q4").append(quick("Why is it useful for a model to look at the whole prompt rather than just the last word?", ["It uses less memory", "Earlier words can change what should come next", "It makes the reply shorter"], 1, "In “the laptop arrived with a cracked screen, should we refund?”, the answer depends on words far from the end."));
+$("#q5").append(quick("What gives a word its percentage chance of coming next?", ["Someone looks it up at that moment", "The parameters learned from the training text", "The temperature setting"], 1, "The percentages come from the parameters, which training shaped by repeated adjustment."));
+$("#q6").append(quick("At temperature 0, if you ran the same prompt ten times, how many different replies would you expect?", ["One", "Ten", "About five"], 0, "With no dice roll, the top word is always taken, so the reply is the same every time."));
+$("#q8").append(quick("Your team needs consistent wording from the model each time. Which setting would you lean towards?", ["A low temperature", "A high temperature", "It makes no difference"], 0, "Lower temperatures cut down on random variety, though they don’t guarantee identical replies on every system."));
+pipeline("#pipe", "infer");
+</script></body></html>

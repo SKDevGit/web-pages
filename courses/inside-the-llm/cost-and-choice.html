@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cost, choice and where to start</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css"></head><body>
+<header id="site-head"></header>
+<main class="col">
+<h1>Cost, choice and where to start</h1>
+<p class="meta">3 exercises</p>
+<p class="lede">Three practical questions come up in every adoption discussion: which model, at what cost, and for which job first. This page gives you a simple way to think about each.</p>
+<div class="learn"><b>By the end you can</b>choose a model size for a task, tell the main kinds of model apart, and rank candidate use cases.</div>
+
+<span class="step">Step 1 of 3</span>
+<h2>Pick the smallest model that is good enough</h2>
+<p>Bigger models are more capable, but cost more and respond more slowly. Choose how hard the task is, and see which sizes handle it.</p>
+<div class="widget">
+  <div class="row"><span class="hint">Task:</span><div class="seg3" id="b1-seg"></div></div>
+  <div id="b1-t" style="overflow:auto"></div>
+  <div class="note" id="b1-msg"></div>
+  <p class="hint">Relative figures to show the trade-off. Real prices and speeds vary by provider and change often.</p>
+</div>
+<div id="q1"></div>
+
+<span class="step">Step 2 of 3</span>
+<h2>The landscape of models</h2>
+<p>Models differ in who runs them, what they can read, and what they are built for. Choose a kind to compare.</p>
+<div class="widget">
+  <div class="chips" id="b2-chips"></div>
+  <div class="mini" id="b2-out"></div>
+  <div class="label">How we got here</div>
+  <div class="stepper" id="b2-time"></div>
+  <div class="note" id="b2-tmsg"></div>
+</div>
+<div id="q2"></div>
+
+<span class="step">Step 3 of 3</span>
+<h2>Where to start</h2>
+<p>Good first projects have high volume, low risk, and answers that are easy to check. Switch each criterion on or off to see how the use cases rank.</p>
+<div class="widget">
+  <div class="stack" id="b3-list"></div>
+  <p class="hint">Starting values are suggestions. Change them to match your own business.</p>
+</div>
+<div id="q3"></div>
+
+<h2>What to remember</h2>
+<p>Match the model to the job, not to the headline. Start with a task that is frequent, forgiving and easy to review, learn from it, and then move to harder work.</p>
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
+<script>
+chrome(8);
+// 1
+const MD = [["Small", 1, 1, [1, 0, 0]], ["Medium", 5, 2, [1, 1, 0]], ["Large", 20, 4, [1, 1, 1]]];
+const TK = [["Simple: label or sort", 0], ["Moderate: draft or summarize", 1], ["Hard: multi-step analysis", 2]];
+seg("#b1-seg", TK.map(t => t[0]), 0, k => {
+  const need = TK[k][1]; let best = -1; MD.forEach((m, i) => { if (best < 0 && m[3][need]) best = i; });
+  const t = h("table", { class: "cmpt" }, h("tr", null, ...["Model size", "Relative cost", "Relative wait", "Good enough?"].map(x => h("th", { text: x }))), ...MD.map((m, i) => h("tr", null, h("td", { style: { fontWeight: 600 }, text: m[0] }), h("td", { text: m[1] + "×" }), h("td", { text: m[2] + "×" }), h("td", null, h("span", { class: "pill " + (i === best ? "good" : m[3][need] ? "info" : "warn"), text: i === best ? "Yes, cheapest fit" : m[3][need] ? "Yes, but costs more" : "Struggles" })))));
+  clear($("#b1-t")).append(t); $("#b1-msg").textContent = "Use the " + MD[best][0].toLowerCase() + " model. " + (best === 2 ? "Hard tasks justify the extra cost, but test whether a smaller model passes first." : "Paying for a larger one adds cost and delay without a better result.");
+});
+$("#q1").append(quick("A company labels 100,000 support emails a day. What is the sensible choice?", ["A small model, if it labels accurately enough", "The largest model available", "No model"], 0, "Cost and delay multiply with volume. Choose the smallest model that passes your accuracy test."));
+// 2
+const KD = [["Hosted by a vendor", "You use it over the internet, and the provider runs it.", "Quick start, strong models, little setup.", "Your data goes to the vendor. Prices and terms are theirs."], ["Open weights", "The parameters are published, so you can run it yourself.", "More control over data and customisation.", "You need the people and hardware to run it."], ["Multimodal", "Reads and sometimes writes images, audio or video as well as text.", "Read invoices, charts, photos and speech.", "Costs and risks differ by format. Check each."], ["Specialised", "Tuned for one area, such as code, law or medicine.", "Better on its home turf.", "Narrower, and still needs review."]];
+KD.forEach((k, i) => $("#b2-chips").append(h("button", { class: "btn" + (i === 0 ? " on" : ""), onclick: e => { document.querySelectorAll("#b2-chips button").forEach(b => b.classList.remove("on")); e.currentTarget.classList.add("on"); show(i); } }, k[0])));
+function show(i) { const k = KD[i]; clear($("#b2-out")).append(cell("What it is", k[1]), cell("Good for", k[2]), cell("Watch out for", k[3])); } show(0);
+const TL = [["2017", "The transformer design is introduced, built around attention."], ["2020", "Models grow much larger, trained on far more text. Their general ability surprises researchers."], ["2022", "Chat assistants make the technology available to everyone."], ["2023", "Models begin to handle images and sound, and to call tools."], ["Now", "Agents take multi-step actions, and companies embed models in their own products."]];
+TL.forEach((t, i) => $("#b2-time").append(h("button", { class: i === 0 ? "on" : "", onclick: e => { document.querySelectorAll("#b2-time button").forEach(b => b.classList.remove("on")); e.currentTarget.classList.add("on"); $("#b2-tmsg").textContent = t[1]; } }, t[0])));
+$("#b2-tmsg").textContent = TL[0][1];
+$("#q2").append(quick("Why might a bank choose an open-weights model it runs itself?", ["To keep sensitive data inside its own systems", "Because it is always smarter", "Because it needs no staff"], 0, "Running a model yourself gives control over data and customisation. In return, you take on the work of running it."));
+// 3
+const UC = [["Sort incoming support emails", [1, 1, 1]], ["Draft replies for agents to review", [1, 1, 1]], ["Summarize weekly meeting notes", [0, 1, 1]], ["Approve refunds automatically", [1, 0, 0]], ["Write legal advice for clients", [0, 0, 0]], ["Extract fields from invoices", [1, 1, 1]]];
+const CR3 = ["High volume", "Low risk", "Easy to check"];
+function r3() {
+  const l = clear($("#b3-list")), rows = UC.map((u, i) => [u, i, u[1].reduce((a, b) => a + b, 0)]).sort((a, b) => b[2] - a[2] || a[1] - b[1]);
+  rows.forEach(([u, i, sc]) => l.append(h("div", { class: "row", style: { alignItems: "center" } }, h("span", { style: { flex: 1, minWidth: "13rem" }, text: u[0] }), h("span", { class: "pill " + (sc === 3 ? "good" : sc === 2 ? "info" : "warn"), style: { minWidth: "5.5rem", textAlign: "center" }, text: sc === 3 ? "Start here" : sc === 2 ? "Maybe" : "Later" }), ...CR3.map((c, k) => h("button", { class: "btn" + (u[1][k] ? " on" : ""), onclick: () => { u[1][k] = u[1][k] ? 0 : 1; r3(); } }, c)))));
+}
+r3();
+$("#q3").append(quick("Which first project is best?", ["Drafting replies that an agent reviews before sending", "Sending refunds with no human check", "Giving legal advice to clients"], 0, "It is frequent, forgiving and easy to review. A person catches mistakes before they reach a customer."));
+</script></body></html>

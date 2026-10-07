@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Start with a prediction</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<header id="site-head"></header>
+<main class="col">
+<h1>Start with a prediction</h1>
+<p class="meta">3 short steps</p>
+<p class="lede">The first idea in the course comes from doing, not reading. Try being the model, then see how a real model spreads its odds across many sensible endings.</p>
+<div class="learn"><b>By the end you can</b>explain why a language model gives odds for many endings, not one fixed answer.</div>
+
+<span class="step">Part 1 · Step 1 of 3</span>
+<h2>Finish the sentence</h2>
+<p>Before any explanation, try being the model. Complete the sentence with the ending you think is most likely.</p>
+<div class="widget">
+  <div class="big">The customer returned the product because <em>…</em></div>
+  <input type="text" id="pred-in" maxlength="90" placeholder="Type the most likely ending" aria-label="Your ending">
+  <div class="row"><button class="btn primary" id="pred-send">Submit my answer</button><span class="hint" id="pred-status"></span></div>
+</div>
+
+<span class="step">Part 1 · Step 2 of 3</span>
+<h2>See what a model produces</h2>
+<p>A language model doesn’t produce one answer. It produces odds for many possible endings. These percentages are illustrative, set by hand for this exercise.</p>
+<div class="widget">
+  <div id="pred-bars"></div>
+  <div class="row"><button class="btn primary" id="pred-reveal">Reveal the odds</button><button class="btn" id="pred-draw">Draw a random ending</button></div>
+  <div class="wall" id="pred-draws" aria-live="polite"></div>
+</div>
+<div id="q1"></div>
+
+<span class="step">Part 1 · Step 3 of 3</span>
+<h2>Compare with the class</h2>
+<p>Your classmates wrote different endings, and most of them are reasonable. That is the first idea to hold on to: language has patterns, and many continuations fit.</p>
+<div class="widget" id="pred-class"><div class="row" style="justify-content:space-between"><div class="label">Class answers</div><div class="row" id="pred-admin"></div></div><div id="pred-class-body"></div></div>
+
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
+<script>
+chrome(0);
+const CONT = [["it was damaged", 22], ["it didn’t fit", 15], ["it arrived late", 13], ["it wasn’t what they expected", 11], ["it stopped working", 10], ["they changed their mind", 9], ["they found a lower price", 6], ["the size was wrong", 5], ["it was the wrong color", 4], ["they received a duplicate", 3], ["they were unhappy with the service", 2]];
+let revealed = 0, timer = null;
+function renderBars() { const b = clear($("#pred-bars")); if (!revealed) { b.append(h("div", { class: "empty", text: "Hidden until you reveal. Write your own ending first." })); return; } b.append(bars(CONT.slice(0, revealed).map(([l, p]) => ({ label: l, p: p / 100 })), { max: 0.25 })); }
+$("#pred-reveal").onclick = () => { clearInterval(timer); revealed = 0; renderBars(); timer = setInterval(() => { revealed++; renderBars(); if (revealed >= CONT.length) clearInterval(timer); }, 400); };
+$("#pred-draw").onclick = () => { let r = Math.random() * 100, c = 0, pick = CONT[0][0]; for (const [l, p] of CONT) { c += p; if (r < c) { pick = l; break; } } const w = $("#pred-draws"); w.prepend(h("span", { text: pick })); while (w.children.length > 12) w.lastChild.remove(); };
+renderBars();
+$("#q1").append(quick("If you asked a model to finish the sentence ten times, what would you expect?", ["The same ending every time", "Several different, reasonable endings", "Random words with no meaning"], 1, "The odds spread across many sensible endings, so repeated runs can differ."));
+
+const THEMES = [["Broken or defective", /damag|broke|defect|crack|scratch|faulty|not work|stopped|malfunction|doesn.?t work/i], ["Wrong size or fit", /fit|size|small|large|big|tight|loose/i], ["Late or delivery issue", /late|delay|shipping|deliver|arriv|slow|never came/i], ["Not as expected", /expect|described|different|quality|picture|photo|not what|cheap|look/i], ["Price", /price|cheaper|expensive|cost|discount|sale/i], ["Changed mind", /mind|no longer|didn.?t want|don.?t want|don.?t need|gift|change/i]];
+const themeOf = t => { for (const [n, re] of THEMES) if (re.test(t)) return n; return "Something else"; };
+const EXAMPLES = ["it was damaged in the box", "the size was too small", "it arrived two weeks late", "it didn’t match the photos", "it stopped working after a day", "they found it cheaper elsewhere", "it was a gift they didn’t need", "the screen had a crack", "it was too big", "they changed their mind", "the color was wrong", "it was defective"];
+const CL = { db: null, uid: null, canEdit: false, isOwner: false, rows: [], open: false, local: [], preview: false };
+function renderClass() {
+  const body = clear($("#pred-class-body")), adm = clear($("#pred-admin"));
+  const show = CL.open || CL.canEdit || !CL.db, rows = CL.preview ? EXAMPLES.map(t => ({ text: t })) : (CL.db ? CL.rows : CL.local);
+  if (CL.canEdit && CL.db) adm.append(h("button", { class: "btn", onclick: async () => { try { await CL.db.doc("settings/reveal").set({ open: !CL.open }); } catch (e) { $("#pred-status").textContent = "Couldn’t change visibility."; } } }, CL.open ? "Hide from students" : "Show to students"));
+  if (CL.isOwner && CL.db && CL.rows.length) adm.append(h("button", { class: "btn", onclick: async () => { for (const r of CL.rows) { try { await CL.db.doc("completions/" + r.id).delete(); } catch (e) { } } } }, "Clear answers"));
+  if (CL.canEdit || !CL.db) adm.append(h("button", { class: "btn", onclick: () => { CL.preview = !CL.preview; renderClass(); } }, CL.preview ? "Stop previewing" : "Preview with examples"));
+  if (!rows.length) { body.append(h("div", { class: "empty", text: "No answers yet. When students submit, their endings and themes appear here." })); return; }
+  if (!show) { body.append(h("div", { class: "empty", text: rows.length + " answers are in. The instructor will show them shortly." })); return; }
+  const cnt = {}; rows.forEach(r => { const t = themeOf(r.text); cnt[t] = (cnt[t] || 0) + 1; });
+  body.append(h("p", { class: "hint", text: rows.length + (rows.length === 1 ? " answer" : " answers") + ", grouped by theme" + (CL.preview ? " (example data, not saved)" : "") }), bars(Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([l, n]) => ({ label: l + " (" + n + ")", p: n / rows.length })), { max: 1 }));
+  const wall = h("div", { class: "wall", style: { marginTop: "12px" } }); rows.slice(0, 60).forEach(r => wall.append(h("span", { text: r.text }))); body.append(wall);
+}
+$("#pred-send").onclick = async () => {
+  const t = $("#pred-in").value.trim(), st = $("#pred-status"); if (!t) { st.textContent = "Type an ending first."; return; }
+  if (CL.db && CL.uid) { try { await CL.db.doc("completions/" + CL.uid).set({ text: t.slice(0, 90), ts: Date.now() }); st.textContent = "Submitted. You can resubmit to replace it."; } catch (e) { st.textContent = "Couldn’t save to the class. Ask your instructor for contributor access."; CL.local.unshift({ text: t }); } }
+  else { CL.local.unshift({ text: t }); st.textContent = "Saved on this screen only (not signed in to the class)."; }
+  renderClass();
+};
+renderClass();
+(async () => { try {
+  const c = window.claude; if (!c || !c.use) return;
+  const [db, user] = await Promise.all([c.use("db"), c.use("user")]);
+  if (user) { CL.uid = await user.id(); CL.canEdit = await user.canEdit(); CL.isOwner = await user.isOwner(); }
+  if (!db) { renderClass(); return; } CL.db = db;
+  db.collection("completions").orderBy("ts", "desc").limit(300).onSnapshot(s => { CL.rows = s.docs.map(d => ({ id: d.id, text: String(d.data().text || "") })); renderClass(); }, () => { });
+  db.doc("settings/reveal").onSnapshot(s => { CL.open = !!(s.exists && s.data().open); renderClass(); }, () => { });
+  renderClass();
+} catch (e) { } })();
+</script></body></html>

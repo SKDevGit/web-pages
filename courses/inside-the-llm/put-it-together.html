@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Put it all together</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css"></head><body>
+<header id="site-head"></header>
+<main class="col">
+<h1>Put it all together</h1>
+<p class="meta">2 exercises</p>
+<p class="lede">You’ve now seen both halves. Training happens once, long before you type anything, and produces the parameters. Inference happens every time you send a prompt, and uses those parameters together with your context.</p>
+<div class="learn"><b>By the end you can</b>trace one prompt from text to reply, and say for any step whether it belongs to training, inference, or both.</div>
+
+<span class="step">Step 1 of 2</span>
+<h2>Follow one prompt</h2>
+<p>Step through a full request. The highlighted boxes show where you are, in the training process that built the model and in the inference process that runs your prompt.</p>
+<div class="widget">
+  <div id="pipe-lanes" class="stack"></div>
+  <div id="pipe-view" class="stack"></div>
+  <div class="row"><button class="btn" id="pipe-back">Back</button><button class="btn primary" id="pipe-next">Next step</button><span class="hint" id="pipe-pos"></span></div>
+</div>
+<div id="q1"></div>
+
+<span class="step">Step 2 of 2</span>
+<h2>Training, inference, or both?</h2>
+<p>For each statement, choose when it happens, then check your answers.</p>
+<div class="widget">
+  <div class="stack" id="quiz"></div>
+  <div class="row"><button class="btn primary" id="quiz-check">Check my answers</button><span class="hint" id="quiz-score"></span></div>
+</div>
+
+<h2>What this means for you</h2>
+<p><b>Knowledge has a date.</b> What the model learned stops at its training cutoff. Anything current has to arrive in the prompt.</p>
+<p><b>Answers vary.</b> Sampling means two runs can differ. Test with many runs, and lower the temperature when you need consistency.</p>
+<p><b>Tokens are the meter.</b> Cost, speed, and the size of the brief you can supply are all measured in tokens.</p>
+<p><b>Context is your lever.</b> You can’t retrain a model in a meeting, but you can change what it reads before it answers.</p>
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
+<script>
+chrome(9);
+const TEXT = "A customer says their laptop arrived with a cracked screen. Should we refund?";
+const RESP = "Yes, a cracked screen on arrival is a defect. Refund in full and send a prepaid return label.";
+const STEPS = ["Receive the prompt", "Split into tokens", "Weigh the context", "Predict the next token", "Pick one, add it, repeat", "Where the parameters came from"];
+const LT = ["Collect text", "Guess next word", "Measure error", "Adjust parameters", "Parameters saved"], LI = ["Prompt", "Tokenize", "Frozen parameters + context", "Odds", "Pick", "Add and repeat"];
+const ON = [{ i: [0] }, { i: [1] }, { i: [2] }, { i: [2, 3] }, { i: [4, 5] }, { t: [1, 2, 3, 4] }];
+const PA = [["cracked", 0.3], ["screen", 0.22], ["refund", 0.2], ["laptop", 0.1], ["Should", 0.08], ["we", 0.06], ["arrived", 0.04]], PP = [["Yes", 0.34], ["Based", 0.16], ["I", 0.13], ["Absolutely", 0.08], ["Because", 0.07], ["We", 0.07], ["A", 0.05], ["Refund", 0.04]];
+let k = 0, timer = null;
+function pipe() {
+  clearInterval(timer);
+  const ln = clear($("#pipe-lanes")), on = ON[k];
+  [["Training (done once, earlier)", LT, on.t || []], ["Inference (every prompt)", LI, on.i || []]].forEach(([lab, arr, act]) => { const row = h("div", { class: "toks", style: { alignItems: "center" } }, h("span", { class: "label", style: { minWidth: "9.5rem" }, text: lab })); arr.forEach((x, j) => row.append(h("span", { class: "tok", style: act.includes(j) ? { background: "var(--accent)", color: "var(--surface)" } : { background: "var(--soft)" }, text: x }))); ln.append(row); });
+  const v = clear($("#pipe-view")); v.append(h("h3", { text: (k + 1) + ". " + STEPS[k] }));
+  if (k === 0) v.append(h("div", { class: "big", text: TEXT }), h("p", { class: "hint", text: "The model’s parameters were fixed before this prompt arrived. Nothing you type changes them." }));
+  if (k === 1) { const t = tokenize(TEXT); v.append(tokChips(t.map(x => ({ t: x, id: tokId(x) }))), h("p", { class: "hint", text: t.length + " tokens, each then looked up as a number." })); }
+  if (k === 2) v.append(bars(PA.map(([l, p]) => ({ label: l, p }))), h("p", { class: "hint", text: "Illustrative: where the last token looks. The parameters set how words relate; your prompt supplies the words." }));
+  if (k === 3) v.append(bars(PP.map(([l, p]) => ({ label: l, p }))), h("p", { class: "hint", text: "Illustrative odds for the first word of the reply, from the frozen parameters plus this exact context." }));
+  if (k === 4) { const out = h("div", { class: "strip" }), w = RESP.split(" "); let n = w.length; const draw = () => { clear(out); w.slice(0, n).forEach(x => out.append(h("span", { class: "w g", text: x }))); if (n < w.length) out.append(h("span", { class: "cursor" })); }; draw(); v.append(out, h("div", null, h("button", { class: "btn", onclick: () => { clearInterval(timer); n = 0; draw(); timer = setInterval(() => { n++; draw(); if (n >= w.length) clearInterval(timer); }, 280); } }, "Replay"))); }
+  if (k === 5) v.append(h("p", { text: "Long before this prompt, the model read vast amounts of text, guessed the next token, measured its error, and nudged its parameters, repeating that loop an enormous number of times. That is the loop from the training page. The result is a fixed set of numbers that inference reads and never changes." }));
+  $("#pipe-back").disabled = k === 0; $("#pipe-next").disabled = k === STEPS.length - 1; $("#pipe-pos").textContent = "Step " + (k + 1) + " of " + STEPS.length;
+}
+$("#pipe-back").onclick = () => { k = Math.max(0, k - 1); pipe(); }; $("#pipe-next").onclick = () => { k = Math.min(STEPS.length - 1, k + 1); pipe(); }; pipe();
+$("#q1").append(quick("While the model writes a reply, do its parameters change?", ["Yes, it learns from every prompt", "No. They are fixed at inference time.", "Only if the temperature is high"], 1, "Parameters change only during training. Inference reads them and never edits them."));
+const QUIZ = [["Compare the guess with the real next word and compute the error", "T", "Measuring error needs a known right answer, which exists in training text."], ["Adjust billions of parameters to reduce the error", "T", "Parameters change only in training."], ["Split text into tokens", "B", "Training text and your prompt are both tokenized."], ["Turn probabilities into one chosen token using temperature", "I", "Sampling happens when generating an answer."], ["Feed each chosen token back in to predict the next one", "I", "This loop produces the reply one token at a time."], ["Read the brief you put in the prompt", "I", "Your context exists only at inference."], ["Learn how words should relate to each other (the attention parameters)", "T", "The relationships are learned in training."], ["Work out which words in your brief matter for this answer", "I", "The learned rules are applied afresh to every prompt."], ["Keep the parameters fixed", "I", "Inference reads the parameters and never edits them."]];
+const QA = {};
+QUIZ.forEach(([t], i) => { const seg = h("div", { class: "seg3" }); [["T", "Training"], ["I", "Inference"], ["B", "Both"]].forEach(([v, l]) => seg.append(h("button", { "data-v": v, onclick: () => { QA[i] = v; seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); } }, l))); $("#quiz").append(h("div", { class: "q-item", id: "qi" + i }, h("span", { text: t }), seg)); });
+$("#quiz-check").onclick = () => { let ok = 0; QUIZ.forEach(([, a, why], i) => { const el = $("#qi" + i); el.classList.remove("right", "wrong"); el.querySelectorAll(".why").forEach(x => x.remove()); if (!QA[i]) return; const good = QA[i] === a; if (good) ok++; el.classList.add(good ? "right" : "wrong"); el.append(h("div", { class: "why", text: (good ? "Correct. " : "Answer: " + { T: "Training", I: "Inference", B: "Both" }[a] + ". ") + why })); }); $("#quiz-score").textContent = ok + " of " + QUIZ.length + " correct"; };
+</script></body></html>

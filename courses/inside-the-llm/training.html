@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>How training works</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css"></head><body>
+<header id="site-head"></header>
+<main class="col">
+<h1>How training works</h1>
+<p class="meta">6 short exercises</p>
+<p class="lede">A language model isn’t given rules. It reads a very large amount of text and gradually adjusts itself until its guesses about what comes next get good. Here you’ll run that process yourself, one step at a time, on a model small enough to see.</p>
+<div class="learn"><b>By the end you can</b>describe the training loop in five steps, explain what an error score is, and say why repeating the loop makes the model better.</div>
+
+<h2>The big picture</h2>
+<p>This is how a useful assistant is built, in simplified form. The exercises below simulate the pre-training stage, where the model learns to predict the next token. Click any box to see what happens there, and use the switch to see where risks come from and what your business can influence.</p>
+<div class="widget" id="pipe"></div>
+
+<span class="step">Step 1 of 6</span>
+<h2>Take a text example</h2>
+<p>Training starts with ordinary text. Take a sentence, hide the next word, and ask the model to guess it. The text provides its own answer key, because the word that really came next is the right answer.</p>
+<div class="widget" id="x1"></div>
+<div id="q1"></div>
+
+<span class="step">Step 2 of 6</span>
+<h2>Let the model guess</h2>
+<p>The model holds a table of numbers called parameters. It uses them to give every word it knows a percentage chance of coming next. Early on those numbers are close to zero, so the guesses are close to random.</p>
+<div class="widget" id="x2"></div>
+<div id="q2"></div>
+
+<span class="step">Step 3 of 6</span>
+<h2>Check the answer</h2>
+<p>Now reveal the real word and measure how surprised the model was. The error score is low when the model gave the right word a high chance, and high when it gave it a low chance. Training is the project of pushing that score down.</p>
+<div class="widget" id="x3"></div>
+<div id="q3"></div>
+
+<span class="step">Step 4 of 6</span>
+<h2>Adjust the numbers</h2>
+<p>The model nudges its parameters so that, next time it sees this context, the right word gets a little more chance. The nudge is small on purpose. Press it a few times and watch the chance climb.</p>
+<div class="widget" id="x4"></div>
+<div id="q4"></div>
+
+<span class="step">Step 5 of 6</span>
+<h2>Repeat</h2>
+<p>One example teaches the model almost nothing. Training is this loop run over and over on different sentences, so the nudges add up. Run it in bulk and watch the error score fall.</p>
+<div class="widget" id="x5"></div>
+<div id="q5"></div>
+
+<span class="step">Step 6 of 6</span>
+<h2>From base model to assistant</h2>
+<p>Next-word training alone gives a <b>base model</b>: it continues any text, but it does not follow instructions. Two more rounds turn it into an assistant. Step through the stages and see how the same request is handled.</p>
+<div class="widget">
+  <div class="stepper" id="as-st"></div>
+  <div class="label">Request</div><div class="docbox">Write a polite reply declining a late return.</div>
+  <div class="label">What the model does</div><div class="docbox" id="as-out"></div>
+  <div class="note" id="as-note"></div>
+  <p class="hint">Scripted illustration of the three stages.</p>
+</div>
+<div id="q6"></div>
+
+<h2>What you’ve seen</h2>
+<p>Take an example, guess, check, adjust, repeat. Large models run the same loop, with far more text and far more parameters. Nothing in it tells the model what a customer or a refund is. Patterns in the text get stronger because they come up again and again.</p>
+<p>The numbers you just trained are saved in this browser. The next page uses them to write.</p>
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script><script src="js/pipe.js"></script>
+<script>
+chrome(2);
+const M = loadModel(new Tiny()), FLOOR = empiricalFloor();
+const S = { cur: null, before: null, guessed: false, revealed: false, nudged: false, lr: 0.5, ask: "because", s: 0, myGuess: "damaged" };
+const UNIQ = []; CORPUS.forEach((c, i) => { if (!UNIQ.some(j => CORPUS[j] === c)) UNIQ.push(i); });
+function sentEl(showT) {
+  const w = CORPUS[S.cur.s].split(" "), box = h("div", { class: "sent" });
+  if (S.cur.pos === 0) box.append(h("span", { class: "ctx", text: "(start)" }));
+  w.forEach((x, k) => { if (k === S.cur.pos - 1) box.append(h("span", { class: "ctx", text: x })); else if (k < S.cur.pos) box.append(h("span", { text: x })); else if (k === S.cur.pos) box.append(h("span", { class: showT ? "tgt" : "hide", text: showT ? x : "?" })); });
+  return box;
+}
+const need = msg => h("div", { class: "empty", text: msg });
+function newExample() { S.cur = M.draw(); S.before = M.probs(S.cur.i); S.guessed = S.revealed = S.nudged = false; renderAll(); }
+function fresh() { M.reset(); resetSaved(); saveModel(M); if (S.cur) S.before = M.probs(S.cur.i); S.guessed = S.revealed = S.nudged = false; renderAll(); }
+
+function pickWord(k) { const w = CORPUS[S.s].split(" "); S.cur = { s: S.s, pos: k, i: k === 0 ? 0 : VI[w[k - 1]], j: VI[w[k]] }; S.before = M.probs(S.cur.i); if (S.cur.i) S.ask = VOCAB[S.cur.i]; S.guessed = S.revealed = S.nudged = false; renderAll(); }
+function r1() {
+  const x = clear($("#x1")); x.append(h("div", { class: "label", text: "Pick a sentence, then hide a word" }));
+  const sel = h("select", { id: "sent", "aria-label": "Training sentence", onchange: e => { S.s = +e.target.value; S.cur = null; renderAll(); } });
+  UNIQ.forEach(i => sel.append(h("option", { value: i, text: CORPUS[i].replace(" .", "."), selected: i === S.s })));
+  const row = h("div", { class: "sent" }); CORPUS[S.s].split(" ").forEach((w, k) => row.append(h("button", { class: "btn", style: S.cur && S.cur.pos === k && S.cur.s === S.s ? { borderStyle: "dashed", borderColor: "var(--accent)", background: "var(--accent-soft)" } : {}, title: "Hide this word", onclick: () => pickWord(k) }, S.cur && S.cur.pos === k && S.cur.s === S.s ? "?" : w)));
+  x.append(sel, row);
+  x.append(h("p", { class: "hint", text: S.cur ? "Hidden: the word after “" + dispW(S.cur.i) + "”. The model gets only “" + dispW(S.cur.i) + "” and has to guess it." : "Click any word to hide it. That word becomes the answer, and the word before it is all the model sees." }));
+  x.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { const d = M.draw(); S.s = d.s; pickWord(d.pos); } }, "Or draw a random example")));
+}
+function r2() {
+  const x = clear($("#x2")); x.append(h("div", { class: "label", text: "You guess, then the model guesses" }));
+  if (!S.cur) { x.append(need("Hide a word in step 1 first.")); return; }
+  x.append(sentEl(false));
+  const sel = h("select", { id: "myg", "aria-label": "Your guess" }); VOCAB.forEach((w, k) => { if (k && w !== ".") sel.append(h("option", { value: w, text: w, selected: w === S.myGuess })); });
+  sel.onchange = () => { S.myGuess = sel.value; };
+  x.append(h("label", { class: "field", for: "myg" }, "Your guess for the hidden word", sel));
+  if (S.guessed) { const g = VI[S.myGuess]; x.append(bars(topRows(S.before, 6, g, null, g)), h("p", { class: "hint", text: "You chose “" + S.myGuess + "”. The model gave it " + pct(S.before[g]) + ". " + (M.steps ? "This model has been trained for " + M.steps + " steps." : "This model is untrained, so no word stands out.") })); }
+  x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.myGuess = sel.value; S.guessed = true; renderAll(); } }, "Lock in my guess and show the model’s"), h("button", { class: "btn", onclick: fresh }, "Start from an untrained model")));
+}
+function r3() {
+  const x = clear($("#x3")); x.append(h("div", { class: "label", text: "The error score" }));
+  if (!S.cur || !S.guessed) { x.append(need("Make a guess in step 2 first.")); }
+  else {
+    x.append(sentEl(S.revealed));
+    if (S.revealed) { const p = S.before[S.cur.j]; x.append(bars(topRows(S.before, 5, S.cur.j, null, S.cur.j)), h("div", { class: "stats" }, h("span", null, h("b", { text: pct(p) }), "chance given to “" + dispW(S.cur.j) + "”"), h("span", null, h("b", { text: (-Math.log(p)).toFixed(2) }), "error score"))); }
+    x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { S.revealed = true; renderAll(); } }, "Reveal the real word")));
+  }
+  const out = h("b", { text: "" }), sl = h("input", { type: "range", min: 1, max: 99, value: 20, id: "p-sl", "aria-label": "Chance given to the right word" });
+  const upd = () => { const p = sl.value / 100; out.textContent = (-Math.log(p)).toFixed(2); lab.textContent = sl.value + "%"; };
+  const lab = h("b", { text: "" });
+  sl.oninput = upd;
+  x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "Try it: how the score behaves" }), h("label", { class: "field", for: "p-sl" }, h("span", null, "If the model had given the right word a chance of ", lab), sl), h("p", { class: "hint" }, "The error score would be ", out, ". Higher confidence in the right word means a lower score."));
+  upd();
+}
+function r4() {
+  const x = clear($("#x4")); x.append(h("div", { class: "label", text: "Nudge the parameters" }));
+  if (!S.cur || !S.revealed) { x.append(need("Reveal the real word in step 3 first.")); return; }
+  x.append(sentEl(true));
+  const now = M.probs(S.cur.i);
+  x.append(bars(topRows(now, 5, S.cur.j, S.before, S.cur.j)));
+  x.append(h("p", { class: "hint", text: "Chance of “" + dispW(S.cur.j) + "”: " + pct(S.before[S.cur.j]) + " before, " + pct(now[S.cur.j]) + " now. Black ticks show where each word started." }));
+  const lab = h("b", { text: S.lr.toFixed(2) }), sl = h("input", { type: "range", min: 0.05, max: 1.5, step: 0.05, value: S.lr, id: "lr-sl" });
+  sl.oninput = () => { S.lr = parseFloat(sl.value); lab.textContent = S.lr.toFixed(2); };
+  x.append(h("label", { class: "field", for: "lr-sl" }, h("span", null, "Size of each nudge: ", lab), sl), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { M.apply(S.cur.i, S.cur.j, S.lr); saveModel(M); S.nudged = true; renderAll(); } }, "Nudge the numbers")));
+}
+function r5() {
+  const x = clear($("#x5")); x.append(h("div", { class: "label", text: "Many examples" }));
+  const cv = h("div"); cv.innerHTML = lossChart(M, FLOOR); x.append(cv);
+  x.append(h("div", { class: "stats" }, h("span", null, h("b", { text: M.steps.toLocaleString() }), "examples seen"), h("span", null, h("b", { text: M.avgLoss() == null ? "–" : M.avgLoss().toFixed(2) }), "recent error score")));
+  const train = n => () => { M.train(n, S.lr); saveModel(M); S.nudged = false; if (S.cur) S.before = M.probs(S.cur.i); renderAll(); };
+  x.append(h("div", { class: "row" }, h("button", { class: "btn primary", onclick: train(25) }, "Train on 25 examples"), h("button", { class: "btn", onclick: train(500) }, "Train on 500"), h("button", { class: "btn", onclick: fresh }, "Start over")));
+  const sel = h("select", { id: "ask-sel", onchange: e => { S.ask = e.target.value; r5(); } }); VOCAB.forEach((w, k) => { if (k && w !== ".") sel.append(h("option", { value: w, text: w, selected: w === S.ask })); });
+  const unif = new Array(V).fill(1 / (V - 1)); unif[0] = 0;
+  x.append(h("div", { class: "label", style: { marginTop: "10px" }, text: "Ask the model" }), h("label", { class: "field", for: "ask-sel" }, "After the word", sel),
+    h("div", null, h("p", { class: "hint", text: "Before any training" }), bars(topRows(unif, 4))), h("div", null, h("p", { class: "hint", text: "Now" }), bars(topRows(M.probs(VI[S.ask]), 4))));
+}
+function renderAll() { r1(); r2(); r3(); r4(); r5(); }
+renderAll();
+$("#q1").append(quick("Who writes the right answers for training?", ["A team of human graders", "Nobody. The next word in the text is the answer.", "The model itself"], 1, "Text labels itself: each word is the answer to the question “what comes after the words before it?”"));
+$("#q2").append(quick("Where does the model’s guess come from?", ["Only from its current parameters", "It looks the answer up", "From searching the internet"], 0, "The guess is calculated from the numbers it holds right now. That is why changing the numbers changes the guess."));
+$("#q3").append(quick("Which guess earns the lowest error score?", ["Gave the right word 80%", "Gave the right word 20%", "Gave the right word 1%"], 0, "The more chance the model gave the right word, the less surprised it was."));
+$("#q4").append(quick("After a nudge, what happens to the chance of the right word after this context?", ["It goes up", "It goes down", "Nothing changes"], 0, "The nudge is aimed at the right word. It also lowers the chances of the others a little."));
+$("#q5").append(quick("As the loop repeats, what should the error score do?", ["Fall quickly at first, then level off", "Stay the same", "Rise steadily"], 0, "Early examples teach a lot. Later, the model has learned the patterns and what is left is real uncertainty in the text, such as “it was damaged” versus “it arrived late”."));
+
+const AS = [["1. Pre-training", "Write a polite reply declining a late return. Write a polite reply declining a late return from a customer who wants to return a coat after 60 days. Write a polite reply...", "It learns from huge amounts of general text. The result continues text, but ignores what you asked."], ["2. Fine-tuning on examples", "Dear customer, thank you for contacting us. Unfortunately we are unable to accept returns after 30 days. We hope to serve you again soon.", "It is trained on example requests paired with good replies, so it learns to follow instructions."], ["3. Learning from feedback", "Hi, thanks for getting in touch. I’m sorry, but our return window is 30 days, so we can’t take this back. If it helps, I can suggest a repair option.", "People rank answers, and the model is adjusted toward the ones they prefer: helpful, polite and careful. This step is why assistants sound the way they do."]];
+seg("#as-st", AS.map(a => a[0]), 0, i => { $("#as-out").textContent = AS[i][1]; $("#as-note").textContent = AS[i][2]; });
+$("#q6").append(quick("Why does a chat assistant follow instructions while a base model just continues the text?", ["It had extra training on instructions and on human feedback", "It has a larger vocabulary", "It runs at a lower temperature"], 0, "Pre-training teaches language. Later rounds of training teach the model to behave like a helpful assistant."));
+pipeline("#pipe", "train");
+</script></body></html>
