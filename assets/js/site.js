@@ -32,12 +32,15 @@ function bars(rows, opts = {}) {
 function quick(q, opts, ans, why) {
   const box = h("div", { class: "quick" }, h("div", { class: "label", text: "Quick check" }), h("div", { text: q }));
   const list = h("div", { class: "opts" }), note = h("p", { class: "why" });
+  const again = h("button", { class: "btn sm", style: { display: "none", marginTop: "8px" }, onclick: () => {
+    [...list.children].forEach(b => { b.disabled = false; b.classList.remove("right", "wrong"); }); note.textContent = ""; again.style.display = "none";
+  } }, "Try again");
   opts.forEach((o, i) => list.append(h("button", { onclick: e => {
     [...list.children].forEach((b, k) => { b.disabled = true; if (k === ans) b.classList.add("right"); });
     if (i !== ans) e.currentTarget.classList.add("wrong");
-    note.textContent = (i === ans ? "Correct. " : "Not quite. ") + why;
+    note.textContent = (i === ans ? "Correct. " : "Not quite. ") + why; again.style.display = "";
   } }, o)));
-  box.append(list, note); return box;
+  box.append(list, note, again); return box;
 }
 function sidebar(i) {
   const aside = h("aside", { class: "side", "aria-label": "Course navigation" });

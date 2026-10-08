@@ -39,6 +39,7 @@ button{font:inherit;font-size:.92rem;color:var(--ink);cursor:pointer}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 .btn:disabled{opacity:.45;cursor:default}
+.btn.sm{padding:4px 11px;font-size:.85rem;color:var(--muted)}
 input[type=text],textarea,select{font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0;max-width:100%}
 input[type=text],textarea{width:100%}
 textarea{resize:vertical}

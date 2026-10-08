@@ -74,11 +74,13 @@ const QUIZ = [
 
 /* sort items into labelled buckets, with feedback on each */
 function sorter(host, items, labels) {
-  const stat = h("p", { class: "hint" }); let done = 0, right = 0;
+  const stat = h("p", { class: "hint", style: { margin: 0 } }); let done = 0, right = 0; const resets = [];
+  const clr = h("button", { class: "btn sm", style: { display: "none" }, onclick: () => { resets.forEach(f => f()); done = 0; right = 0; stat.textContent = ""; clr.style.display = "none"; } }, "Clear answers");
   items.forEach(it => {
     const fb = h("div", { class: "afb", style: { display: "none" } }), btns = []; let locked = false;
+    resets.push(() => { locked = false; btns.forEach(b => { b.disabled = false; b.classList.remove("right", "wrong"); }); fb.style.display = "none"; });
     labels.forEach((l, i) => btns.push(h("button", { class: "btn", onclick: () => {
-      if (locked) return; locked = true; done++;
+      if (locked) return; locked = true; done++; clr.style.display = "";
       const ok = i === it.a; if (ok) right++;
       btns.forEach((b, k) => { b.disabled = true; if (k === it.a) b.classList.add("right"); });
       if (!ok) btns[i].classList.add("wrong");
@@ -87,7 +89,7 @@ function sorter(host, items, labels) {
     } }, l)));
     host.append(h("div", { class: "sortrow" }, h("span", { class: "st", text: it.t }), h("div", { class: "row" }, ...btns), fb));
   });
-  host.append(stat);
+  host.append(h("div", { class: "row", style: { marginTop: "8px" } }, clr, stat));
 }
 const disc = t => h("div", { class: "disc" }, h("b", { text: "Discuss" }), t);
 
@@ -109,7 +111,8 @@ function votes(host) {
     } }, o)));
     list.append(h("div", { class: "vote" }, h("span", { class: "st", text: it.t }), sg));
   });
-  host.append(h("div", { class: "widget" }, list, msg), dd); note();
+  const clr = h("button", { class: "btn sm", onclick: () => { Object.keys(saved).forEach(k => delete saved[k]); setJSON(VOTE_KEY, saved); list.querySelectorAll(".seg3 button").forEach(b => b.classList.remove("on")); clear(dd); note(); } }, "Clear my votes");
+  host.append(h("div", { class: "widget" }, list, h("div", { class: "row" }, clr, msg)), dd); note();
 }
 
 /* nested layers: click one to read what it means. items = [[name, meaning], ...] */
@@ -151,12 +154,13 @@ function matcher(host, tasks, labels) {
   let mi = 0, right = 0, locked = false;
   const task = h("p", { class: "mtask" }), chips = h("div", { class: "chips" }), fb = h("div", { class: "afb", style: { display: "none" } });
   const count = h("span", { class: "small" }), next = h("button", { class: "btn", style: { display: "none" } });
+  const again = h("button", { class: "btn sm", style: { display: "none" }, onclick: () => { mi = 0; right = 0; again.style.display = "none"; draw(); } }, "Start again");
   function draw() {
     const t = tasks[mi]; locked = false; task.textContent = t[0];
     count.textContent = "Task " + (mi + 1) + " of " + tasks.length + " · right so far: " + right;
     fb.style.display = "none"; next.style.display = "none"; clear(chips);
     labels.forEach((l, i) => chips.append(h("button", { onclick: e => {
-      if (locked) return; locked = true;
+      if (locked) return; locked = true; again.style.display = "";
       const ok = i === t[1]; if (ok) right++;
       e.currentTarget.classList.add(ok ? "right" : "wrong"); chips.children[t[1]].classList.add("right");
       fb.style.display = ""; fb.className = "afb " + (ok ? "good" : "bad"); fb.textContent = (ok ? "Yes. " : "Not quite. ") + t[2];
@@ -164,8 +168,8 @@ function matcher(host, tasks, labels) {
       next.style.display = ""; next.textContent = mi < tasks.length - 1 ? "Next task" : "Start again";
     } }, l)));
   }
-  next.onclick = () => { if (mi < tasks.length - 1) mi++; else { mi = 0; right = 0; } draw(); };
-  draw(); host.append(h("div", { class: "widget" }, task, chips, fb, h("div", { class: "row" }, next, count)));
+  next.onclick = () => { if (mi < tasks.length - 1) mi++; else { mi = 0; right = 0; again.style.display = "none"; } draw(); };
+  draw(); host.append(h("div", { class: "widget" }, task, chips, fb, h("div", { class: "row" }, next, again, count)));
 }
 
 /* select-all checklist. items = [[text, isRight], ...] */
@@ -175,7 +179,8 @@ function checklist(host, items, goodMsg, badMsg) {
   const go = h("button", { class: "btn primary", onclick: () => {
     const ok = items.every((c, i) => !!c[1] === picks.has(i)); msg.style.display = ""; msg.textContent = ok ? goodMsg : badMsg;
   } }, "Check my choices");
-  host.append(h("div", { class: "widget" }, box, h("div", { class: "row" }, go), msg));
+  const clr = h("button", { class: "btn sm", onclick: () => { picks.clear(); box.querySelectorAll("input").forEach(x => { x.checked = false; }); msg.style.display = "none"; } }, "Clear");
+  host.append(h("div", { class: "widget" }, box, h("div", { class: "row" }, go, clr), msg));
 }
 
 /* one question at a time with any answer options. items = [[question, options, answerIndex, why], ...] */
@@ -183,12 +188,13 @@ function oneByOne(host, items) {
   let i = 0, right = 0, locked = false;
   const q = h("p", { class: "mtask" }), opts = h("div", { class: "stack" }), fb = h("div", { class: "afb", style: { display: "none" } });
   const count = h("span", { class: "small" }), next = h("button", { class: "btn", style: { display: "none" } });
+  const again = h("button", { class: "btn sm", style: { display: "none" }, onclick: () => { i = 0; right = 0; again.style.display = "none"; draw(); } }, "Start again");
   function draw() {
     const t = items[i]; locked = false; q.textContent = t[0];
     count.textContent = "Question " + (i + 1) + " of " + items.length + " · right so far: " + right;
     fb.style.display = "none"; next.style.display = "none"; clear(opts);
     t[1].forEach((o, k) => opts.append(h("button", { class: "btn", style: { textAlign: "left" }, onclick: e => {
-      if (locked) return; locked = true;
+      if (locked) return; locked = true; again.style.display = "";
       const ok = k === t[2]; if (ok) right++;
       e.currentTarget.classList.add(ok ? "right" : "wrong"); opts.children[t[2]].classList.add("right");
       fb.style.display = ""; fb.className = "afb " + (ok ? "good" : "bad"); fb.textContent = (ok ? "Yes. " : "Not quite. ") + t[3];
@@ -196,6 +202,6 @@ function oneByOne(host, items) {
       next.style.display = ""; next.textContent = i < items.length - 1 ? "Next" : "Start again";
     } }, o)));
   }
-  next.onclick = () => { if (i < items.length - 1) i++; else { i = 0; right = 0; } draw(); };
-  draw(); host.append(h("div", { class: "widget" }, q, opts, fb, h("div", { class: "row" }, next, count)));
+  next.onclick = () => { if (i < items.length - 1) i++; else { i = 0; right = 0; again.style.display = "none"; } draw(); };
+  draw(); host.append(h("div", { class: "widget" }, q, opts, fb, h("div", { class: "row" }, next, again, count)));
 }

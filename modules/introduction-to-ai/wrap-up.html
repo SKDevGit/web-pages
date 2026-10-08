@@ -30,7 +30,7 @@ lesson({
       title: "Which votes would you change?",
       main: `<p>These are the votes you made at the start. Set your answer now, then compare with what the OECD definition suggests.</p>`,
       interactive: host => {
-        host.innerHTML = `<div class="widget"><div id="rv"></div><div class="note" id="rv-msg"></div></div>`;
+        host.innerHTML = `<div class="widget"><div id="rv"></div><div class="row"><button class="btn sm" id="rv-clr">Clear my answers</button></div><div class="note" id="rv-msg"></div></div>`;
         const first = getJSON(VOTE_KEY) || {}, second = {};
         function rv() {
           const box = clear($("#rv")); let changed = 0, voted = 0;
@@ -43,6 +43,7 @@ lesson({
           });
           $("#rv-msg").textContent = voted < VOTE_ITEMS.length ? "Set all five to see how many of your votes changed." : changed ? "You changed " + changed + " of your votes. That is the learning at work." : "You kept all of your votes. Could you now explain each one with the definition?";
         }
+        $("#rv-clr").onclick = () => { Object.keys(second).forEach(k => delete second[k]); rv(); };
         rv();
       },
       deep: `<p>There is no single right answer. The “definition suggests” notes apply the OECD wording, which centers on inferring outputs from inputs.</p>`
