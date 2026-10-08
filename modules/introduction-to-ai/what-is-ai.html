@@ -9,22 +9,27 @@
 <script>
 lesson({
   title: "What we mean by AI",
-  lede: "There is no single agreed meaning of AI. Here is the working definition, why the label keeps changing, and what we mean by intelligent.",
+  lede: "There is no single agreed meaning of AI. Here is what we mean by intelligent, the working definition, whether a system has to understand, why the label keeps changing, and how AI, machine learning and deep learning fit together.",
   steps: [
     {
-      title: "AI, machine learning and deep learning",
-      main: `<p>These terms nest inside one another. AI is the broad field. Each layer inside it is a narrower kind: machine learning, then deep learning, then generative AI.</p>`,
+      title: "What is intelligence?",
+      main: `<p>There is no single agreed definition of intelligence. People usually include these five abilities: perceiving, learning, reasoning, deciding and using language.</p>
+<div class="cards" style="margin-top:18px">
+  <div><b>Narrow</b>Today’s systems are strong at specific tasks.</div>
+  <div><b>General</b>A system matching people across all tasks does not exist, and the idea is disputed.</div>
+</div>`,
       interactive: host => {
-        host.append(h("p", { text: "Click a layer to see what it means." }));
-        nester(host, [
-          ["Artificial intelligence", "Machine-based systems that infer, from their input, how to produce outputs such as predictions, content, recommendations or decisions."],
-          ["Machine learning", "AI systems that learn their rules from data, instead of having each rule written by a person."],
-          ["Deep learning", "Machine learning that uses neural networks with many layers."],
-          ["Generative AI", "Models that produce new content: text, images, code or audio."]
-        ]);
+        host.append(h("p", { text: "Click an ability to see what it means." }));
+        chooser(host, [
+          ["Perceiving", "Making sense of what is seen, heard or sensed.", "Reading a scanned invoice, or spotting a defect in a photo."],
+          ["Learning", "Improving from experience, instead of being told every rule.", "A spam filter that gets better as people mark more emails."],
+          ["Reasoning", "Working out a conclusion from facts, step by step.", "Checking whether one clause in a contract conflicts with another."],
+          ["Deciding", "Choosing an action among the options, to reach a goal.", "Approving or flagging a payment."],
+          ["Using language", "Understanding and producing words, in speech or text.", "Drafting a reply to a customer email."]
+        ], "What it means", "A business example");
       },
-      deep: `<p>The nesting is a simplification: not all AI is machine learning, but almost all commercial AI today is.</p>`,
-      quiz: [["Which is the broadest of these terms?", ["Artificial intelligence", "Machine learning", "Deep learning"], 0, "Machine learning sits inside AI, and deep learning sits inside machine learning."]]
+      deep: `<p>“General intelligence” is a contested and undefined target, and forecasts about it are opinion, not measurement.</p>`,
+      quiz: [["Which best describes today’s AI systems?", ["Equal to people across all tasks", "Unable to learn", "Strong at specific tasks"], 2, "They are strong at specific tasks. A system matching people across all tasks does not exist."]]
     },
     {
       title: "The official definition",
@@ -43,36 +48,7 @@ lesson({
       },
       deep: `<p>The definition describes an “AI system”, not “AI” in general. It covers the spam filter as well as ChatGPT. Governments use it, including in regulation.</p>
 <p class="hint">Source: OECD.AI (2023 wording, published March 2024).</p>`,
-      quiz: [["What is the key word in the OECD definition?", ["Infers", "Calculates", "Understands"], 0, "The system works out how to produce outputs from its input, rather than following a written rule for each case."]]
-    },
-    {
-      title: "The AI effect",
-      main: `<p>Once a task is solved, it stops being called AI.</p>
-<div class="quote">“AI is whatever hasn’t been done yet.”</div>
-<p>The label keeps moving to whatever computers cannot yet do.</p>`,
-      interactive: host => {
-        host.append(h("p", { text: "Click a task to see how it was seen then, and now." }));
-        flipRows(host, [
-          ["Reading printed text (optical character recognition)", "A core AI research problem.", "Ordinary engineering, built into scanners and phones."],
-          ["Recognizing speech", "A core AI research problem.", "A routine feature on phones and in call centres."],
-          ["Playing championship chess (Deep Blue, 1997)", "A landmark of AI. Critics then dismissed it as brute force.", "Seen as a chess program, not as intelligence."]
-        ]);
-      },
-      deep: `<p>The historian Pamela McCorduck called this an “odd paradox”, and the line is often called Tesler’s theorem.</p>
-<p>It is also why people disagree about some items in the Lesson 1 vote. For a spam filter or a spreadsheet forecast, whether it counts as AI depends on where you draw the line.</p>
-<p class="hint">Source: Wikipedia, “AI effect” (secondary).</p>`,
-      quiz: [["After a task is solved and becomes routine, people usually…", ["Stop calling it AI", "Call it a stronger form of AI", "Call it general intelligence"], 0, "This is the AI effect: the label moves on to whatever has not been done yet."]]
-    },
-    {
-      title: "What is intelligence?",
-      main: `<p>People usually include these abilities.</p>
-<div class="chips">${["Perceiving", "Learning", "Reasoning", "Deciding", "Using language"].map(a => `<span class="pill info">${a}</span>`).join("")}</div>
-<div class="cards" style="margin-top:18px">
-  <div><b>Narrow</b>Today’s systems are strong at specific tasks.</div>
-  <div><b>General</b>A system matching people across all tasks does not exist, and the idea is disputed.</div>
-</div>`,
-      deep: `<p>“General intelligence” is a contested and undefined target, and forecasts about it are opinion, not measurement.</p>`,
-      quiz: [["Which best describes today’s AI systems?", ["Strong at specific tasks", "Equal to people across all tasks", "Unable to learn"], 0, "They are strong at specific tasks. A system matching people across all tasks does not exist."]]
+      quiz: [["What is the key word in the OECD definition?", ["Calculates", "Understands", "Infers"], 2, "The system works out how to produce outputs from its input, rather than following a written rule for each case."]]
     },
     {
       title: "Does it have to understand?",
@@ -96,7 +72,40 @@ lesson({
       },
       deep: `<p>A system can produce useful, human-sounding work without the properties we associate with a mind. That matters for how much to trust it.</p>
 <p class="hint">Sources: Turing (1950), “Computing Machinery and Intelligence”; Wikipedia, “Turing test” (secondary).</p>`,
-      quiz: [["For a manager, what is the most useful way to judge an AI system?", ["By what it reliably does for you", "By whether it understands", "By whether it sounds human"], 0, "Capability matters more than understanding. A system can be useful without having the properties we associate with a mind."]]
+      quiz: [["For a manager, what is the most useful way to judge an AI system?", ["By whether it understands", "By whether it sounds human", "By what it reliably does for you"], 2, "Capability matters more than understanding. A system can be useful without having the properties we associate with a mind."]]
+    },
+    {
+      title: "The AI effect",
+      main: `<p>Once a task is solved, it stops being called AI.</p>
+<div class="quote">“AI is whatever hasn’t been done yet.”</div>
+<p>The label keeps moving to whatever computers cannot yet do.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Click a task to see how it was seen then, and now." }));
+        flipRows(host, [
+          ["Reading printed text (optical character recognition)", "A core AI research problem.", "Ordinary engineering, built into scanners and phones."],
+          ["Recognizing speech", "A core AI research problem.", "A routine feature on phones and in call centres."],
+          ["Playing championship chess (Deep Blue, 1997)", "A landmark of AI. Critics then dismissed it as brute force.", "Seen as a chess program, not as intelligence."]
+        ]);
+      },
+      deep: `<p>The historian Pamela McCorduck called this an “odd paradox”, and the line is often called Tesler’s theorem.</p>
+<p>It is also why people disagree about some items in the Lesson 1 vote. For a spam filter or a spreadsheet forecast, whether it counts as AI depends on where you draw the line.</p>
+<p class="hint">Source: Wikipedia, “AI effect” (secondary).</p>`,
+      quiz: [["After a task is solved and becomes routine, people usually…", ["Call it a stronger form of AI", "Stop calling it AI", "Call it general intelligence"], 1, "This is the AI effect: the label moves on to whatever has not been done yet."]]
+    },
+    {
+      title: "AI, machine learning and deep learning",
+      main: `<p>These terms nest inside one another. AI is the broad field. Each layer inside it is a narrower kind: machine learning, then deep learning, then generative AI.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Click a layer to see what it means." }));
+        nester(host, [
+          ["Artificial intelligence", "Machine-based systems that infer, from their input, how to produce outputs such as predictions, content, recommendations or decisions."],
+          ["Machine learning", "AI systems that learn their rules from data, instead of having each rule written by a person."],
+          ["Deep learning", "Machine learning that uses neural networks with many layers."],
+          ["Generative AI", "Models that produce new content: text, images, code or audio."]
+        ]);
+      },
+      deep: `<p>The nesting is a simplification: not all AI is machine learning, but almost all commercial AI today is.</p>`,
+      quiz: [["Which is the broadest of these terms?", ["Machine learning", "Deep learning", "Artificial intelligence"], 2, "Machine learning sits inside AI, and deep learning sits inside machine learning."]]
     }
   ]
 });

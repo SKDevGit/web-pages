@@ -49,7 +49,7 @@ lesson({
       deep: `<p>Learning handles cases nobody could write rules for. But the rules it finds are not readable and can be wrong in ways that are hard to predict. Rules are transparent but brittle. Learned models are flexible but opaque.</p>
 <p>Go back to your Lesson 1 vote: the thermostat follows written rules, while the spam filter and Netflix learn from data.</p>
 <p class="hint">The spam demo is illustrative. The model’s scores are set by hand to show the idea.</p>`,
-      quiz: [["In machine learning, what does the machine find?", ["The rules, from data and answers", "The data, from rules and answers", "The answers, from rules and data"], 0, "In traditional software people write the rules. In machine learning the machine finds them, from data and answers. The result is the model."]]
+      quiz: [["In machine learning, what does the machine find?", ["The data, from rules and answers", "The rules, from data and answers", "The answers, from rules and data"], 1, "In traditional software people write the rules. In machine learning the machine finds them, from data and answers. The result is the model."]]
     },
     {
       title: "Three ways machines learn",
@@ -75,7 +75,7 @@ lesson({
       },
       deep: `<p>Supervised learning needs examples with correct answers, and someone has to provide them. That is why labeling is often the expensive part.</p>
 <p class="hint">Sources: IBM overview (supervised, unsupervised; vendor explainer). The reinforcement example is a common textbook one, so treat the examples as illustrative.</p>`,
-      quiz: [["Why is labeling often the expensive part?", ["Someone has to supply the correct answer for many examples", "Labels need special hardware", "Labels are illegal to collect"], 0, "Supervised learning needs examples with correct answers, and someone has to provide them."]]
+      quiz: [["Why is labeling often the expensive part?", ["Labels need special hardware", "Labels are illegal to collect", "Someone has to supply the correct answer for many examples"], 2, "Supervised learning needs examples with correct answers, and someone has to provide them."]]
     },
     {
       title: "Analytical versus generative AI",
@@ -124,7 +124,7 @@ lesson({
           { t: "Charge the correct sales tax by state", a: 0, why: "It must be exact and explainable, so a rule is safer than a learned model." }
         ], ["Written rule", "Plain analytics", "AI"]);
       },
-      quiz: [["A pricing decision must be explained exactly to a regulator. What is the safest choice?", ["A written rule", "A learned model, because it is more flexible", "Whatever is cheapest"], 0, "Rules are transparent. Learned models are flexible but opaque, so they are harder to explain exactly."]]
+      quiz: [["A pricing decision must be explained exactly to a regulator. What is the safest choice?", ["A learned model, because it is more flexible", "Whatever is cheapest", "A written rule"], 2, "Rules are transparent. Learned models are flexible but opaque, so they are harder to explain exactly."]]
     }
   ]
 });

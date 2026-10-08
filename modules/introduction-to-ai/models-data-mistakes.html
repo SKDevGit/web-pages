@@ -76,7 +76,7 @@ lesson({
       },
       deep: `<p>The recipe repeatedly nudges the two numbers in the direction that reduces the average error. The data here is illustrative.</p>
 <p class="hint">A teaching device, not a technical definition. Parameter counts of commercial models are usually not disclosed.</p>`,
-      quiz: [["In the regression line example, what are the model’s parameters?", ["The slope and the intercept", "The dots on the chart", "The error"], 0, "The two learned numbers are the model. The dots are the training data."]]
+      quiz: [["In the regression line example, what are the model’s parameters?", ["The dots on the chart", "The error", "The slope and the intercept"], 2, "The two learned numbers are the model. The dots are the training data."]]
     },
     {
       title: "Where training data comes from",
@@ -125,9 +125,10 @@ lesson({
 </div>
 <p>A model that flags nothing is 98% accurate when only 2% of payments are fraud, yet it catches no fraud at all. What matters is the cost of each kind of mistake, which only the business can say.</p>`,
       interactive: host => {
-        host.innerHTML = `<div class="widget">
+        host.innerHTML = `<p>Each payment gets a fraud score from 0 to 1: how strongly the model suspects fraud. You choose the cutoff above which a payment is flagged.</p>
+<div class="widget">
   <label class="field">Flag a payment when its fraud score is above: <b id="th-v"></b><input type="range" id="th" min="0" max="100" step="1" value="50"></label>
-  <div class="mini" id="cm"></div>
+  <div class="mini four" id="cm"></div>
   <div class="tally" id="acc"></div>
   <div class="fields2">
     <label class="field">Cost of one missed fraud ($)<input type="number" id="c1" value="500" min="0" step="50"></label>
@@ -154,8 +155,17 @@ lesson({
         mistakes();
       },
       deep: `<p>Moving the threshold trades one kind of mistake for the other. Lowering it catches more fraud and flags more good customers. Raising it does the opposite.</p>
+<p>The four counts in the exercise have a name: a <b>confusion matrix</b>. It sorts every decision into one of four boxes, by what the payment really was and what the model said.</p>
+<div class="widget cmpwrap">
+<table class="cmpt">
+<tr><th></th><th>Model flagged it</th><th>Model passed it</th></tr>
+<tr><td><b>Really fraud</b></td><td>Fraud caught<br><span class="small">true positive</span></td><td>Fraud missed<br><span class="small">false negative</span></td></tr>
+<tr><td><b>Really fine</b></td><td>Good customer wrongly flagged<br><span class="small">false positive</span></td><td>Good payment passed<br><span class="small">true negative</span></td></tr>
+</table>
+</div>
+<p><b>Accuracy</b> is the share of payments in the two correct boxes. Two more measures come straight from the matrix. <b>Precision</b>: of the payments flagged, how many were really fraud. <b>Recall</b>: of all the real fraud, how many were caught. Moving the threshold shifts counts between the boxes, so one measure improves while another gets worse.</p>
 <p class="hint">Illustrative: 1,000 payments, 20 of them fraudulent. The scores are made up to show the trade-off.</p>`,
-      quiz: [["A model blocks a good customer’s payment. What kind of mistake is that?", ["A false positive: a false alarm", "A false negative: a missed case", "Not a mistake, only a cost"], 0, "It flagged something that was fine, which is a false positive. Whether it matters more than missing fraud depends on the costs."]]
+      quiz: [["A model blocks a good customer’s payment. What kind of mistake is that?", ["A false negative: a missed case", "Not a mistake, only a cost", "A false positive: a false alarm"], 2, "It flagged something that was fine, which is a false positive. Whether it matters more than missing fraud depends on the costs."]]
     }
   ]
 });

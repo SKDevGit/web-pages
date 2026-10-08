@@ -316,3 +316,6 @@ body.fsmode{overflow:hidden}
 .slide .sortrow{padding:6px 0}
 .slide .stack{gap:2px}
 .slide .chart{max-height:180px}
+details.layer .cmpt td .small{font-size:.8rem}
+.slide .mini.four{grid-template-columns:repeat(4,1fr)}
+.slide .mini.four>div{font-size:.85rem;padding:8px 10px}

@@ -39,7 +39,7 @@ lesson({
             if (now) { voted++; if (was !== "Not voted" && now !== was) changed++; }
             const sg = h("div", { class: "seg3" });
             ["Yes", "No", "Unsure"].forEach(o => sg.append(h("button", { class: now === o ? "on" : "", onclick: () => { second[it.t] = o; rv(); } }, o)));
-            box.append(h("div", { class: "sortrow" }, h("div", { class: "vote", style: { border: 0, padding: 0 } }, h("span", { class: "st", text: it.t }), sg), h("span", { class: "small", text: "At the start you voted: " + was + "." + (now ? " The definition suggests: " + it.now + ". " + it.why : "") })));
+            box.append(h("div", { class: "sortrow", style: { gap: "2px 16px", padding: "4px 0" } }, h("div", { class: "vote", style: { border: 0, padding: 0 } }, h("span", { class: "st", text: it.t }), sg), h("span", { class: "small", style: { gridColumn: "1 / -1", lineHeight: "1.35" }, text: (now ? it.now + ". " + it.why : "At the start you voted: " + was + ".") })));
           });
           $("#rv-msg").textContent = voted < VOTE_ITEMS.length ? "Set all five to see how many of your votes changed." : changed ? "You changed " + changed + " of your votes. That is the learning at work." : "You kept all of your votes. Could you now explain each one with the definition?";
         }

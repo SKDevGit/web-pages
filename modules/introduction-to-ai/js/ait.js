@@ -66,9 +66,9 @@ function setJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } cat
 /* five questions, asked in Lesson 1 and again in the wrap-up */
 const QUIZ = [
   ["Once a task is solved and becomes routine, people often stop calling it AI. What is this called?", ["The AI effect", "An AI winter", "The Turing test"], 0, "It is the AI effect: once a task is solved it stops being called AI."],
-  ["In machine learning, what does the machine find?", ["The rules, from data and answers", "The data, from rules and answers", "The answers, from rules and data"], 0, "In traditional software people write the rules. In machine learning, the machine finds them from data and answers."],
-  ["Which is an example of analytical (predictive) AI?", ["Scoring whether a customer is likely to cancel", "Drafting a reply to a customer", "Creating an image from a description"], 0, "Analytical AI outputs a number, label or score. The other two create new content, which is generative."],
-  ["A model is trained on ten years of résumés, mostly from men. What is most likely?", ["It reflects that pattern in its scores", "It ignores gender automatically", "It becomes fair with more of the same data"], 0, "A model learns whatever patterns the data contains, including bias. More of the same data does not fix it."],
+  ["In machine learning, what does the machine find?", ["The data, from rules and answers", "The rules, from data and answers", "The answers, from rules and data"], 1, "In traditional software people write the rules. In machine learning, the machine finds them from data and answers."],
+  ["Which is an example of analytical (predictive) AI?", ["Drafting a reply to a customer", "Scoring whether a customer is likely to cancel", "Creating an image from a description"], 1, "Analytical AI outputs a number, label or score. The other two create new content, which is generative."],
+  ["A model is trained on ten years of résumés, mostly from men. What is most likely?", ["It ignores gender automatically", "It becomes fair with more of the same data", "It reflects that pattern in its scores"], 2, "A model learns whatever patterns the data contains, including bias. More of the same data does not fix it."],
   ["Models can now write a spreadsheet formula from a plain-language request. Which skill matters more as a result?", ["Specifying the goal and checking the result", "Learning every programming language", "Memorizing function names"], 0, "The scarce skill shifts to specifying the goal and checking the result."]
 ];
 
@@ -118,7 +118,7 @@ function nester(host, items) {
   function draw() {
     clear(root); let at = root;
     items.forEach((n, i) => {
-      const b = h("button", { class: i === sel ? "on" : "", onclick: () => { sel = i; draw(); } }, n[0]);
+      const b = h("button", { class: i === sel ? "on" : "", onclick: e => { e.stopPropagation(); sel = i; draw(); } }, n[0]);
       at.append(b); if (i < items.length - 1) { const inner = h("div", { class: "in" }); b.append(inner); at = inner; }
     });
     msg.textContent = items[sel][1];

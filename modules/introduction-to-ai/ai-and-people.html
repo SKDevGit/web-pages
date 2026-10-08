@@ -54,13 +54,14 @@ lesson({
         host.append(disc("What is one task you would now attempt that you would have handed to a specialist two years ago? What would you check?"));
       },
       deep: `<p>Modern models also accept images, audio and documents (multimodal input). The abstraction is leaky: errors can be harder to spot when you do not understand what was produced.</p>`,
-      quiz: [["A colleague says natural language means everyone is now a programmer. What is the best reply?", ["It lowers the skill needed, but checking the result still matters", "Yes, no technical knowledge is needed any more", "No, because it cannot write code at all"], 0, "The abstraction is leaky. Errors can be harder to spot when you do not understand what was produced."]]
+      quiz: [["A colleague says natural language means everyone is now a programmer. What is the best reply?", ["Yes, no technical knowledge is needed any more", "It lowers the skill needed, but checking the result still matters", "No, because it cannot write code at all"], 1, "The abstraction is leaky. Errors can be harder to spot when you do not understand what was produced."]]
     },
     {
       title: "Automate or assist?",
       main: `<div class="cards">
-  <div><b>Automation</b>The system does the whole task.</div>
-  <div><b>Augmentation</b>The system helps a person who stays in charge of the result.</div>
+  <div><b>Automate</b>The system does the whole task on its own.</div>
+  <div><b>Assist</b>The system prepares or recommends. A person reviews it and decides.</div>
+  <div><b>Person leads</b>A person does the task and is accountable. AI is at most a tool.</div>
 </div>
 <p><b>A useful rule:</b> the costlier a mistake is, and the harder it is to check, the more a person should stay involved.</p>`,
       interactive: host => {
@@ -68,12 +69,12 @@ lesson({
         const w = h("div", { class: "widget" }); host.append(w);
         sorter(w, [
           { t: "Sorting incoming support emails by topic", a: 0, why: "Frequent, low risk and easy to check, so it suits automation." },
-          { t: "Drafting replies for an agent to review before sending", a: 1, why: "A person reviews each draft, so a mistake is caught before it reaches a customer." },
-          { t: "Approving a very large refund", a: 1, why: "The cost of a mistake is high, so a person should stay in the loop." },
+          { t: "Drafting replies for an agent to review before sending", a: 1, why: "The system drafts and a person reviews each reply, so a mistake is caught before it reaches a customer." },
+          { t: "Approving a refund", a: 1, why: "The cost of a mistake is high, so the system can prepare the case but a person should approve it." },
           { t: "Giving legal advice to clients", a: 2, why: "Costly to get wrong and hard to check, and an accountable professional must stand behind it." }
-        ], ["Automate", "Assist a person", "Keep with a person"]);
+        ], ["Automate", "Assist", "Person leads"]);
       },
-      quiz: [["Who is accountable for a decision that an AI system helped to make?", ["The people and organization using it", "The AI system", "Nobody, because the model decided"], 0, "Accountability does not move to the system. The organization and the people using it remain answerable."]]
+      quiz: [["Who is accountable for a decision that an AI system helped to make?", ["The AI system", "Nobody, because the model decided", "The people and organization using it"], 2, "Accountability does not move to the system. The organization and the people using it remain answerable."]]
     }
   ]
 });
