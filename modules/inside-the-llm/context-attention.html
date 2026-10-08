@@ -19,7 +19,7 @@
   <div class="label">The answer</div>
   <div id="br-ans" class="stack"></div>
   <p class="hint" id="br-tokens"></p>
-  <p class="hint">This is a scripted illustration: the answers come from a small set of rules so they stay predictable in class. A real model weighs the same facts, learned from text rather than rules.</p>
+  <p class="hint">This is a scripted illustration: the answers come from a small set of rules so the result stays predictable. A real model also draws on the facts you give it, but it learned from text rather than rules, so it can weigh them differently or get them wrong.</p>
 </div>
 <div id="q1"></div>
 
@@ -37,7 +37,7 @@
 
 <span class="step">Step 3 of 3</span>
 <h2>Meaning as numbers</h2>
-<p>Before attention can work, each token becomes a list of numbers called an embedding. Words used in similar ways get nearby numbers. Click a word on the map to see its closest neighbours.</p>
+<p>Before attention can work, each token becomes a list of numbers called an embedding. Words used in similar ways get nearby numbers. Click a word on the map to see its closest neighbors.</p>
 <div class="widget">
   <div class="plot" id="em-map" style="position:relative;height:300px;background:var(--soft);border-radius:8px"></div>
   <div class="note" id="em-msg"></div>
@@ -75,7 +75,7 @@ function att() {
 }
 ["defective", "closed"].forEach(x => $("#att-switch").append(h("button", { class: x === AT.last ? "on" : "", onclick: () => { AT.last = x; AT.q = 11; $("#att-switch").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.textContent === x)); att(); } }, x)));
 att();
-$("#q1").append(quick("You get a poor answer from a model. What is the first thing to check?", ["Whether the brief contained the facts it needed", "Whether the model was retrained today", "The font of the prompt"], 0, "The model can only use what it was given. Missing context is the most common cause of a vague or wrong answer."));
+$("#q1").append(quick("You get a poor answer from a model. What is the first thing to check?", ["Whether the brief contained the facts it needed", "Whether the model was retrained today", "The font of the prompt"], 0, "The model can only use what it was given. Missing context is a very common cause of a vague or wrong answer."));
 $("#q2").append(quick("In one sentence, what does attention do?", ["It lets the model weigh which earlier words matter for the word it is working on", "It stores the customer’s account", "It decides the temperature"], 0, "Attention is how the model uses relationships between words in the context."));
 
 const EM = [["refund", 20, 25], ["reimbursement", 28, 33], ["money back", 14, 38], ["laptop", 72, 70], ["notebook", 80, 62], ["computer", 66, 58], ["late", 45, 85], ["delayed", 54, 90], ["banana", 88, 15], ["apple", 78, 22]];

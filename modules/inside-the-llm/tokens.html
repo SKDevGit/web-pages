@@ -4,8 +4,8 @@
 <header id="site-head"></header>
 <main class="col">
 <h1>What are tokens?</h1>
-<p class="meta">3 short exercises</p>
-<p class="lede">A model doesn’t read words the way you do. It reads tokens: small chunks of text. Knowing how text becomes tokens explains a surprising amount of model behaviour, and it explains the bill.</p>
+<p class="meta">3 exercises</p>
+<p class="lede">A model doesn’t read words the way you do. It reads tokens: small chunks of text. Knowing how text becomes tokens explains a surprising amount of model behavior, and it explains the bill.</p>
 <div class="learn"><b>By the end you can</b>say what a token is, predict which kinds of text use more tokens, and estimate what a model costs to run at volume.</div>
 
 <span class="step">Step 1 of 3</span>
@@ -28,7 +28,7 @@
 
 <span class="step">Step 3 of 3</span>
 <h2>Tokens are the meter</h2>
-<p>Usage is billed and limited in tokens: what you send in, and what the model writes back. A longer prompt and a longer reply both cost more, and the context window, how much the model can read at once, is also counted in tokens.</p>
+<p>Usage is billed and limited in tokens: what you send in, and what the model writes back. A longer prompt and a longer reply both cost more, and the context window, how much text fits at once (your input plus the model’s reply), is also counted in tokens.</p>
 <div class="widget">
   <div class="form">
     <label class="field" for="tok-vol">Tickets per day<input type="text" id="tok-vol" value="5000" inputmode="numeric"></label>
@@ -64,10 +64,10 @@ function cmpRender() {
 cmpRender();
 function cost() {
   const v = parseFloat($("#tok-vol").value.replace(/,/g, "")) || 0, p = parseFloat($("#tok-price").value) || 0, n = parseFloat($("#tok-len").value.replace(/,/g, "")) || 0;
-  const day = v * n / 1e6 * p; clear($("#cost")).append(h("span", null, h("b", { text: (v * n / 1e6).toFixed(1) + "M" }), "tokens a day"), h("span", null, h("b", { text: "$" + day.toFixed(0) }), "a day"), h("span", null, h("b", { text: "$" + (day * 30).toLocaleString(undefined, { maximumFractionDigits: 0 }) }), "a month"));
+  const day = v * n / 1e6 * p; clear($("#cost")).append(h("span", null, h("b", { text: (v * n / 1e6).toFixed(1) + "M" }), "tokens a day"), h("span", null, h("b", { text: "$" + day.toFixed(0) }), "a day"), h("span", null, h("b", { text: "$" + (day * 30).toLocaleString(undefined, { maximumFractionDigits: 0 }) }), "a month (30 days)"));
 }
 ["#tok-vol", "#tok-price", "#tok-len"].forEach(s => $(s).oninput = cost); cost();
 $("#q1").append(quick("Which text is likely to use the most tokens per word?", ["Everyday English", "A long number or a product code", "A short common word"], 1, "Numbers and codes split into short groups, so one “word” can take several tokens."));
-$("#q2").append(quick("A model handles Hindi and English text. What might you expect for the same message?", ["Hindi uses more tokens, so it can cost more", "Identical token counts", "Hindi uses no tokens"], 0, "Vocabularies are usually built mostly from English text, so many other scripts split into more pieces."));
+$("#q2").append(quick("A model handles Hindi and English text. What might you expect for the same message?", ["Hindi uses more tokens, so it can cost more", "Identical token counts", "Hindi uses no tokens"], 0, "Many vocabularies were built from text dominated by English, so other scripts such as Hindi often split into more pieces. Newer vocabularies narrow the gap."));
 $("#q3").append(quick("Your replies are twice as long. What happens to cost?", ["It roughly doubles for the reply portion", "Nothing, cost is per request", "It halves"], 0, "You pay per token written as well as per token read."));
 </script></body></html>

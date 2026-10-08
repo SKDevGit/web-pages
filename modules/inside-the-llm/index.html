@@ -7,21 +7,21 @@
 <section class="hero" id="home">
 <p class="kicker">A hands-on module for MBA students</p>
 <h1>Inside the LLM</h1>
-<p class="lede">Large language models can feel like magic. They are not. They are a very large version of something simple: a system that guesses the next word. Here you will build that intuition with small examples you can see all the way through, then learn what it means for the way you work.</p>
-<div class="row"><a class="btn primary" href="prediction.html" id="start-btn">Start Part 1</a><a class="btn" href="#map">See the module map</a></div>
+<p class="lede">Large language models can feel like magic. They are not. They are a very large version of something simple: a system that guesses the next word (more exactly, the next token). Here you will build that intuition with small examples you can see all the way through, then learn what it means for the way you work.</p>
+<div class="row"><a class="btn primary" href="prediction.html" id="start-btn">Start Lesson 1</a><a class="btn" href="#map">See the module map</a></div>
 <p class="hint">No coding and no maths. Everything runs in your browser.</p>
 </section>
 
 <h2>What you will be able to do</h2>
 <div class="cards">
   <div><b>Explain it</b>Say in plain words what a token is, how a model learns, and how it writes an answer.</div>
-  <div><b>Use it</b>Recognise what LLMs are good at, from sorting text to reasoning, and where they fail.</div>
+  <div><b>Use it</b>Recognize what LLMs are good at, from sorting text to reasoning, and where they fail.</div>
   <div><b>Decide about it</b>Choose between prompting, retrieval and fine-tuning, pick a model size, and rank first projects.</div>
 </div>
 
-<h2>How each part works</h2>
+<h2>How each lesson works</h2>
 <div class="cards three">
-  <div><b>1 · Read</b>A few short paragraphs introduce one idea.</div>
+  <div><b>1 · Read</b>A few paragraphs introduce one idea.</div>
   <div><b>2 · Try</b>A small exercise lets you see the idea working.</div>
   <div><b>3 · Check</b>A quick question confirms you have it.</div>
 </div>
@@ -37,6 +37,6 @@
 chrome(-1);
 const DESC = ["Be the model: finish a sentence and compare with the class.", "See how text is split into the pieces a model reads, and why they set the cost.", "Guess, check, adjust, repeat, then see how a base model becomes an assistant.", "Follow one prompt, step by step, until the next word is chosen.", "Change the brief, see which words matter, and how meaning becomes numbers.", "Seven uses, from sorting and summarizing to reasoning and acting.", "Spot invented claims, understand bias, protect confidential data.", "Prompting, retrieval and fine-tuning, and when to use each.", "Choose a model size, compare kinds of model, and rank first projects.", "Follow one request from start to finish and test what you have learned.", "48 terms in plain language, each with a picture or a small exercise."];
 const cm = $("#cmap"); let lastG = null;
-PAGES.forEach((p, k) => { if (p[2] !== lastG) { lastG = p[2]; cm.append(h("div", { class: "cg", text: p[2] })); } cm.append(h("a", { href: p[0] }, h("small", { text: k < NPARTS ? "Part " + (k + 1) : "Terms" }), h("div", null, h("b", { text: p[1] }), h("span", { text: DESC[k] })))); });
+PAGES.forEach((p, k) => { if (p[2] !== lastG) { lastG = p[2]; cm.append(h("div", { class: "cg", text: p[2] })); } cm.append(h("a", { href: p[0] }, h("small", { text: k < NPARTS ? "Lesson " + (k + 1) : "Terms" }), h("div", null, h("b", { text: p[1] }), h("span", { text: DESC[k] })))); });
 </script>
 </body></html>

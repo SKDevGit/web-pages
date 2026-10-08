@@ -4,7 +4,7 @@
 <header id="site-head"></header>
 <main class="col">
 <h1>How training works</h1>
-<p class="meta">3 stages · 9 short exercises</p>
+<p class="meta">3 stages · 9 exercises</p>
 <p class="lede">A language model isn’t given rules. It reads a very large amount of text and gradually adjusts itself until its guesses about what comes next get good. Here you’ll run that process yourself, one step at a time, on a model small enough to see.</p>
 <div class="learn"><b>By the end you can</b>describe the training loop, explain what an error score is, and say how a base model becomes an assistant and then a product.</div>
 
@@ -41,7 +41,7 @@
 <span class="step">Base model · Step 5 of 5</span>
 <h2>Repeat</h2>
 <p>One example teaches the model almost nothing. Training is this loop run over and over on different sentences, so the nudges add up. Run it in bulk and watch the error score fall.</p>
-<p>Training repeats this loop over many different examples, and stops when the average error stops improving or the budget runs out. It never reaches zero, because many endings are reasonable.</p>
+<p>Training repeats this loop over many different examples, and stops when the average error stops improving or the planned budget of data and computing is used up. It never reaches zero, because many endings are reasonable.</p>
 <div class="widget" id="x5"></div>
 <div id="q5"></div>
 
@@ -49,7 +49,7 @@
 
 <span class="step">Base model to assistant · Step 1 of 3</span>
 <h2>Fine-tune on examples</h2>
-<p>A base model predicts the next token from patterns in its training text. So it simply continues whatever text it is given, and does not treat a request as an instruction to follow. Fine-tuning shows it many example requests paired with good answers, using the same loop you just ran, so it learns to answer rather than continue. Switch between the two and compare, then look at the kind of examples it learns from.</p>
+<p>A base model predicts the next token from patterns in its training text. So it simply continues whatever text it is given, and does not reliably treat a request as an instruction to follow. Fine-tuning shows it many example requests paired with good answers, using the same loop you just ran, so it learns to answer rather than continue. Switch between the two and compare, then look at the kind of examples it learns from.</p>
 <div class="widget">
   <div class="row"><div class="seg3" id="ft-seg"></div></div>
   <div class="label">Request</div><div class="docbox">Write a polite reply declining a late return.</div>
@@ -64,7 +64,7 @@
 
 <span class="step">Base model to assistant · Step 2 of 3</span>
 <h2>Learn from human feedback</h2>
-<p>Fine-tuning teaches the format. Feedback teaches the quality. For each request the model writes two answers, and a person picks the better one. The model is then adjusted toward the answers people prefer. You are the rater: choose the better answer in each round.</p>
+<p>Fine-tuning teaches the format. Feedback teaches the quality. For each request the model writes two answers, and a person picks the better one. People’s choices are turned into a score for answers, and the model is adjusted toward higher-scoring ones. You are the rater: choose the better answer in each round.</p>
 <div class="widget" id="fb"></div>
 <div id="q8"></div>
 
@@ -169,7 +169,7 @@ function r4() {
   const lab = h("b", { text: S.lr.toFixed(2) }), sl = h("input", { type: "range", min: 0.05, max: 1.5, step: 0.05, value: S.lr, id: "lr-sl" });
   sl.oninput = () => { S.lr = parseFloat(sl.value); lab.textContent = S.lr.toFixed(2); };
   x.append(h("label", { class: "field", for: "lr-sl" }, h("span", null, "Size of each nudge: ", lab), sl), h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => { M.apply(S.cur.i, S.cur.j, S.lr); saveModel(M); S.nudged = true; renderAll(); } }, "Nudge the numbers")));
-  x.append(h("p", { class: "hint", text: "Size of each nudge (also called the learning rate) is how far the numbers move in one press. Too large and the model overshoots, favouring this word and getting other contexts wrong. Too small and it needs many more nudges. Try a small size, then a large one, on the same example." }));
+  x.append(h("p", { class: "hint", text: "Size of each nudge (also called the learning rate) is how far the numbers move in one press. Too large and the model overshoots, favoring this word too strongly and crowding out other sensible endings. Too small and it needs many more nudges. Try a small size, then a large one, on the same example." }));
 }
 function r5() {
   const x = clear($("#x5")); x.append(h("div", { class: "label", text: "Many examples" }));
@@ -181,7 +181,7 @@ function r5() {
   const unif = new Array(V).fill(1 / (V - 1)); unif[0] = 0;
   const now = M.probs(VI[S.ask]), idx = now.map((v, k) => k).filter(k => k !== 0).sort((a, b) => now[b] - now[a]).slice(0, 5);
   x.append(h("div", { class: "label", style: { marginTop: "14px" }, text: "Ask the model: what comes next?" }),
-    h("p", { style: { margin: "0 0 8px" }, text: "Once training has run, what the model learned is stored in its parameters. You can ask it a question at any time: given this word, what chance does each possible next word get? Looking up those chances is exactly what the model does when it writes (Part 4). Compare the answer before and after training." }),
+    h("p", { style: { margin: "0 0 8px" }, text: "Once training has run, what the model learned is stored in its parameters. You can ask it a question at any time: given this word, what chance does each possible next word get? Reading off those chances is what the model does each time it writes the next word (Lesson 4). Compare the answer before and after training." }),
     h("label", { class: "field", for: "ask-sel" }, "After the word", sel));
   if (!M.steps) x.append(h("div", { class: "empty", text: "The model has not been trained yet, so every word has the same small chance. Press “Train on 25 examples” above, then look at the chances again." }));
   x.append(h("p", { class: "hint", style: { marginTop: "8px" }, text: "Bars: chances after training on " + M.steps.toLocaleString() + " examples. Black ticks: the chances before any training (all equal)." }), bars(topRows(now, 5, undefined, unif)));
@@ -208,12 +208,12 @@ $("#ft-next").onclick = () => { ftn++; ftx(); }; ftx();
 $("#q7").append(quick("What does fine-tuning on examples change?", ["The model learns to answer requests instead of just continuing the text", "The model reads the internet again", "The model’s vocabulary doubles"], 0, "It is the same guess, check and adjust loop, but on example requests paired with good answers."));
 
 // Stage 2, step 2: human feedback
-const FB = [["Customer asks: “Where is my order?”", [["Check the tracking page.", false], ["Your order shipped yesterday and should arrive Friday. Here is the tracking link.", true]]], ["Customer asks: “Can I return this after 45 days?”", [["Yes, of course! Anything is possible.", false], ["Our window is 30 days, so we can’t accept this return, but I can suggest a repair option.", true]]], ["Customer is angry about a late delivery.", [["I’m sorry about the delay. I’ve flagged it, and you’ll get an update today.", true], ["Delays happen. There is nothing more I can do.", false]]]];
+const FB = [["Customer asks: “Where is my order?” (The system shows: shipped yesterday, due Friday.) (The system shows: shipped yesterday, due Friday.)", [["Check the tracking page.", false], ["Your order shipped yesterday and should arrive Friday. Here is the tracking link.", true]]], ["Customer asks: “Can I return this after 45 days?”", [["Yes, of course! Anything is possible.", false], ["Our window is 30 days, so we can’t accept this return, but I can suggest a repair option.", true]]], ["Customer is angry about a late delivery.", [["I’m sorry about the delay. I’ve passed this to the team.", true], ["Delays happen. There is nothing more I can do.", false]]]];
 let fbr = 0, fbGood = 0;
 function fbr_() {
   const root = clear($("#fb"));
   if (fbr >= FB.length) {
-    root.append(h("div", { class: "note" }, "You picked the helpful, accurate answer in " + fbGood + " of " + FB.length + " rounds. The model would now be adjusted toward answers like those."), h("p", { class: "hint", text: "Different raters pull the model in different directions. Raters sometimes prefer a confident, pleasing answer over an accurate one, which is one way models learn to flatter (see Part 7)." }), h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { fbr = 0; fbGood = 0; fbr_(); } }, "Try again")));
+    root.append(h("div", { class: "note" }, "You picked the helpful, accurate answer in " + fbGood + " of " + FB.length + " rounds. The model would now be adjusted toward answers like those."), h("p", { class: "hint", text: "Different raters pull the model in different directions. Raters sometimes prefer a confident, pleasing answer over an accurate one, which is one way models learn to flatter (see Lesson 7)." }), h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { fbr = 0; fbGood = 0; fbr_(); } }, "Try again")));
     return;
   }
   const r = FB[fbr];
@@ -230,7 +230,7 @@ function tsr() {
   TESTS.forEach((t, i) => l.append(h("div", { style: { display: "grid", gap: "6px", paddingBottom: "10px", borderBottom: "1px solid var(--line)" } }, h("div", { style: { fontWeight: 500 }, text: (i + 1) + ". " + t[0] }), TD[i] ? h("div", { class: "fb " + (t[1] === "good" ? "good" : t[1] === "warn" ? "bad" : ""), style: { textAlign: "left" } }, h("b", { text: t[2] + ". " }), t[3]) : h("div", null, h("button", { class: "btn", onclick: () => { TD[i] = true; tsr(); } }, "Run test")))));
   const all = TD.every(Boolean); $("#ts-rel").disabled = !all || released; $("#ts-hint").textContent = released ? "" : all ? "All tests run. Known limits and weak spots are recorded, not hidden." : "Run all four tests first.";
 }
-$("#ts-rel").onclick = () => { released = true; const n = $("#ts-note"); n.hidden = false; n.textContent = "Version 1.0 released. The parameters are now frozen, so it does not learn from your chats. Fixes arrive in a later version."; tsr(); };
+$("#ts-rel").onclick = () => { released = true; const n = $("#ts-note"); n.hidden = false; n.textContent = "Version 1.0 released. The parameters are now frozen, so it does not learn from your chats while you use it. Whether chats may be used to train a later version depends on the vendor’s settings and contract. Fixes arrive in a later version."; tsr(); };
 tsr();
 $("#q9").append(quick("After release, what happens to the model’s parameters when you chat with it?", ["They stay frozen", "They update with every chat", "They reset each night"], 0, "Using a model is inference: it only reads the parameters. New versions come from further training by the vendor."));
 
@@ -250,6 +250,6 @@ $("#pk-check").onclick = () => {
   if (!miss.length && !extra.length) n.textContent = "Complete. This is what " + (p[0] === "Agent" ? "an agent" : "a " + p[0].toLowerCase()) + " needs around the model.";
   else n.textContent = (miss.length ? "Still missing: " + miss.map(cname).join(", ") + ". " : "") + (extra.length ? "Not needed here: " + extra.map(cname).join(", ") + "." : "");
 };
-$("#q10").append(quick("Which piece lets an agent act on the world instead of only writing text?", ["Tools, such as a database or email, plus an approval step for risky actions", "A larger vocabulary", "A different colour scheme"], 0, "The model only writes text. The product turns some of that text into tool calls, and software carries them out."));
+$("#q10").append(quick("Which piece lets an agent act on the world instead of only writing text?", ["Tools, such as a database or email, plus an approval step for risky actions", "A larger vocabulary", "A different color scheme"], 0, "The model only writes text. The product turns some of that text into tool calls, and software carries them out."));
 pipeline("#pipe", "train");
 </script></body></html>

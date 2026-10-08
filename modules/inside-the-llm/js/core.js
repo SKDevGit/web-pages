@@ -139,7 +139,7 @@ function advise(f) {
   } else if (f.cond === "defective") {
     used.add("cond"); used.add("policy"); verdict = "Approve"; tone = "good";
     out.push("Approve a full refund or a replacement, and cover the return shipping.");
-    out.push(f.policy === "final" ? "Final-sale terms don’t normally override a defect." : (dn && dn > win ? "The return window has passed, but defects are normally handled separately from it." : "The fault is on our side, so the return window isn’t the deciding factor."));
+    out.push(f.policy === "final" ? "A final-sale label does not normally remove the remedy for a defective item (check local consumer law)." : (dn && dn > win ? "The return window has passed, but defects are normally handled separately from it." : "The fault is on our side, so the return window isn’t the deciding factor."));
     if (dn) used.add("days");
   } else if (f.policy === "final") {
     used.add("policy"); verdict = "Decline, offer an alternative"; tone = "warn";
@@ -152,7 +152,7 @@ function advise(f) {
   } else if (dn <= win) {
     used.add("policy"); used.add("days");
     if (f.cond === "unopened") { used.add("cond"); verdict = "Approve"; tone = "good"; out.push("Approve a full refund. It is " + dn + " days in, inside the " + win + "-day window, and the item is unopened."); }
-    else if (f.policy === "fee14") { used.add("cond"); verdict = "Approve with conditions"; tone = "good"; out.push("Approve, and apply the 15% restocking fee because the item has been opened."); }
+    else if (f.policy === "fee14") { used.add("cond"); verdict = "Approve with conditions"; tone = "good"; out.push(f.cond === "used" ? "Approve, and apply the 15% restocking fee because the item has been opened." : "Approve. If the item has been opened, apply the 15% restocking fee. Tell me its condition to confirm."); }
     else { if (f.cond === "used") used.add("cond"); verdict = "Approve"; tone = "good"; out.push("Approve a refund. It is " + dn + " days in, inside the " + win + "-day window" + (f.cond === "used" ? "; inspect the item when it comes back." : ".")); }
   } else {
     used.add("policy"); used.add("days");

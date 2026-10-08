@@ -33,7 +33,7 @@
 
 <span class="step" id="s4">Step 4 of 6</span>
 <h2>Look at the context</h2>
-<p>Next the model decides which tokens matter for the next word. This is called attention. The tiny model here only looks at the last token. Large models weigh the whole prompt, as you’ll see in part 5.</p>
+<p>Next the model decides which tokens matter for the next word. This is called attention. The tiny model here only looks at the last token. Large models weigh the whole prompt, as you’ll see in Lesson 5.</p>
 <div class="widget" id="x4"></div>
 <div id="q4"></div>
 
@@ -135,7 +135,7 @@ $("#q2").append(quick("Are tokens always whole words?", ["Yes, always", "No. Rar
 $("#q3").append(quick("Why are tokens turned into numbers?", ["The model’s calculations only work on numbers", "To make the text shorter", "To keep it secret"], 0, "Everything the model does is arithmetic, so text has to become numbers first."));
 $("#q4").append(quick("Why is it useful for a model to look at the whole prompt rather than just the last word?", ["It uses less memory", "Earlier words can change what should come next", "It makes the reply shorter"], 1, "In “the laptop arrived with a cracked screen, should we refund?”, the answer depends on words far from the end."));
 $("#q5").append(quick("What gives a word its percentage chance of coming next?", ["Someone looks it up at that moment", "The parameters learned from the training text", "The temperature setting"], 1, "The percentages come from the parameters, which training shaped by repeated adjustment."));
-$("#q6").append(quick("At temperature 0, if you ran the same prompt ten times, how many different replies would you expect?", ["One", "Ten", "About five"], 0, "With no dice roll, the top word is always taken, so the reply is the same every time."));
+$("#q6").append(quick("At temperature 0, if you ran the same prompt ten times, how many different replies would you expect?", ["One", "Ten", "About five"], 0, "With no dice roll, the top word is always taken, so the reply is the same every time in this demo. Real systems are close to repeatable, but not always exactly."));
 $("#q8").append(quick("Your team needs consistent wording from the model each time. Which setting would you lean towards?", ["A low temperature", "A high temperature", "It makes no difference"], 0, "Lower temperatures cut down on random variety, though they don’t guarantee identical replies on every system."));
 pipeline("#pipe", "infer");
 </script></body></html>
