@@ -1,0 +1,164 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Models, data and mistakes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const PTS = [[1, 8.2], [2, 8.1], [3, 12.6], [4, 11.4], [5, 14.7], [6, 15.2], [7, 18.4], [8, 18.1], [9, 21.9], [10, 22.0]];
+const SRC = [
+  ["Web text and images", "Very large and varied.", "Quality and bias are uneven, and permission is not always clear."],
+  ["Licensed content", "Obtained under an agreement with the owner.", "Costly, but the rights are clearer."],
+  ["Company and user data", "Your own records and what customers do.", "Valuable, but privacy and consent matter."],
+  ["Synthetic (machine-generated) data", "Data made by another model or a simulation.", "Cheap and plentiful, but it can repeat the mistakes of its source."]
+];
+const AM = [
+  ["Trained on", "Ten years of résumés, mostly from men."],
+  ["It learned", "To penalize résumés containing the word “women’s” and the names of some all-women’s colleges."],
+  ["Outcome", "Amazon scrapped the project in 2017 after losing confidence that it was gender neutral."]
+];
+lesson({
+  title: "Models, data and mistakes",
+  lede: "A model is a set of learned numbers. It can only be as good as the data it learned from, and it will sometimes be wrong. This lesson shows what a model is, where its training data comes from, and how to think about the cost of its mistakes.",
+  learn: `<b>By the end you can</b>say what a model is in plain language, ask three questions about training data, and judge a model by the cost of its mistakes, not only its accuracy.`,
+  steps: [
+    {
+      title: "Algorithm, model and neural network",
+      main: `<div class="cards three">
+  <div><b>Algorithm</b>The recipe for learning: “adjust the numbers to reduce the error.”</div>
+  <div><b>Model</b>The result: learned numbers (parameters) that turn inputs into outputs.</div>
+  <div><b>Training and inference</b>Training finds the parameters. Inference uses them.</div>
+</div>
+<p>The smallest model you know is a regression line. It has just two numbers: a slope and an intercept. The dots in the exercise are past data: advertising spend and the sales that followed.</p>
+<p>A neural network is the same idea scaled up: many layers of simple calculations, with billions of parameters instead of two, learning patterns no one specified. A model is a compressed summary of patterns in its training data, and it is only as good as that data.</p>`,
+      interactive: host => {
+        host.innerHTML = `<p>Move the two numbers to reduce the error, or let the recipe do it.</p>
+<div class="widget">
+  <div class="fields2"><label class="field">Slope: <b id="m-v"></b><input type="range" id="m" min="-1" max="4" step="0.05" value="0.5"></label>
+  <label class="field">Intercept: <b id="b-v"></b><input type="range" id="b" min="-5" max="15" step="0.1" value="9"></label></div>
+  <div id="reg"></div>
+  <div class="row"><button class="btn primary" id="run">Run the recipe</button><button class="btn" id="reset">Reset</button><span class="hint" id="err"></span></div>
+  <div class="note" id="use"></div>
+</div>`;
+        const st = { m: 0.5, b: 9 };
+        const meanErr = () => PTS.reduce((a, p) => a + Math.abs(p[1] - (st.m * p[0] + st.b)), 0) / PTS.length;
+        function drawReg() {
+          const W = 560, H = 230, l = 34, r = 10, t = 10, bt = 26, iw = W - l - r, ih = H - t - bt, X = x => l + x / 11 * iw, Y = y => t + ih - (y + 2) / 30 * ih;
+          let s = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Past data and a fitted line">';
+          [0, 10, 20].forEach(v => { s += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="' + cssv("--line") + '"/><text x="' + (l - 6) + '" y="' + (Y(v) + 3) + '" text-anchor="end">' + v + "</text>"; });
+          s += '<text x="' + l + '" y="' + (H - 6) + '">Ad spend →</text><text x="' + (W - r) + '" y="' + (H - 6) + '" text-anchor="end">Sales ↑</text>';
+          PTS.forEach(p => { const yh = st.m * p[0] + st.b; s += '<line x1="' + X(p[0]) + '" x2="' + X(p[0]) + '" y1="' + Y(p[1]) + '" y2="' + Y(yh) + '" stroke="' + cssv("--bad") + '" stroke-opacity=".5"/>'; });
+          s += '<line x1="' + X(0) + '" x2="' + X(11) + '" y1="' + Y(st.b) + '" y2="' + Y(st.m * 11 + st.b) + '" stroke="' + cssv("--accent") + '" stroke-width="2.4"/>';
+          PTS.forEach(p => { s += '<circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="4.5" fill="' + cssv("--ink") + '"/>'; });
+          $("#reg").innerHTML = s + "</svg>";
+          $("#m-v").textContent = st.m.toFixed(2); $("#b-v").textContent = st.b.toFixed(1);
+          $("#err").textContent = "Average error: " + meanErr().toFixed(2);
+          $("#use").textContent = "Using it (inference): for an ad spend of 6, the model predicts sales of " + (st.m * 6 + st.b).toFixed(1) + ". Finding the two numbers was training. Applying them to a new case is inference.";
+        }
+        let timer = null;
+        const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+        $("#m").oninput = e => { stop(); st.m = +e.target.value; drawReg(); };
+        $("#b").oninput = e => { stop(); st.b = +e.target.value; drawReg(); };
+        $("#run").onclick = () => {
+          stop(); let n = 0;
+          timer = setInterval(() => {
+            let dm = 0, db = 0;
+            PTS.forEach(p => { const e = st.m * p[0] + st.b - p[1]; dm += 2 * e * p[0] / PTS.length; db += 2 * e / PTS.length; });
+            st.m -= 0.012 * dm; st.b -= 0.012 * db; n++;
+            $("#m").value = st.m; $("#b").value = st.b; drawReg();
+            if (n >= 150) stop();
+          }, 30);
+        };
+        $("#reset").onclick = () => { stop(); st.m = 0.5; st.b = 9; $("#m").value = st.m; $("#b").value = st.b; drawReg(); };
+        drawReg();
+      },
+      deep: `<p>The recipe repeatedly nudges the two numbers in the direction that reduces the average error. The data here is illustrative.</p>
+<p class="hint">A teaching device, not a technical definition. Parameter counts of commercial models are usually not disclosed.</p>`,
+      quiz: [["In the regression line example, what are the model’s parameters?", ["The slope and the intercept", "The dots on the chart", "The error"], 0, "The two learned numbers are the model. The dots are the training data."]]
+    },
+    {
+      title: "Where training data comes from",
+      main: `<p><b>Garbage in, garbage out.</b> A model learns whatever patterns the data contains, including errors and bias.</p>
+<p>“More data” is not always better: relevant, clean, permitted data matters more.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Choose a source to see what to ask about it." }));
+        chooser(host, SRC, "What it is", "Watch out for");
+      },
+      deep: `<p>Every source has a trade-off between size, cost, rights and quality. The question is not “how much data?” but “is this the right data, and are we allowed to use it?”</p>`
+    },
+    {
+      title: "A case: Amazon’s recruiting tool",
+      main: `<p>Amazon built a tool to score job applicants. It learned from the company’s own hiring history, and that history carried a pattern nobody wanted to repeat.</p>
+<p>A model learns whatever patterns the data contains, including bias from the past.</p>`,
+      interactive: host => {
+        host.innerHTML = `<p>Click through what happened.</p><div class="widget"><div class="stepper" id="am"></div><div class="note" id="am-msg"></div></div>`;
+        function showAm(i) { $("#am-msg").textContent = AM[i][1]; [...$("#am").children].forEach((b, k) => b.classList.toggle("on", k === i)); }
+        AM.forEach((a, i) => $("#am").append(h("button", { onclick: () => showAm(i) }, a[0])));
+        showAm(0);
+      },
+      deep: `<p>The model learned to prefer what the past hiring data rewarded. Removing one word would not have fixed it, because the pattern was spread through the data.</p>
+<p class="hint">Source: MIT Technology Review (Oct 10, 2018), summarizing Reuters.</p>`,
+      quiz: [["What did the Amazon case teach about training data?", ["A model learns whatever patterns the data contains, including bias", "Bias disappears when a model is large enough", "Résumé data should never be used"], 0, "A model learns the patterns in its data, including bias from history. The fix starts with the data and with testing."]]
+    },
+    {
+      title: "Three questions to ask about training data",
+      main: `<p>Before you trust a model, ask three questions:</p>
+<ol class="obj"><li>What was it trained on?</li><li>Were the rights clear?</li><li>Does that data look like ours?</li></ol>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which question is each case missing?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "A hiring tool trained on a decade of mostly male résumés", a: 0, why: "The data itself carried a pattern the company did not want to repeat." },
+          { t: "A writing tool trained on articles whose owners never agreed", a: 1, why: "The rights to the training content were not clear." },
+          { t: "A fraud model built on another country’s payments, used on yours", a: 2, why: "Different customers and habits: the data does not look like yours." }
+        ], ["What it learned from", "The rights", "Fit with our data"]);
+      }
+    },
+    {
+      title: "When AI is wrong, and what it costs",
+      main: `<p>No model is right every time. A fraud model can make two kinds of mistake:</p>
+<div class="cards">
+  <div><b>Miss real fraud</b>A false negative.</div>
+  <div><b>Flag a good customer</b>A false positive.</div>
+</div>
+<p>A model that flags nothing is 98% accurate when only 2% of payments are fraud, yet it catches no fraud at all. What matters is the cost of each kind of mistake, which only the business can say.</p>`,
+      interactive: host => {
+        host.innerHTML = `<div class="widget">
+  <label class="field">Flag a payment when its fraud score is above: <b id="th-v"></b><input type="range" id="th" min="0" max="100" step="1" value="50"></label>
+  <div class="mini" id="cm"></div>
+  <div class="tally" id="acc"></div>
+  <div class="fields2">
+    <label class="field">Cost of one missed fraud ($)<input type="number" id="c1" value="500" min="0" step="50"></label>
+    <label class="field">Cost of wrongly flagging a good customer ($)<input type="number" id="c2" value="20" min="0" step="5"></label>
+  </div>
+  <div class="note" id="cost"></div>
+</div>`;
+        const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+        const gauss = () => { let u = 0; for (let i = 0; i < 6; i++) u += rnd(); return (u - 3) / Math.sqrt(0.5); };
+        const SC = [];
+        for (let i = 0; i < 20; i++) SC.push([Math.min(.99, Math.max(.05, .7 + .17 * gauss())), 1]);
+        for (let i = 0; i < 980; i++) SC.push([Math.min(.99, Math.max(.01, .28 + .15 * gauss())), 0]);
+        const counts = th => { let tp = 0, fn = 0, fp = 0, tn = 0; SC.forEach(s => { const f = s[0] > th; if (s[1] && f) tp++; else if (s[1]) fn++; else if (f) fp++; else tn++; }); return { tp, fn, fp, tn }; };
+        function mistakes() {
+          const th = +$("#th").value / 100, c = counts(th), c1 = +$("#c1").value || 0, c2 = +$("#c2").value || 0;
+          $("#th-v").textContent = th.toFixed(2);
+          clear($("#cm")).append(cell("Fraud caught", c.tp + " of 20"), cell("Fraud missed (false negatives)", String(c.fn)), cell("Good customers wrongly flagged (false positives)", String(c.fp)), cell("Good payments passed", String(c.tn)));
+          clear($("#acc")).append(h("span", null, h("b", { text: Math.round((c.tp + c.tn) / 10) / 1 + "%" }), "accurate overall"));
+          const cost = c.fn * c1 + c.fp * c2; let best = 0, bt = Infinity;
+          for (let t = 0; t <= 100; t++) { const k = counts(t / 100), v = k.fn * c1 + k.fp * c2; if (v < bt) { bt = v; best = t; } }
+          $("#cost").textContent = "Total cost of mistakes at this threshold: $" + cost.toLocaleString() + ". With these costs, the lowest total is around a threshold of " + (best / 100).toFixed(2) + ". Change the two costs and see where the best threshold moves.";
+        }
+        ["th", "c1", "c2"].forEach(id => $("#" + id).oninput = mistakes);
+        mistakes();
+      },
+      deep: `<p>Moving the threshold trades one kind of mistake for the other. Lowering it catches more fraud and flags more good customers. Raising it does the opposite.</p>
+<p class="hint">Illustrative: 1,000 payments, 20 of them fraudulent. The scores are made up to show the trade-off.</p>`,
+      quiz: [["A model blocks a good customer’s payment. What kind of mistake is that?", ["A false positive: a false alarm", "A false negative: a missed case", "Not a mistake, only a cost"], 0, "It flagged something that was fine, which is a false positive. Whether it matters more than missing fraud depends on the costs."]]
+    }
+  ]
+});
+chrome(5);
+</script>
+</body></html>

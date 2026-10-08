@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Introduction to AI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col">
+<section class="hero" id="home">
+<p class="kicker">A hands-on module</p>
+<h1>Introduction to AI</h1>
+<p class="lede">What it is and how it works. Before looking inside a language model, get a clear picture of what AI is, how it learns, where it goes wrong, and what it changes for the people who use it.</p>
+<div class="row" style="margin-top:18px"><a class="btn primary" href="is-this-ai.html" id="start-btn">Start Lesson 1</a><a class="btn" href="#map">See the module map</a></div>
+<p class="hint">No coding and no maths. Everything runs in your browser.</p>
+</section>
+
+<h2>What you will be able to do</h2>
+<div class="cards">
+  <div><b>Explain it</b>Say what people mean by AI, why the label keeps moving, and how a model differs from a written rule.</div>
+  <div><b>Tell types apart</b>Separate analytical from generative AI, and the three ways machines learn.</div>
+  <div><b>Judge it</b>Weigh the cost of a model’s mistakes, ask the right questions about its data, and decide when AI is the right tool.</div>
+</div>
+
+<h2>How each part works</h2>
+<div class="cards three">
+  <div><b>1 · Read</b>A few short paragraphs introduce one idea.</div>
+  <div><b>2 · Try</b>A small exercise lets you see the idea working.</div>
+  <div><b>3 · Check</b>A quick question confirms you have it.</div>
+</div>
+
+<h2 id="map">The module map</h2>
+<div class="cm" id="cmap"></div>
+</main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+chrome(-1);
+const DESC = [
+  "Vote on five everyday items, then try five opening questions.",
+  "The OECD definition, the AI effect, and what intelligence means.",
+  "Six abilities: seeing, listening, reading and writing, predicting, recommending and acting.",
+  "A timeline from 1956 to today, and why it took off now.",
+  "Rules versus learning, three ways machines learn, analytical versus generative AI, and when you do not need AI.",
+  "What a model is, where training data comes from, and what mistakes cost.",
+  "From machine code to natural language, and when to automate or assist.",
+  "Common myths, your first vote revisited, and the five questions again."
+];
+const cm = $("#cmap"); let lastG = null;
+PAGES.forEach((p, k) => { if (p[2] !== lastG) { lastG = p[2]; cm.append(h("div", { class: "cg", text: p[2] })); } cm.append(h("a", { href: p[0] }, h("small", { text: "Lesson " + (k + 1) }), h("div", null, h("b", { text: p[1] }), h("span", { text: DESC[k] })))); });
+</script>
+</body></html>

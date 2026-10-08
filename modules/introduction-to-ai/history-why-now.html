@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A short history, and why now</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const TL = [
+  ["1956", "rules", "Rules era", "Dartmouth workshop; the term “AI” introduced. Organized by John McCarthy and Marvin Minsky with Claude Shannon and Nathan Rochester."],
+  ["1980s", "rules", "Rules era", "Expert systems boom; one system reported to save DEC about $40M a year by 1986."],
+  ["Winters", "winter", "Funding collapse", "Funding collapses after overpromising: mid-1970s and late 1980s."],
+  ["1997", "rules", "Rules era", "Deep Blue beats Kasparov, 3½ to 2½: rules and brute-force search. In May 1997 it became the first computer system to beat a reigning world champion in a match under standard tournament time controls, searching about 200 million positions a second."],
+  ["2012", "learning", "Learning era", "AlexNet wins ImageNet: 15.3% error, 10.8+ points better. By Krizhevsky, Sutskever and Hinton, September 30, 2012 (top-5 error)."],
+  ["2017", "learning", "Learning era", "The transformer: “Attention Is All You Need”. The paper was submitted on June 12, 2017."],
+  ["Nov 2022", "learning", "Learning era", "ChatGPT launches; about 100M monthly users in two months. Launched on November 30, 2022, built on GPT-3.5."],
+  ["2024–26", "learning", "Learning era", "Reasoning models and agents."]
+];
+const WH = [
+  ["Data", "Vast digitized text, images and behavior records", "There is nothing to learn from."],
+  ["Compute", "GPUs that do the huge parallel calculations training needs. AlexNet trained on two Nvidia GPUs.", "Training would take far too long to be practical."],
+  ["Algorithms", "Better training methods, then the transformer", "Data and chips alone are not enough without methods that can use them."]
+];
+lesson({
+  title: "A short history, and why now",
+  lede: "AI is not new. It has been through waves of excitement and disappointment since the 1950s. Knowing the pattern helps you judge today’s claims, and knowing why it took off recently explains why it costs so much to build.",
+  learn: `<b>By the end you can</b>place the main milestones on a timeline, name the three things that came together, and explain why each wave was oversold.`,
+  steps: [
+    {
+      title: "A short history",
+      main: `<p>The early years leaned on written rules. Later waves learned from data.</p>
+<p>Each wave was driven by a change in cost, data or compute, and each was oversold before it delivered. Expert systems were real businesses that later collapsed. That is a useful caution when you hear “this time is different.”</p>`,
+      interactive: host => {
+        host.innerHTML = `<p>Click through the timeline.</p><div class="widget"><div class="stepper" id="tl"></div><div class="note" id="tl-msg"></div></div>`;
+        function showTl(i) { const t = TL[i]; clear($("#tl-msg")).append(h("span", { class: "erap " + t[1], text: t[2] }), " ", t[3]); [...$("#tl").children].forEach((b, k) => b.classList.toggle("on", k === i)); }
+        TL.forEach((t, i) => $("#tl").append(h("button", { onclick: () => showTl(i) }, t[0])));
+        showTl(0);
+      },
+      deep: `<p>Where sources differ on the exact years for the funding collapses, the timeline gives the period.</p>
+<p class="hint">Sources: Wikipedia (history of AI; Deep Blue; AlexNet; ChatGPT, all secondary); Vaswani et al. (2017), arXiv 1706.03762.</p>`,
+      quiz: [["What pattern does the history of AI show?", ["Each wave was oversold before it delivered", "Each wave arrived exactly when promised", "Progress has been steady with no setbacks"], 0, "Funding collapsed after overpromising, twice. Each wave was driven by a change in cost, data or compute."]]
+    },
+    {
+      title: "Why now?",
+      main: `<p>Three things came together: <b>data</b>, <b>compute</b> and <b>algorithms</b>.</p>
+<p><b>Capital is the fuel.</b> Hundreds of billions of dollars a year now go into data centres. Compute and data are costs, so AI is capital-intensive.</p>`,
+      interactive: host => {
+        host.innerHTML = `<p>Switch each one on or off to see what happens without it.</p><div class="widget"><div class="row" id="why-sw"></div><div class="flow" id="why-flow"></div><div class="note" id="why-msg"></div></div>`;
+        const on = [true, true, true];
+        function why() {
+          const f = clear($("#why-flow"));
+          WH.forEach((w, i) => { f.append(h("div", { class: "bx", style: on[i] ? {} : { opacity: ".35", textDecoration: "line-through" }, text: w[0] })); f.append(h("span", { class: "ar", text: i < 2 ? "+" : "→" })); });
+          const all = on.every(Boolean);
+          f.append(h("div", { class: "bx" + (all ? " out" : ""), style: all ? {} : { opacity: ".35" }, text: "Deep learning takes off" }));
+          const missing = WH.filter((w, i) => !on[i]);
+          $("#why-msg").textContent = all ? "All three together: large datasets, GPUs and improved training methods. Deep learning takes off." : "Without " + missing.map(m => m[0].toLowerCase()).join(" and ") + ": " + missing.map(m => m[2]).join(" ");
+          [...$("#why-sw").children].forEach((b, i) => b.classList.toggle("on", on[i]));
+        }
+        WH.forEach((w, i) => $("#why-sw").append(h("button", { class: "btn on", title: w[1], onclick: () => { on[i] = !on[i]; why(); } }, w[0] + ": " + w[1].split(".")[0])));
+        why();
+      },
+      deep: `<p>AlexNet is the clean example: the ideas were not new. Large datasets, GPUs and improved training methods arrived together.</p>
+<p class="hint">Source: Wikipedia, “AlexNet” (secondary).</p>`,
+      quiz: [["Why did deep learning take off around 2012?", ["Large datasets, GPUs and better training methods arrived together", "Someone invented a brand new kind of idea", "Computers suddenly became cheap enough for anyone"], 0, "The ideas were not new. The combination of data, compute and methods was."]]
+    }
+  ]
+});
+chrome(3);
+</script>
+</body></html>

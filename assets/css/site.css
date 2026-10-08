@@ -263,3 +263,56 @@ table.cmpt{border-collapse:collapse;width:100%;font-size:.88rem;margin-bottom:10
 @media(max-width:520px){.resgrid{grid-template-columns:1fr}}
 
 .stagebar{margin:34px 0 6px;padding:12px 16px;border-left:4px solid var(--accent);background:var(--soft);border-radius:0 8px 8px 0}.stagebar span{font:500 .72rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}.stagebar b{display:block;font:600 1.25rem var(--f-serif);margin:2px 0}.stagebar p{margin:0;font-size:.92rem;color:var(--muted)}
+
+/* three layers for each step: teach (on screen), go deeper and check yourself (collapsed) */
+details.layer{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+details.layer>summary{cursor:pointer;list-style:none;padding:12px 16px;font:500 .8rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+details.layer>summary::-webkit-details-marker{display:none}
+details.layer>summary::after{content:"+";font-size:1.2rem;line-height:1}
+details.layer[open]>summary::after{content:"\2013"}
+details.layer>summary:hover{color:var(--ink)}
+details.layer>.lbody{padding:2px 18px 18px}
+details.layer>.lbody>:first-child{margin-top:4px}
+details.layer.deep{border-left:3px solid var(--good)}
+details.layer.check{border-left:3px solid var(--accent)}
+details.layer .quick:first-child{margin-top:8px}
+.openall{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 10px;font-size:.8rem;color:var(--muted)}
+.openall:hover{border-color:var(--accent);color:var(--ink)}
+
+.aerow{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.aerow:last-child{border-bottom:0}
+.aerow .btn{flex:0 1 22rem}.aerow .small{flex:1 1 14rem;font-size:1rem}
+.step{scroll-margin-top:12px}
+.keyhint{color:var(--muted);font-size:.8rem}
+
+.fsbtn{float:right;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:0;margin-top:-5px;cursor:pointer}
+.fsbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fsbtn:hover{border-color:var(--accent);color:var(--ink)}
+.slide .fshead,.slide .fsbar{display:none}
+.slide.fs{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.slide.fs .tin{width:820px;font-size:1.05rem;flex:none;transform-origin:center center}
+.slide.fs .fshead{display:block;margin-bottom:10px}
+.fsstep{font:500 .75rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.fsh2{font:600 1.7rem var(--f-serif);margin:4px 0 14px}
+.slide.fs .fsbar{display:flex;gap:10px;align-items:center;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:.85rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.fsbar button{border:0;background:none;color:var(--muted);font-size:1rem;padding:2px 8px}
+.fsbar button:hover{color:var(--accent)}
+body.fsmode{overflow:hidden}
+.slide .disc{margin-top:14px}
+.mtask{font:600 1.15rem var(--f-serif);margin:0 0 12px;color:var(--ink)}
+.chips button.right{background:var(--good-soft);border-color:var(--good)}.chips button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+
+.anc{display:block;scroll-margin-top:12px;height:0}
+.trylabel{font:500 .72rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.trylabel .fsbtn{float:none;margin:0}
+.slide.fs .trylabel{display:none}
+.stp>.teach>:first-child{margin-top:0}
+.slide .sortrow{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 16px}
+.slide .sortrow .afb{grid-column:1/-1}
+@media (max-width:640px){.slide .sortrow{grid-template-columns:1fr}}
+.slide .chart{max-height:220px;width:100%}
+.fields2{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+@media (max-width:640px){.fields2{grid-template-columns:1fr}}
+.slide .sortrow{padding:6px 0}
+.slide .stack{gap:2px}
+.slide .chart{max-height:180px}

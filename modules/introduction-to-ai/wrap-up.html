@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wrap-up</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const MYTHS = [
+  ["AI understands what it says, the way a person does.", false, "A system can produce useful, human-sounding work without the properties we associate with a mind. Judge it by what it reliably does."],
+  ["More data always makes a better model.", false, "Relevant, clean, permitted data matters more than sheer volume."],
+  ["AI is objective because it is maths.", false, "A model learns the patterns in its data, including bias from history, as the Amazon recruiting tool showed."],
+  ["“AI” names one specific technology.", false, "It is a moving label. The definition covers a spam filter as well as ChatGPT, and tasks stop being called AI once they are solved."],
+  ["A learned model is always better than a written rule.", false, "Rules are transparent but brittle. Learned models are flexible but opaque. The right choice depends on the job."],
+  ["Natural language means everyone is now a programmer.", false, "It lowers the skill needed, but the abstraction is leaky and checking the result still matters."]
+].map(m => [m[0], ["True", "False"], m[1] ? 0 : 1, m[2]]);
+lesson({
+  title: "Wrap-up",
+  lede: "Test the common myths, return to your first vote, and try the five opening questions again.",
+  learn: `<b>By the end you can</b>spot six common myths about AI, say which of your first votes you would change, and recall the main ideas of the module.`,
+  steps: [
+    {
+      title: "Common myths",
+      main: `<p>Six statements about AI sound sensible and are wrong. Decide whether each one is true or false.</p>`,
+      interactive: host => oneByOne(host, MYTHS),
+      deep: `<p>Most myths come from treating AI as one thing, or from mistaking fluent output for understanding. When you hear a bold claim, ask what the system reliably does and what data it learned from.</p>`
+    },
+    {
+      title: "Which votes would you change?",
+      main: `<p>These are the votes you made at the start. Set your answer now, then compare with what the OECD definition suggests.</p>`,
+      interactive: host => {
+        host.innerHTML = `<div class="widget"><div id="rv"></div><div class="note" id="rv-msg"></div></div>`;
+        const first = getJSON(VOTE_KEY) || {}, second = {};
+        function rv() {
+          const box = clear($("#rv")); let changed = 0, voted = 0;
+          VOTE_ITEMS.forEach(it => {
+            const was = first[it.t] || "Not voted", now = second[it.t];
+            if (now) { voted++; if (was !== "Not voted" && now !== was) changed++; }
+            const sg = h("div", { class: "seg3" });
+            ["Yes", "No", "Unsure"].forEach(o => sg.append(h("button", { class: now === o ? "on" : "", onclick: () => { second[it.t] = o; rv(); } }, o)));
+            box.append(h("div", { class: "sortrow" }, h("div", { class: "vote", style: { border: 0, padding: 0 } }, h("span", { class: "st", text: it.t }), sg), h("span", { class: "small", text: "At the start you voted: " + was + "." + (now ? " The definition suggests: " + it.now + ". " + it.why : "") })));
+          });
+          $("#rv-msg").textContent = voted < VOTE_ITEMS.length ? "Set all five to see how many of your votes changed." : changed ? "You changed " + changed + " of your votes. That is the learning at work." : "You kept all of your votes. Could you now explain each one with the definition?";
+        }
+        rv();
+      },
+      deep: `<p>There is no single right answer. The “definition suggests” notes apply the OECD wording, which centers on inferring outputs from inputs.</p>`
+    },
+    {
+      title: "The five questions again",
+      main: `<p>These are the same five questions from the start of the module. See what has changed.</p>
+<ol class="obj">${QUIZ.map(q => "<li>" + q[0] + "</li>").join("")}</ol>`,
+      interactive: host => oneByOne(host, QUIZ)
+    },
+    {
+      title: "Key takeaways",
+      main: `<ol class="obj">
+<li>“AI” is a moving label. The OECD definition centers on systems that infer outputs from inputs.</li>
+<li>Rules are written; models are learned from data.</li>
+<li>Analytical AI predicts; generative AI creates. Most firms need both.</li>
+<li>A model is a set of learned numbers, and only as good as its data.</li>
+<li>No model is always right. Judge it by the cost of its mistakes, and choose a rule, plain analytics or AI to fit the job.</li>
+<li>Natural language lowers the skill needed to direct computers. Checking the result still matters.</li>
+</ol>`,
+      deep: `<div class="srcs">
+<p><b>What we mean by AI.</b> OECD.AI, “OECD’s updated definition of an AI system”, <a href="https://oecd.ai/en/wonk/definition">oecd.ai/en/wonk/definition</a> (2023 wording, published March 2024). Wikipedia, “AI effect”, <a href="https://en.wikipedia.org/wiki/AI_effect">en.wikipedia.org/wiki/AI_effect</a> (secondary). Wikipedia, “Turing test”, <a href="https://en.wikipedia.org/wiki/Turing_test">en.wikipedia.org/wiki/Turing_test</a> (secondary). Turing (1950), “Computing Machinery and Intelligence”, <i>Mind</i> (cited, not opened).</p>
+<p><b>A short history, and why now.</b> Wikipedia, “History of artificial intelligence”; “Deep Blue (chess computer)”; “AlexNet”; “ChatGPT” (all secondary). Vaswani et al. (2017), “Attention Is All You Need”, <a href="https://arxiv.org/abs/1706.03762">arxiv.org/abs/1706.03762</a>.</p>
+<p><b>How machines learn.</b> IBM, “Supervised versus unsupervised learning”, <a href="https://www.ibm.com/think/topics/supervised-vs-unsupervised-learning">ibm.com/think/topics/supervised-vs-unsupervised-learning</a> (vendor explainer). The reinforcement example is a common textbook one.</p>
+<p><b>Models, data and mistakes.</b> MIT Technology Review, “Amazon ditched AI recruitment software because it was biased against women” (Oct 10, 2018, summarizing Reuters), <a href="https://www.technologyreview.com/2018/10/10/139858/amazon-ditched-ai-recruitment-software-because-it-was-biased-against-women/">technologyreview.com</a>.</p>
+<p><b>AI and people.</b> Wikipedia, “Fortran”, “SQL”, “VisiCalc”, “Graphical user interface” (all secondary): <a href="https://en.wikipedia.org/wiki/Fortran">Fortran</a>, <a href="https://en.wikipedia.org/wiki/SQL">SQL</a>, <a href="https://en.wikipedia.org/wiki/VisiCalc">VisiCalc</a>, <a href="https://en.wikipedia.org/wiki/Graphical_user_interface">GUI</a>.</p>
+<p class="hint">The comparison tables, the spam and fraud demos, the abilities map, the “do you need AI” cases and the automate-or-assist cases are illustrative or instructor synthesis, not data. Drafted with an AI assistant made by Anthropic. Treat vendor descriptions of their own methods as claims.</p>
+</div>`
+    }
+  ]
+});
+chrome(7);
+</script>
+</body></html>

@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>How machines learn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const EM = [
+  ["You won the lottery! Claim now", true, true, .96],
+  ["Claim your free prize today", true, false, .91],
+  ["Lunch tomorrow at 12?", false, false, .04],
+  ["Free shipping on your order", false, false, .62],
+  ["Invoice 4821 attached", false, false, .08],
+  ["Urgent: verify your account details", true, false, .88]
+];
+lesson({
+  title: "How machines learn",
+  lede: "The big shift in AI is from people writing rules to machines finding them. This lesson explains that shift, the three main ways machines learn, the difference between analytical and generative AI, and when you do not need AI at all.",
+  learn: `<b>By the end you can</b>tell rules from learning, name the three ways machines learn, tell analytical from generative AI, and choose between a rule, plain analytics and AI.`,
+  steps: [
+    {
+      title: "Rules versus learning",
+      main: `<p>In traditional software, people write the rules. In machine learning, the machine finds the rules.</p>
+<p>Take spam. A rule might flag any email containing “lottery”. A model instead learns from thousands of labeled emails.</p>
+<div class="widget">
+  <div class="label">Traditional software: people write the rules</div>
+  <div class="flow"><div class="bx">Rules</div><span class="ar">+</span><div class="bx">Data</div><span class="ar">→</span><div class="bx out">Answers</div></div>
+  <div class="label">Machine learning: the machine finds the rules</div>
+  <div class="flow"><div class="bx">Data</div><span class="ar">+</span><div class="bx">Answers</div><span class="ar">→</span><div class="bx out">Rules (the model)</div></div>
+</div>`,
+      interactive: host => {
+        host.innerHTML = `<p>Switch between the two and compare.</p>
+<div class="widget"><div class="row"><span class="hint">Method:</span><div class="seg3" id="sp-seg"></div></div><div id="sp-list" class="stack"></div><div class="note" id="sp-msg"></div></div>`;
+        let spMode = 0;
+        function spam() {
+          const l = clear($("#sp-list")); let caught = 0, wrong = 0;
+          EM.forEach(e => {
+            const flag = spMode === 0 ? e[2] : e[3] >= .5, sp = e[1];
+            if (flag && sp) caught++; if (flag && !sp) wrong++;
+            l.append(h("div", { class: "sortrow", style: { gridTemplateColumns: "minmax(0,1fr) auto", alignItems: "center" } }, h("span", null, e[0], h("span", { class: "small", text: sp ? "  (actually spam)" : "  (genuine)" })), h("span", { class: "pill " + (flag ? (sp ? "good" : "warn") : (sp ? "warn" : "info")), text: (flag ? "Flagged" : "Passed") + (spMode === 1 ? " · " + Math.round(e[3] * 100) + "%" : "") })));
+          });
+          const total = EM.filter(e => e[1]).length;
+          $("#sp-msg").textContent = spMode === 0 ? "The rule “flag ‘lottery’” caught " + caught + " of " + total + " spam emails. It misses the ones that use other words, and it cannot adapt unless someone writes another rule." : "The learned model caught " + caught + " of " + total + " spam emails, including ones with no rule written for them. It also wrongly flagged " + wrong + " genuine email, and nobody can read a simple rule to see why.";
+        }
+        seg("#sp-seg", ["Written rule", "Learned model"], 0, i => { spMode = i; spam(); });
+      },
+      deep: `<p>Learning handles cases nobody could write rules for. But the rules it finds are not readable and can be wrong in ways that are hard to predict. Rules are transparent but brittle. Learned models are flexible but opaque.</p>
+<p>Go back to your Lesson 1 vote: the thermostat follows written rules, while the spam filter and Netflix learn from data.</p>
+<p class="hint">The spam demo is illustrative. The model’s scores are set by hand to show the idea.</p>`,
+      quiz: [["In machine learning, what does the machine find?", ["The rules, from data and answers", "The data, from rules and answers", "The answers, from rules and data"], 0, "In traditional software people write the rules. In machine learning the machine finds them, from data and answers. The result is the model."]]
+    },
+    {
+      title: "Three ways machines learn",
+      main: `<div class="widget cmpwrap">
+<table class="cmpt">
+<tr><th>Type</th><th>What the data looks like</th><th>Business example</th></tr>
+<tr><td><b>Supervised</b></td><td>Labeled examples: input and correct answer</td><td>Fraud detection: train on transactions labeled fraudulent or legitimate</td></tr>
+<tr><td><b>Unsupervised</b></td><td>Unlabeled data; find structure</td><td>Grouping products bought together, for “frequently bought together”</td></tr>
+<tr><td><b>Reinforcement</b></td><td>Trial and error with a reward</td><td>Improving through feedback on outcomes (for example, tuning a chat model with human ratings)</td></tr>
+</table>
+</div>
+<p>Most business predictions (churn, credit risk, demand) are supervised. Labeling is often the expensive part.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which type of learning fits each case?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "Predict which customers will leave, from past customers labeled “stayed” or “left”", a: 0, why: "The data has correct answers attached, which is supervised learning." },
+          { t: "Group shoppers by what they buy, with no labels at all", a: 1, why: "The data is unlabeled and the system finds structure, which is unsupervised learning." },
+          { t: "Improve a chat model using human ratings of its answers", a: 2, why: "It learns from a reward signal on outcomes, a reinforcement-style approach." },
+          { t: "Spot fraud from transactions labeled fraudulent or legitimate", a: 0, why: "Labeled examples, input and correct answer: supervised." }
+        ], ["Supervised", "Unsupervised", "Reinforcement"]);
+        host.append(disc("Where would the labels come from in your company?"));
+      },
+      deep: `<p>Supervised learning needs examples with correct answers, and someone has to provide them. That is why labeling is often the expensive part.</p>
+<p class="hint">Sources: IBM overview (supervised, unsupervised; vendor explainer). The reinforcement example is a common textbook one, so treat the examples as illustrative.</p>`,
+      quiz: [["Why is labeling often the expensive part?", ["Someone has to supply the correct answer for many examples", "Labels need special hardware", "Labels are illegal to collect"], 0, "Supervised learning needs examples with correct answers, and someone has to provide them."]]
+    },
+    {
+      title: "Analytical versus generative AI",
+      main: `<div class="widget cmpwrap">
+<table class="cmpt">
+<tr><th></th><th>Analytical (predictive)</th><th>Generative</th></tr>
+<tr><td><b>Output</b></td><td>A number, label or score</td><td>New content: text, images, code, audio</td></tr>
+<tr><td><b>Typical question</b></td><td>“Will this customer churn?” “Is this fraud?”</td><td>“Draft this reply.” “Summarize this contract.”</td></tr>
+<tr><td><b>Trained on</b></td><td>Your structured, labeled data</td><td>Very large collections of text, images or code</td></tr>
+<tr><td><b>Judged by</b></td><td>Accuracy against known outcomes</td><td>Usefulness; correctness is harder to measure</td></tr>
+<tr><td><b>Strength</b></td><td>Precise, cheap per prediction, auditable</td><td>Flexible: one model, many tasks, natural-language input</td></tr>
+<tr><td><b>Weakness</b></td><td>Narrow; needs good labeled data</td><td>Can be fluent but wrong; costlier per use</td></tr>
+</table>
+</div>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which kind is each request?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "“Will this customer churn?”", a: 0, why: "The output is a score or label, so it is analytical." },
+          { t: "“Draft this reply.”", a: 1, why: "The output is new content, so it is generative." },
+          { t: "“Is this transaction fraud?”", a: 0, why: "A label for a case, so it is analytical." },
+          { t: "“Summarize this contract.”", a: 1, why: "New text, so it is generative." }
+        ], ["Analytical", "Generative"]);
+        host.append(disc("Name one decision in your organization that is analytical and one that is generative."));
+      },
+      deep: `<p>Most companies need both: analytical AI says what will probably happen; generative AI helps communicate and act on it.</p>
+<p class="hint">The comparison is a simplified instructor synthesis of standard distinctions, not data.</p>`,
+      quiz: [["Which statement about the two kinds is true?", ["Analytical AI is judged against known outcomes, generative AI by usefulness", "Generative AI is always more accurate", "Analytical AI creates new content"], 0, "Analytical AI can be checked against what actually happened. Generative AI is flexible, but correctness is harder to measure."]]
+    },
+    {
+      title: "Do you need AI at all?",
+      main: `<p>AI is one tool among several.</p>
+<div class="cards three">
+  <div><b>A written rule</b>When the logic is simple, stable and must be explained exactly.</div>
+  <div><b>Plain analytics</b>Totals, averages, a spreadsheet: when a question has a clear calculation.</div>
+  <div><b>AI</b>When the patterns are too complex to write down, you have good data, and you can live with some errors.</div>
+</div>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which tool fits each case?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "Free shipping on orders over $50", a: 0, why: "Simple, stable, and must be exact. A written rule is the right tool." },
+          { t: "Total sales by region last quarter", a: 1, why: "A clear calculation. Plain analytics does it, with no model needed." },
+          { t: "Spot unusual fraud among millions of transactions where the patterns keep shifting", a: 2, why: "The patterns are too complex to write down, and there is plenty of data." },
+          { t: "Draft first replies to varied customer emails", a: 2, why: "Open-ended language is too varied for rules, and a person can review the draft." },
+          { t: "Charge the correct sales tax by state", a: 0, why: "It must be exact and explainable, so a rule is safer than a learned model." }
+        ], ["Written rule", "Plain analytics", "AI"]);
+      },
+      quiz: [["A pricing decision must be explained exactly to a regulator. What is the safest choice?", ["A written rule", "A learned model, because it is more flexible", "Whatever is cheapest"], 0, "Rules are transparent. Learned models are flexible but opaque, so they are harder to explain exactly."]]
+    }
+  ]
+});
+chrome(4);
+</script>
+</body></html>

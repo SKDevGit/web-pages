@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What AI can do</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const AB = [
+  ["Seeing", "Finds patterns in pictures and video.", "Checking that product photos follow brand rules. Reading scanned invoices."],
+  ["Listening", "Turns speech into text, and sometimes text into speech.", "Transcribing customer calls. Voice assistants."],
+  ["Reading and writing", "Understands and produces language.", "Summarizing hundreds of product reviews. Drafting replies."],
+  ["Predicting", "Scores how likely something is to happen.", "Which customers are likely to cancel. Next month’s demand."],
+  ["Recommending", "Ranks what to show someone.", "“Frequently bought together.” Which video to play next."],
+  ["Acting", "Carries out steps toward a goal, using other tools.", "Looking up an order and issuing a refund within set limits."]
+];
+lesson({
+  title: "What AI can do",
+  lede: "Instead of asking whether something is AI, ask what it does. Most business uses of AI come down to six abilities. Learning to name them makes it easier to see where AI could help.",
+  learn: `<b>By the end you can</b>name the six main abilities, match a business task to the right one, and see that many tasks combine several.`,
+  steps: [
+    {
+      title: "Six abilities",
+      main: `<p>Most business uses of AI come down to six abilities: <b>seeing</b>, <b>listening</b>, <b>reading and writing</b>, <b>predicting</b>, <b>recommending</b> and <b>acting</b>.</p>
+<p>Naming the ability makes it easier to see where AI could help in a business.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Choose an ability to see what it does and where a business might use it." }));
+        chooser(host, AB, "What it does", "Business example");
+      },
+      deep: `<p>This is a simple grouping to organize your thinking, not a technical standard. Real products often combine several abilities.</p>`,
+      quiz: [["Estimating which customers are likely to cancel is mostly which ability?", ["Predicting", "Seeing", "Acting"], 0, "It scores how likely something is to happen, which is prediction."]]
+    },
+    {
+      title: "Match the task to the ability",
+      main: `<p>For any business task, ask which ability does most of the work.</p>
+<p>Many real tasks combine several abilities, so look for the one that carries the task.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which ability does most of the work in this task?" }));
+        matcher(host, [
+          ["Flag photos that break brand guidelines", 0, "It finds patterns in pictures."],
+          ["Turn a recorded sales call into notes", 1, "It turns speech into text."],
+          ["Summarize 500 product reviews", 2, "It understands and produces language."],
+          ["Estimate which subscribers will cancel", 3, "It scores how likely something is to happen."],
+          ["Suggest the next product to show a shopper", 4, "It ranks what to show someone."],
+          ["Check stock, then place a reorder", 5, "It carries out steps toward a goal using other tools."]
+        ], AB.map(a => a[0]));
+      },
+      deep: `<p>A tool that listens to a sales call, writes a summary and then updates the CRM uses listening, reading and writing, and acting together. The question is which ability does most of the work.</p>`,
+      quiz: [["A tool listens to a sales call, writes a summary and then updates the CRM. What does this show?", ["Real tasks often combine several abilities", "Each task needs exactly one ability", "Only one ability can be automated"], 0, "Listening, reading and writing, and acting are all at work. Most useful systems combine abilities."]]
+    }
+  ]
+});
+chrome(2);
+</script>
+</body></html>

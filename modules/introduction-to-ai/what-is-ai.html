@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What we mean by AI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+lesson({
+  title: "What we mean by AI",
+  lede: "There is no single agreed meaning of AI. Here is the working definition, why the label keeps changing, and what we mean by intelligent.",
+  steps: [
+    {
+      title: "AI, machine learning and deep learning",
+      main: `<p>These terms nest inside one another. AI is the broad field. Each layer inside it is a narrower kind: machine learning, then deep learning, then generative AI.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Click a layer to see what it means." }));
+        nester(host, [
+          ["Artificial intelligence", "Machine-based systems that infer, from their input, how to produce outputs such as predictions, content, recommendations or decisions."],
+          ["Machine learning", "AI systems that learn their rules from data, instead of having each rule written by a person."],
+          ["Deep learning", "Machine learning that uses neural networks with many layers."],
+          ["Generative AI", "Models that produce new content: text, images, code or audio."]
+        ]);
+      },
+      deep: `<p>The nesting is a simplification: not all AI is machine learning, but almost all commercial AI today is.</p>`,
+      quiz: [["Which is the broadest of these terms?", ["Artificial intelligence", "Machine learning", "Deep learning"], 0, "Machine learning sits inside AI, and deep learning sits inside machine learning."]]
+    },
+    {
+      title: "The official definition",
+      main: `<div class="label">OECD definition (2023)</div>
+<div class="quote">“A machine-based system that, for explicit or implicit objectives, <mark>infers</mark>, from the input it receives, how to generate outputs such as predictions, content, recommendations, or decisions that can influence physical or virtual environments.”</div>
+<p><b>The key word: infers.</b> The system works out how to produce outputs, rather than following a written rule for each case.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which of these systems infers, and which follows a written rule?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "A thermostat that sets the temperature on a schedule", a: 1, why: "It follows a written rule for each case. Nothing is inferred." },
+          { t: "A spam filter trained on thousands of labeled emails", a: 0, why: "It works out for itself how to tell spam from legitimate mail." },
+          { t: "A tax calculator with a fixed rate table", a: 1, why: "Every case is covered by a rule someone wrote down." },
+          { t: "A system that recommends films from what you have watched", a: 0, why: "It infers what you may want from patterns in viewing data." }
+        ], ["Infers", "Follows a written rule"]);
+      },
+      deep: `<p>The definition describes an “AI system”, not “AI” in general. It covers the spam filter as well as ChatGPT. Governments use it, including in regulation.</p>
+<p class="hint">Source: OECD.AI (2023 wording, published March 2024).</p>`,
+      quiz: [["What is the key word in the OECD definition?", ["Infers", "Calculates", "Understands"], 0, "The system works out how to produce outputs from its input, rather than following a written rule for each case."]]
+    },
+    {
+      title: "The AI effect",
+      main: `<p>Once a task is solved, it stops being called AI.</p>
+<div class="quote">“AI is whatever hasn’t been done yet.”</div>
+<p>The label keeps moving to whatever computers cannot yet do.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Click a task to see how it was seen then, and now." }));
+        flipRows(host, [
+          ["Reading printed text (optical character recognition)", "A core AI research problem.", "Ordinary engineering, built into scanners and phones."],
+          ["Recognizing speech", "A core AI research problem.", "A routine feature on phones and in call centres."],
+          ["Playing championship chess (Deep Blue, 1997)", "A landmark of AI. Critics then dismissed it as brute force.", "Seen as a chess program, not as intelligence."]
+        ]);
+      },
+      deep: `<p>The historian Pamela McCorduck called this an “odd paradox”, and the line is often called Tesler’s theorem.</p>
+<p>It is also why people disagree about some items in the Lesson 1 vote. For a spam filter or a spreadsheet forecast, whether it counts as AI depends on where you draw the line.</p>
+<p class="hint">Source: Wikipedia, “AI effect” (secondary).</p>`,
+      quiz: [["After a task is solved and becomes routine, people usually…", ["Stop calling it AI", "Call it a stronger form of AI", "Call it general intelligence"], 0, "This is the AI effect: the label moves on to whatever has not been done yet."]]
+    },
+    {
+      title: "What is intelligence?",
+      main: `<p>People usually include these abilities.</p>
+<div class="chips">${["Perceiving", "Learning", "Reasoning", "Deciding", "Using language"].map(a => `<span class="pill info">${a}</span>`).join("")}</div>
+<div class="cards" style="margin-top:18px">
+  <div><b>Narrow</b>Today’s systems are strong at specific tasks.</div>
+  <div><b>General</b>A system matching people across all tasks does not exist, and the idea is disputed.</div>
+</div>`,
+      deep: `<p>“General intelligence” is a contested and undefined target, and forecasts about it are opinion, not measurement.</p>`,
+      quiz: [["Which best describes today’s AI systems?", ["Strong at specific tasks", "Equal to people across all tasks", "Unable to learn"], 0, "They are strong at specific tasks. A system matching people across all tasks does not exist."]]
+    },
+    {
+      title: "Does it have to understand?",
+      main: `<div class="cards">
+  <div><b>The Turing test (1950)</b>If an interrogator cannot tell a machine from a person by written answers, the machine passes.</div>
+  <div><b>The counter-argument</b>Searle’s “Chinese room”: a system could shuffle symbols convincingly without understanding them.</div>
+</div>
+<p><b>For a manager:</b> judge systems by what they reliably do for you, not by whether they “understand.”</p>`,
+      interactive: host => {
+        host.append(disc("Would you hire a system that passes the Turing test but sometimes invents facts? What would you check?"));
+        host.append(h("p", { text: "Which checks would you want before relying on it? Select all that apply." }));
+        checklist(host, [
+          ["Whether its facts are checked against a source", 1],
+          ["Whether it admits when it is unsure", 1],
+          ["Its track record on tasks like yours", 1],
+          ["Whether it truly understands", 0],
+          ["Whether it sounds confident", 0]
+        ],
+        "Good. These checks look at what the system reliably does. Whether it “understands” cannot be measured directly, and confidence is not evidence.",
+        "Look again. The useful checks are about what the system reliably does: facts checked against a source, admitting uncertainty, and track record. Whether it “understands”, or sounds confident, tells you little.");
+      },
+      deep: `<p>A system can produce useful, human-sounding work without the properties we associate with a mind. That matters for how much to trust it.</p>
+<p class="hint">Sources: Turing (1950), “Computing Machinery and Intelligence”; Wikipedia, “Turing test” (secondary).</p>`,
+      quiz: [["For a manager, what is the most useful way to judge an AI system?", ["By what it reliably does for you", "By whether it understands", "By whether it sounds human"], 0, "Capability matters more than understanding. A system can be useful without having the properties we associate with a mind."]]
+    }
+  ]
+});
+chrome(1);
+</script>
+</body></html>

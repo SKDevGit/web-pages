@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI and people</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+</head><body>
+<header id="site-head"></header>
+<main class="col" id="lesson"></main>
+<nav id="pager"></nav>
+<script src="../../assets/js/site.js"></script><script src="js/ait.js"></script>
+<script>
+const LAD = [
+  ["Machine code, assembly", "Instructions to the hardware, step by step.", "lo"],
+  ["1957: Fortran", "IBM’s compiler: efficient enough that programmers accepted high-level code. First compiler delivered in April 1957 under John Backus.", "lo"],
+  ["1970s: SQL", "Say what data you want, not how to retrieve it (IBM). Developed in the early 1970s by Chamberlin and Boyce; it is declarative.", "lo"],
+  ["1979: VisiCalc", "The first spreadsheet; businesspeople bought computers to run it. Released on October 17, 1979, for the Apple II.", "lo"],
+  ["1973–1984: graphical interfaces", "Xerox Alto to Macintosh: point and click replaces typed commands. Xerox Alto (1973), Xerox Star (1981), Macintosh (1984).", "lo"],
+  ["2022 on: natural language", "Describe the task in words.", "hi"]
+];
+lesson({
+  title: "AI and people",
+  lede: "Computing has moved, step by step, from telling machines how to do something to telling them what you want. Natural language is the latest step. It widens who can direct a computer, but it does not remove the need to check the result.",
+  learn: `<b>By the end you can</b>place natural language on the history of abstraction, say what it changes and what it does not, and decide when AI should automate a task and when it should assist a person.`,
+  steps: [
+    {
+      title: "A history of abstraction",
+      main: `<p>Each layer hides detail from the one below it, so more people can get useful work done.</p>
+<p>More “what”, less “how”: more people can direct a computer. Natural language is a higher rung, not a replacement for the lower ones.</p>`,
+      interactive: host => {
+        host.innerHTML = `<p>Click a layer to see where it came from.</p><div class="widget"><div class="ladder" id="lad"></div><div class="note" id="lad-msg"></div></div>`;
+        let lsel = 5;
+        function drawLad() {
+          const l = clear($("#lad"));
+          LAD.forEach((r, i) => l.append(h("button", { class: "rung " + r[2] + (i === lsel ? " hi" : ""), onclick: () => { lsel = i; drawLad(); } }, h("span", { class: "n", text: i + 1 }), h("span", { text: r[0] }), h("span", { class: "lv", text: i === 0 ? "more how" : i === LAD.length - 1 ? "more what" : "" }))));
+          $("#lad-msg").textContent = LAD[lsel][1];
+        }
+        drawLad();
+      },
+      deep: `<p>Each abstraction was resisted by specialists at first. Someone still needs to know how to check the result.</p>
+<p class="hint">Sources: Wikipedia (Fortran; SQL; VisiCalc; graphical user interface), all secondary.</p>`,
+      quiz: [["What does each new layer of abstraction do?", ["Hides detail so more people can direct a computer", "Replaces everything below it", "Makes checking results unnecessary"], 0, "Each layer lets people say more of what they want and less of how to do it. The lower layers are still there, and someone must still check the result."]]
+    },
+    {
+      title: "Natural language as the new interface",
+      main: `<div class="flow"><div class="bx">You state intent in words, images or voice</div><span class="ar">→</span><div class="bx">The model works out the steps</div><span class="ar">→</span><div class="bx out">A report, a spreadsheet formula or a working script</div></div>
+<p><b>An instruction is a program.</b> A good one gives the goal, the context, the format and examples. That is a skill, but not a coding skill.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Which of these change, and which stay the same?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "More people can build simple tools", a: 0, why: "Describing a task in words lowers the skill needed to get something built." },
+          { t: "The scarce skill shifts to specifying the goal and checking the result", a: 0, why: "Writing the code matters less. Knowing what you want, and verifying it, matters more." },
+          { t: "Accountability for the outcome", a: 1, why: "A person or organization still answers for what is done with the output." },
+          { t: "The need for data, judgment and authority to act", a: 1, why: "A model can draft a plan, but acting on it still needs data, judgment and the authority to do so." }
+        ], ["Changes", "Stays the same"]);
+        host.append(disc("What is one task you would now attempt that you would have handed to a specialist two years ago? What would you check?"));
+      },
+      deep: `<p>Modern models also accept images, audio and documents (multimodal input). The abstraction is leaky: errors can be harder to spot when you do not understand what was produced.</p>`,
+      quiz: [["A colleague says natural language means everyone is now a programmer. What is the best reply?", ["It lowers the skill needed, but checking the result still matters", "Yes, no technical knowledge is needed any more", "No, because it cannot write code at all"], 0, "The abstraction is leaky. Errors can be harder to spot when you do not understand what was produced."]]
+    },
+    {
+      title: "Automate or assist?",
+      main: `<div class="cards">
+  <div><b>Automation</b>The system does the whole task.</div>
+  <div><b>Augmentation</b>The system helps a person who stays in charge of the result.</div>
+</div>
+<p><b>A useful rule:</b> the costlier a mistake is, and the harder it is to check, the more a person should stay involved.</p>`,
+      interactive: host => {
+        host.append(h("p", { text: "Who should do each task?" }));
+        const w = h("div", { class: "widget" }); host.append(w);
+        sorter(w, [
+          { t: "Sorting incoming support emails by topic", a: 0, why: "Frequent, low risk and easy to check, so it suits automation." },
+          { t: "Drafting replies for an agent to review before sending", a: 1, why: "A person reviews each draft, so a mistake is caught before it reaches a customer." },
+          { t: "Approving a very large refund", a: 1, why: "The cost of a mistake is high, so a person should stay in the loop." },
+          { t: "Giving legal advice to clients", a: 2, why: "Costly to get wrong and hard to check, and an accountable professional must stand behind it." }
+        ], ["Automate", "Assist a person", "Keep with a person"]);
+      },
+      quiz: [["Who is accountable for a decision that an AI system helped to make?", ["The people and organization using it", "The AI system", "Nobody, because the model decided"], 0, "Accountability does not move to the system. The organization and the people using it remain answerable."]]
+    }
+  ]
+});
+chrome(6);
+</script>
+</body></html>

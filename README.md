@@ -7,20 +7,32 @@ A growing library of interactive teaching pages. Everything is plain HTML, CSS a
 ```
 index.html                 Library home: lists every course
 assets/
-  css/site.css             Shared styles for all courses
+  css/site.css             Shared styles for all modules and courses
   js/site.js               Shared helpers, sidebar and page chrome
 courses/
-  inside-the-llm/          Course 1: how LLMs work, for MBA students
-    index.html             Course home and course map
+  ai-for-marketing/        A course: an ordered list of modules
+    index.html             Course landing page
+modules/
+  introduction-to-ai/      Module 1: what AI is and how it works
+  inside-the-llm/          Module 2: how LLMs work, for MBA students
+    index.html             Module home and map
     *.html                 One page per part
-    js/                    Course-specific scripts
+    js/                    Module-specific scripts
 ```
+
+A module is written once and can be used by several courses. A course is a landing page that links to its modules.
+
+## Add a module
+
+1. Copy `modules/inside-the-llm/` to `modules/your-module-name/`.
+2. Edit `js/llm.js`: set `COURSE_TITLE` and `PAGES`.
 
 ## Add a course
 
-1. Copy `courses/inside-the-llm/` to `courses/your-course-name/`.
-2. Edit `js/llm.js`: set `COURSE_TITLE` and `PAGES`.
-3. Add a card for it in the root `index.html`.
+1. Copy `courses/ai-for-marketing/` to `courses/your-course-name/` and edit its text and module links.
+2. Link each module as `../../modules/<module>/index.html?from=<course-name>`.
+3. Add the course to `COURSES` in `assets/js/site.js` so modules can link back to it.
+4. Add a card for it in the root `index.html`.
 
 ## Run locally
 
