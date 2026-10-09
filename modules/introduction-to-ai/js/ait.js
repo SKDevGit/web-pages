@@ -72,26 +72,6 @@ const QUIZ = [
   ["Models can now write a spreadsheet formula from a plain-language request. Which skill matters more as a result?", ["Specifying the goal and checking the result", "Learning every programming language", "Memorizing function names"], 0, "The scarce skill shifts to specifying the goal and checking the result."]
 ];
 
-/* sort items into labelled buckets, with feedback on each */
-function sorter(host, items, labels) {
-  const stat = h("p", { class: "hint", style: { margin: 0 } }); let done = 0, right = 0; const resets = [];
-  const clr = h("button", { class: "btn sm", style: { display: "none" }, onclick: () => { resets.forEach(f => f()); done = 0; right = 0; stat.textContent = ""; clr.style.display = "none"; } }, "Clear answers");
-  items.forEach(it => {
-    const fb = h("div", { class: "afb", style: { display: "none" } }), btns = []; let locked = false;
-    resets.push(() => { locked = false; btns.forEach(b => { b.disabled = false; b.classList.remove("right", "wrong"); }); fb.style.display = "none"; });
-    labels.forEach((l, i) => btns.push(h("button", { class: "btn", onclick: () => {
-      if (locked) return; locked = true; done++; clr.style.display = "";
-      const ok = i === it.a; if (ok) right++;
-      btns.forEach((b, k) => { b.disabled = true; if (k === it.a) b.classList.add("right"); });
-      if (!ok) btns[i].classList.add("wrong");
-      fb.style.display = ""; fb.className = "afb " + (ok ? "good" : "bad"); fb.textContent = (ok ? "Yes. " : "Not quite. ") + it.why;
-      stat.textContent = "Right so far: " + right + " of " + done + (done === items.length ? ". All done." : ".");
-    } }, l)));
-    host.append(h("div", { class: "sortrow" }, h("span", { class: "st", text: it.t }), h("div", { class: "row" }, ...btns), fb));
-  });
-  host.append(h("div", { class: "row", style: { marginTop: "8px" } }, clr, stat));
-}
-const disc = t => h("div", { class: "disc" }, h("b", { text: "Discuss" }), t);
 
 /* ---- reusable interactive pieces: each fills a host element ---- */
 

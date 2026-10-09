@@ -4,6 +4,10 @@ A record of each content review: what was checked, what was fixed, and what is s
 
 Content that changes quickly (model names, prices, context sizes, regulations, product features) should be rechecked before each new class, even if it is listed as verified here.
 
+## Content added after Review 1
+
+- **Model development (Lesson 3) and Model usage (Lesson 4)**, written 9 October 2026. New claims to check at the next review: output tokens usually cost more than input tokens; real vocabularies hold tens of thousands to a few hundred thousand tokens; embeddings use hundreds to thousands of numbers; image generators often work by removing noise step by step; refund limits in the checks step are examples only.
+
 ## Review 1 · 8 October 2026
 
 **Scope.** Every page: the library home, the course page, Introduction to AI (Lessons 1 to 8) and Inside the LLM (index, 10 lessons, Key terms) with their helper scripts.

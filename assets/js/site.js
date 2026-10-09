@@ -42,6 +42,27 @@ function quick(q, opts, ans, why) {
   } }, o)));
   box.append(list, note, again); return box;
 }
+/* sort items into labelled buckets, with feedback on each */
+function sorter(host, items, labels) {
+  const stat = h("p", { class: "hint", style: { margin: 0 } }); let done = 0, right = 0; const resets = [];
+  const clr = h("button", { class: "btn sm", style: { display: "none" }, onclick: () => { resets.forEach(f => f()); done = 0; right = 0; stat.textContent = ""; clr.style.display = "none"; } }, "Clear answers");
+  items.forEach(it => {
+    const fb = h("div", { class: "afb", style: { display: "none" } }), btns = []; let locked = false;
+    resets.push(() => { locked = false; btns.forEach(b => { b.disabled = false; b.classList.remove("right", "wrong"); }); fb.style.display = "none"; });
+    labels.forEach((l, i) => btns.push(h("button", { class: "btn", onclick: () => {
+      if (locked) return; locked = true; done++; clr.style.display = "";
+      const ok = i === it.a; if (ok) right++;
+      btns.forEach((b, k) => { b.disabled = true; if (k === it.a) b.classList.add("right"); });
+      if (!ok) btns[i].classList.add("wrong");
+      fb.style.display = ""; fb.className = "afb " + (ok ? "good" : "bad"); fb.textContent = (ok ? "Yes. " : "Not quite. ") + it.why;
+      stat.textContent = "Right so far: " + right + " of " + done + (done === items.length ? ". All done." : ".");
+    } }, l)));
+    host.append(h("div", { class: "sortrow" }, h("span", { class: "st", text: it.t }), h("div", { class: "row" }, ...btns), fb));
+  });
+  host.append(h("div", { class: "row", style: { marginTop: "8px" } }, clr, stat));
+}
+const disc = t => h("div", { class: "disc" }, h("b", { text: "Discuss" }), t);
+
 function sidebar(i) {
   const aside = h("aside", { class: "side", "aria-label": "Course navigation" });
   const list = h("nav", { class: "side-list" });
@@ -104,7 +125,7 @@ function lesson(cfg) {
   if (cfg.learn) { const l = h("div", { class: "learn" }); l.innerHTML = cfg.learn; root.append(l); }
   cfg.steps.forEach((s, k) => {
     const sec = h("section", { class: "stp" });
-    sec.append(h("span", { class: "step", text: "Step " + (k + 1) + " of " + n }), h("h2", { text: s.title }));
+    sec.append(h("span", { class: "step", text: (s.stage ? s.stage + " \u00b7 " : "") + "Step " + (k + 1) + " of " + n }), h("h2", { text: s.title }));
     root.append(sec);
     const m = h("div", { class: "teach slide", "data-kind": "main", "data-step": k }); sec.append(m); put(m, s.main);
     if (s.interactive) {

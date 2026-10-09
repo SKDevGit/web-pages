@@ -129,8 +129,8 @@ lesson({
 | `matcher(host, tasks, labels)` | one task at a time matched to a label, with a score |
 | `oneByOne(host, items)` | one multiple-choice question at a time with a score and Start again |
 | `checklist(host, items, goodMsg, badMsg)` | select-all with feedback |
-| `sorter(host, items, labels)` | sort several items into labelled buckets, feedback per row |
-| `disc(text)` | a "Discuss" prompt box |
+| `sorter(host, items, labels)` | sort several items into labelled buckets, feedback per row, Clear answers (now in `site.js`) |
+| `disc(text)` | a "Discuss" prompt box (now in `site.js`) |
 | `quick(q, options, answer, why)` | one multiple-choice question with feedback (shared) |
 
 Add new helpers to the module's helper file. Each takes a host element and builds into it, so any lesson can use it as `interactive: host => helper(host, ...)`.
@@ -240,8 +240,16 @@ Course memory for the back link uses `sessionStorage`. All reads and writes are 
 | Area | State |
 |---|---|
 | Introduction to AI, Lessons 1 to 8 | all converted to the four-part step layout, with present mode |
-| Inside the LLM | earlier layout; shares `site.js`, so it shows "Lesson" in the header and sidebar, but has no present mode |
+| Inside the LLM, Lesson 3 "Model development" (`training.html`) | converted: 13 steps in three stages (build the base model; fine-tune and polish; package as a product), with present mode |
+| Inside the LLM, Lesson 4 "Model usage" (`inference.html`) | converted: 13 steps in three stages (prepare the input; the model generates; deliver the output), with present mode |
+| Inside the LLM, other lessons | earlier layout; share `site.js`, so they show "Lesson" in the header and sidebar, but have no present mode |
 | AI for Marketing course page | live; lists Inside the LLM |
+
+### Notes added with the Model development lesson
+
+- A step can carry a `stage` field. It prefixes the step label ("Stage 1 · Step 3 of 13") and the present-mode label.
+- Every exercise that records an answer has a way back: Clear answers, Try again or Start again.
+- Review history and settled facts are in `FACTCHECK.md`; read it before a content review.
 
 ## 13. Decided later
 

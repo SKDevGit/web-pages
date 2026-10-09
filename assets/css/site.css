@@ -308,6 +308,7 @@ body.fsmode{overflow:hidden}
 .trylabel .fsbtn{float:none;margin:0}
 .slide.fs .trylabel{display:none}
 .stp>.teach>:first-child{margin-top:0}
+.sortrow{display:grid;gap:4px 0;padding:8px 0;border-bottom:1px solid var(--line)}
 .slide .sortrow{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 16px}
 .slide .sortrow .afb{grid-column:1/-1}
 @media (max-width:640px){.slide .sortrow{grid-template-columns:1fr}}
@@ -320,3 +321,35 @@ body.fsmode{overflow:hidden}
 details.layer .cmpt td .small{font-size:.8rem}
 .slide .mini.four{grid-template-columns:repeat(4,1fr)}
 .slide .mini.four>div{font-size:.85rem;padding:8px 10px}
+
+/* training big picture: three bands */
+.pbands{display:grid;gap:10px;margin:10px 0}
+.pband{border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:10px 12px}
+.pband.b2{background:var(--accent-soft);border-color:var(--accent)}
+.pband.b3{background:var(--good-soft);border-color:var(--good)}
+.pband .phead{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:baseline}
+.pband .phead b{font:600 .95rem var(--f-serif)}
+.pband .phead span{font:500 .68rem var(--f-mono);color:var(--muted)}
+.pband .pgrid{margin:8px 0}
+.pband .pres{font-size:.85rem;color:var(--ink);line-height:1.4}
+.pband .pres b{font-weight:600}
+.pband .parr{color:var(--accent);font-weight:700;margin-right:6px}
+.pband .pcell{background:var(--surface)}
+.pband .pcell.sel{background:var(--surface);border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.pband .pcell.emph{background:var(--good-soft);border-color:var(--good)}
+.pband .pcell{min-height:0}
+.slide.fs .pband .pres{display:none}
+.slide.fs .pbands{gap:6px;margin:6px 0}.slide.fs .pband{padding:6px 10px}.slide.fs .pband .pgrid{margin:4px 0}
+.slide.fs .pbands ~ .label{display:none}
+.slide.fs .pbands ~ .mini{font-size:.8rem;margin-top:6px!important}
+.slide.fs .pbands ~ .mini{grid-template-columns:1fr 1fr}.slide.fs .pbands ~ .mini>:nth-child(2){display:none}
+.slide.fs .pband .pcell{padding:6px 10px}.slide.fs .pbands{margin:4px 0}.slide.fs .pbands ~ .mini>*{padding:8px 10px}
+.pband .pcell small:empty{display:none}.pband .pcell{grid-template-rows:auto}.slide.fs .pband .pcell{align-content:center}
+.loop{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px 4px;margin:14px 0}
+.loop .lp{flex:1 1 7.5rem;min-width:0;display:grid;justify-items:center;align-content:center;gap:6px;text-align:center;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 8px;font-size:.9rem;font-weight:500;line-height:1.25;color:var(--muted)}
+.loop .lp span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--soft);border:1px solid var(--line);font:600 .8rem var(--f-mono);color:var(--muted)}
+.loop .lp.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
+.loop .lp.on span{background:var(--accent);border-color:var(--accent);color:#fff}
+.loop .lp.back{border-style:dashed}
+.loop i{align-self:center;font-style:normal;color:var(--muted);font-size:1.1rem}
+@media (max-width:640px){.loop{flex-direction:column}.loop i{transform:rotate(90deg);align-self:center}.loop .lp{flex:none;grid-auto-flow:column;justify-content:start;justify-items:start}}
