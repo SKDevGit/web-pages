@@ -243,6 +243,8 @@ Course memory for the back link uses `sessionStorage`. All reads and writes are 
 | Inside the LLM, Lesson 3 "Model development" (`training.html`) | converted: 13 steps in three stages (build the base model; fine-tune and polish; package as a product), with present mode |
 | Inside the LLM, Lesson 4 "Model usage" (`inference.html`) | converted: 13 steps in three stages (prepare the input; the model generates; deliver the output), with present mode |
 | Inside the LLM, Lesson 5 "Context" (`context-attention.html`) | converted: 8 steps, with the context picture (layers colour-coded by who supplies them) and present mode |
+| Inside the LLM, Lesson 6 "What LLMs are used for" (`llm-uses.html`) | converted: 11 steps in four stages (one skill; work on text; answer and create; reason and act), then matching checking to the task and a wrap-up. Each use has a Try it demo, with its token-odds panel in Go deeper |
+| Inside the LLM, Lesson 7 "Limits and risks" (`limits-risks.html`) | converted: 7 steps in three stages (wrong answers; unfair and exposed; using it safely), including a new step on prompt injection and agents; present mode |
 | Inside the LLM, other lessons | earlier layout; share `site.js`, so they show "Lesson" in the header and sidebar, but have no present mode |
 | AI for Marketing course page | live; lists Inside the LLM |
 

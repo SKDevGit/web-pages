@@ -1,191 +1,43 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What LLMs are used for</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../../assets/css/site.css">
-</head><body>
+<link rel="stylesheet" href="../../assets/css/site.css"></head><body>
 <header id="site-head"></header>
-<main class="col">
-<h1>What LLMs are used for</h1>
-<p class="meta">7 capabilities · simplest first · how each works</p>
-<p class="lede">All of these uses come from the same skill: predicting the next token. What changes from one to the next is how much the model has to do with the text, and how much a person needs to check the result. We climb from the simplest uses to the most demanding.</p>
-<div class="learn"><b>By the end you can</b>explain how a next-token predictor can do each task, name seven things an LLM does, say which are simple and which are demanding, and explain why the demanding ones need more oversight.</div>
-
-<h2>First: how can next-word prediction do all this?</h2>
-<p>In Lessons 3 and 4 we saw that a model only ever does one thing: given the text so far, choose the next token. Sorting emails, translating and reasoning do not sound like that. The answer is that <b>every task can be written as text that needs continuing</b>.</p>
-<div class="flowd" style="margin:6px 0 12px"><div class="fb">Your request</div><span>→</span><div class="fb acc">Text that needs a continuation</div><span>→</span><div class="fb">Next token, again and again</div><span>→</span><div class="fb good">The result</div></div>
-<p>Why does continuing the text give a useful result? Because the model learned from a huge amount of writing, and that writing is full of every task: emails followed by labels, articles followed by summaries, sentences beside their translations, questions followed by answers, worked solutions with each step written out. To predict the next token well on that text, the model had to pick up the pattern behind each one. It does not look those examples up later: what it learned is built into its parameters, the numbers that training adjusted. When your request sets up the same pattern, the most likely continuation is the answer.</p>
-<p>Under each step below, a small panel shows this happening. You see the text the model receives, then step through the first tokens it writes and the odds behind each one.</p>
-<div id="hq"></div>
-
-<h2>How does it know which task?</h2>
-<p>The model never decides which task to do. Your instruction is part of the text, and it changes which continuation is most likely. Words such as “In one line:”, “Translate to Spanish:” or “Is the customer satisfied?” are cues. The model has learned what usually comes after each of them.</p>
-<p>It learned this in two stages. First, <b>pre-training</b> on huge amounts of writing, where cues and their results appear together: “TL;DR” followed by a short version, a sentence followed by its translation, a question followed by an answer. Second, <b>instruction training</b> (Lesson 3), where it practises on many requests paired with good responses and people rank its answers. That second stage is why an assistant treats your message as a request to fulfil, not as text to continue.</p>
-<p>One thing to be clear about: the model does not search its training examples when you ask. Think of a person who has read thousands of summaries. When you hand them a new report, they do not flip back through old ones. They write a summary, because they have absorbed what a good one looks like. The model works the same way, and that is why it can summarize an article it has never seen.</p>
-<p>Try it. The text below stays the same. Only the last line changes, and so do the model’s odds.</p>
-<div class="widget"><div class="row"><span class="hint">Last line:</span><div class="seg3" id="hd-seg"></div></div></div>
-<div id="hd"></div>
-<p>You can also teach the pattern in the prompt itself. Show the model two sample emails with their labels, then a third without one, and it will follow the pattern. That is a main way it uses examples while it runs, and those examples sit in the context, not in the training data.</p>
-<div id="qd"></div>
-
-<div class="ladder" id="ladder"></div>
-<p class="hint">Click a rung to jump to it. Lower rungs work on text you hand over. Higher rungs make judgements and take actions.</p>
-
-<span class="step" id="u1">Step 1 of 7 · Lower order</span>
-<h2>1. Sort and extract</h2>
-<p>The simplest use: read a piece of text, put it in a category, and pull out the key facts. Pick a message.</p>
-<p class="learned"><b>Already learned</b>text of every kind that is sorted or labelled, such as reviews with star ratings, emails filed into folders, and forms with fields. The model has absorbed what categories and key facts look like.</p>
-<div class="widget">
-  <div class="row" id="s1-pick"></div>
-  <div class="docbox" id="s1-msg"></div>
-  <div class="mini" id="s1-out"></div>
-</div>
-<div id="h1"></div>
-<div id="q1"></div>
-
-<span class="step" id="u2">Step 2 of 7 · Lower order</span>
-<h2>2. Rewrite and translate</h2>
-<p>Same meaning, new form. The model changes tone, length or language while keeping the facts. Choose how to rewrite one message.</p>
-<p class="learned"><b>Already learned</b>writing in many tones and registers, and text published in several languages side by side. The model has absorbed how the same meaning is expressed in different forms.</p>
-<div class="widget">
-  <div class="label">Original</div><div class="docbox" id="s2-orig"></div>
-  <div class="row"><span class="hint">Rewrite as:</span><div class="seg3" id="s2-seg"></div></div>
-  <div class="label">Result</div><div class="docbox" id="s2-out"></div>
-  <p class="hint">Scripted examples for the demo. A real model produces these on demand for any text.</p>
-</div>
-<div id="h2"></div>
-<div id="q2"></div>
-
-<span class="step" id="u3">Step 3 of 7 · Lower order</span>
-<h2>3. Summarize</h2>
-<p>Shrink a long text and keep what matters. Drag between the three lengths and watch how much is dropped.</p>
-<p class="learned"><b>Already learned</b>a huge number of summaries, such as headlines, abstracts and “TL;DR” lines. The model has learned what a summary looks like and which details usually get dropped. It does not look those examples up. What it learned is built into its parameters.</p>
-<div class="widget">
-  <div class="label">Original thread</div><div class="docbox" id="s3-orig"></div>
-  <div class="row"><span class="hint">Summary length:</span><div class="seg3" id="s3-seg"></div></div>
-  <div class="docbox" id="s3-out"></div>
-  <div class="cmp"><div style="flex:1;min-width:160px"><div class="cbar" id="s3-bar"></div></div><span class="hint" id="s3-stat"></span></div>
-</div>
-<div id="h3"></div>
-<div id="q3"></div>
-
-<span class="step" id="u4">Step 4 of 7 · Middle</span>
-<h2>4. Answer questions from your documents</h2>
-<p>Ask a question and let the model answer from a document you supply. This is grounding, from Lesson 5. Try each question, then switch the document off.</p>
-<p class="learned"><b>Already learned</b>question-and-answer pages, FAQs, exam questions with answers, and passages followed by questions about them. The model has learned to find the answer inside a passage.</p>
-<div class="widget">
-  <div class="row"><span class="hint">Document:</span><div class="seg3" id="s4-seg"></div></div>
-  <div class="docbox" id="s4-doc"></div>
-  <div class="label">Ask</div><div class="row" id="s4-q"></div>
-  <div id="s4-ans" class="stack"></div>
-  <p class="hint">Scripted. The unsupported answer is the kind of plausible guess a model can make when it has nothing to read.</p>
-</div>
-<div id="h4"></div>
-<div id="q4"></div>
-
-<span class="step" id="u5">Step 5 of 7 · Middle</span>
-<h2>5. Create new content</h2>
-<p>Generation: write something that did not exist before. Text and code are what an LLM produces directly. Images, audio and video come from related generative models, often steered by an LLM that writes the brief.</p>
-<p class="learned"><b>Already learned</b>enormous amounts of stories, emails, articles and code. The model has learned how each kind of writing is put together, and it samples from that to produce something new.</p>
-<div class="widget">
-  <div class="row"><div class="seg3" id="s5-seg"></div></div>
-  <div class="mini" id="s5-out"></div>
-</div>
-<div id="h5"></div>
-<div id="q5"></div>
-
-<span class="step" id="u6">Step 6 of 7 · Higher order</span>
-<h2>6. Reason and analyze</h2>
-<p>Work through a problem with several steps. The model writes its working one token at a time, and each step becomes context for the next. Reveal the working below.</p>
-<p class="learned"><b>Already learned</b>textbooks, worked examples and forum answers that set out steps in order. The model has learned what step-by-step working looks like. It does not simply run a calculator: it writes working that resembles the worked solutions it learned from, and reasoning models get extra training that rewards correct step-by-step working. Some products also give the model a calculator or code tool.</p>
-<div class="widget">
-  <div class="docbox" id="s6-prob"></div>
-  <div class="stepn" id="s6-steps"></div>
-  <div class="row"><button class="btn primary" id="s6-next">Show next step</button><button class="btn" id="s6-reset">Start over</button></div>
-  <div class="note" id="s6-note"></div>
-</div>
-<div id="h6"></div>
-<div id="q6"></div>
-
-<span class="step" id="u7">Step 7 of 7 · Higher order</span>
-<h2>7. Plan and act with tools</h2>
-<p>The most demanding use: given a goal, the model plans, calls tools such as a database or email, reads the results and continues. This is called an agent. Step through one case.</p>
-<p class="learned"><b>Already learned</b>code, documentation and examples of tools being called, plus extra training on using tools. The model has learned what a tool call looks like. Software, not the model, carries out the action.</p>
-<div class="widget">
-  <div class="stepper" id="s7-stepper"></div>
-  <div class="docbox log" id="s7-log"></div>
-  <div class="row"><button class="btn primary" id="s7-next">Next step</button><button class="btn" id="s7-reset">Start over</button></div>
-  <div class="note" id="s7-note"></div>
-</div>
-<div id="h7"></div>
-<div id="q7"></div>
-
-<h2>The pattern</h2>
-<p>As you climb, the model does more than rephrase: it chooses, calculates and acts. Mistakes also cost more. Checking a summary is quick. Checking an action that moved money may mean undoing it. Match the amount of human review to the rung.</p>
-</main>
+<main class="col" id="lesson"></main>
 <nav id="pager"></nav>
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
-chrome(5);
-const CAPS = [["Sort and extract", "Lower"], ["Rewrite and translate", "Lower"], ["Summarize", "Lower"], ["Answer from documents", "Middle"], ["Create new content", "Middle"], ["Reason and analyze", "Higher"], ["Plan and act with tools", "Higher"]];
-CAPS.forEach(([n, l], i) => $("#ladder").append(h("button", { class: "rung" + (l === "Higher" ? " hi" : ""), onclick: () => $("#u" + (i + 1)).scrollIntoView({ behavior: "smooth", block: "start" }) }, h("span", { class: "n", text: i + 1 }), h("span", { text: n }), h("span", { class: "lv", text: l + " order" }))));
-
-// 1 sort and extract
+/* scripted data for the demos */
 const MS = [["Return request", "Hi, order 4821 arrived with a cracked screen. I need a refund before Friday, I’m travelling.", "Refund request", "Order 4821 · cracked screen · deadline Friday", "High"], ["Question", "Does the extended warranty cover accidental damage? Thinking of buying the Pro model.", "Pre-sale question", "Product: Pro model · topic: warranty", "Low"], ["Complaint", "This is the third time my delivery is late. Nobody replies to my emails. Very disappointed.", "Complaint", "Issue: late delivery (3rd time) · no reply", "Medium"]];
-seg("#s1-pick", MS.map(m => m[0]), 0, i => { $("#s1-msg").textContent = MS[i][1]; clear($("#s1-out")).append(cell("Category", MS[i][2]), cell("Key facts pulled out", MS[i][3]), cell("Urgency", MS[i][4])); });
-$("#q1").append(quick("A firm gets 5,000 support emails a day. Which use fits best?", ["Sort and extract: label each email and pull out order numbers", "Create images", "Plan and act with tools"], 0, "Labelling and extracting is the simplest, most reliable use, and it saves the most routine reading."));
-
-// 2 rewrite
 const ORIG = "Your refund is approved. It will reach your account in 5 days.";
 const RW = [["Formal", "We are pleased to confirm that your refund has been approved. Please allow five days for it to appear in your account."], ["Friendly", "Good news, your refund is approved. It should be in your account within about 5 days."], ["Shorter", "Refund approved. Arrives in 5 days."], ["Spanish", "Su reembolso ha sido aprobado. Llegará a su cuenta en 5 días."], ["Hindi", "आपका रिफ़ंड स्वीकृत हो गया है। यह 5 दिनों में आपके खाते में पहुँच जाएगा।"]];
-$("#s2-orig").textContent = ORIG;
-seg("#s2-seg", RW.map(r => r[0]), 1, i => $("#s2-out").textContent = RW[i][1]);
-$("#q2").append(quick("What should stay the same when a model rewrites a message?", ["The facts: refund approved, 5 days", "The exact wording", "The number of tokens"], 0, "Rewriting changes the form and keeps the facts. Always check that no fact changed, especially numbers and dates."));
-
-// 3 summarize
 const TH = ["Customer: My laptop arrived with a cracked screen on Monday.", "Agent: Sorry to hear that. Can you send a photo and your order number?", "Customer: Photo attached. Order 4821.", "Agent: Thanks. It is under warranty, so we can replace it or refund it. Which do you prefer?", "Customer: A refund please. I need it before Friday for a trip.", "Agent: Approved. The refund of $240 will arrive in 5 business days."];
 const SM = [["One line", "Cracked laptop (order 4821): refund approved, $240, arriving in 5 business days."], ["Three bullets", "• Laptop arrived cracked, order 4821\n• Under warranty; customer chose refund\n• $240 approved, arrives in 5 business days"], ["Full thread", TH.join("\n")]];
 const wc = s => s.trim().split(/\s+/).length;
-$("#s3-orig").style.whiteSpace = "pre-line"; $("#s3-out").style.whiteSpace = "pre-line"; $("#s3-orig").textContent = TH.join("\n");
-seg("#s3-seg", SM.map(s => s[0]), 0, i => { const t = SM[i][1], full = wc(TH.join(" ")), n = wc(t); $("#s3-out").textContent = t; $("#s3-bar").style.width = Math.round(n / full * 100) + "%"; $("#s3-stat").textContent = n + " of " + full + " words kept"; });
-$("#q3").append(quick("Why must a person still skim a summary of an important contract?", ["Summaries drop detail, and the dropped part may be the part that matters", "Summaries are always longer than the original", "Models cannot read contracts"], 0, "A summary is a choice about what to leave out. That choice can be wrong, so check it when stakes are high."));
-
-// 4 answer from documents
 const DOC = ["Returns are accepted within 30 days of delivery.", "Opened items carry a 15% restocking fee.", "Refunds are paid to the original payment method in 5 business days.", "Final-sale items cannot be returned."];
 const QS = [["How long do I have to return something?", 0, "You have 30 days from delivery."], ["Is there a fee on opened items?", 1, "Yes, 15% of the price."], ["Do you ship to Canada?", -1, "The document does not say. Please check with the support team.", "Many online stores ship abroad, so probably yes."]];
-let D4 = { on: true, q: 0 };
-function r4() {
-  const d = clear($("#s4-doc")); if (!D4.on) { d.append(h("div", { class: "hint", text: "(No document supplied.)" })); } else DOC.forEach((l, i) => d.append(h("div", { class: "ln" + (QS[D4.q][1] === i ? " used" : ""), text: l })));
-  const q = QS[D4.q], a = clear($("#s4-ans"));
-  if (D4.on) a.append(h("div", null, h("span", { class: "pill " + (q[1] >= 0 ? "good" : "info"), text: q[1] >= 0 ? "Answered from the document" : "Not in the document" })), h("p", { style: { margin: 0 }, text: q[2] }));
-  else a.append(h("div", null, h("span", { class: "pill warn", text: "Unsupported guess" })), h("p", { style: { margin: 0 }, text: q[3] || ("Probably: " + q[2] + " (but this may not match your policy.)") }));
-}
-$("#s4-q").append(...QS.map((q, i) => h("button", { class: "btn", onclick: () => { D4.q = i; r4(); } }, q[0])));
-seg("#s4-seg", ["On", "Off"], 0, i => { D4.on = i === 0; r4(); });
-$("#q4").append(quick("What is the best defence against a confident but invented answer?", ["Give the model the source text and tell it to answer only from it", "Ask the question twice", "Use a longer prompt with no facts"], 0, "Grounding ties the answer to your documents, and lets you check it against the highlighted source."));
-
-// 5 create
 const CR = [["Text", "“Write a polite reply declining a late return.”", "A full draft email in your tone", "The LLM itself, one token at a time", "Marketing copy, reports, emails"], ["Code", "“Write a spreadsheet formula that adds the restocking fee.”", "Working formula or script", "The LLM itself. Code is just text with strict rules", "Analysis scripts, automations, quick prototypes"], ["Image", "“A flat illustration of a returned parcel.”", "A picture", "A separate image model. An LLM may write or refine the prompt", "Campaign visuals, mock-ups, product images"], ["Audio", "“Read this notice in a calm voice.”", "Speech or music", "A speech or audio model. An LLM can write the script", "Voice-overs, support lines, training audio"], ["Video", "“A short clip of a parcel arriving.”", "Short moving images", "A video model. An LLM can write the storyboard", "Ads, explainers, product demos"]];
-seg("#s5-seg", CR.map(c => c[0]), 0, i => { const c = CR[i]; clear($("#s5-out")).append(cell("Example prompt", c[1]), cell("What you get", c[2]), cell("Made by", c[3]), cell("Business use", c[4])); });
-$("#q5").append(quick("Which output does a text-based LLM produce directly?", ["Text and code", "Video", "Music"], 0, "LLMs generate text and code themselves. Video, images and audio come from related models, which an LLM can help by writing the brief."));
-
-// 6 reason
 const RS = ["Three items: $80, $45, $120. Total $245.", "Items 2 and 3 were opened, so the 15% fee applies to them: 45 + 120 = $165.", "Fee = 15% of $165 = $24.75.", "Refund = $245 − $24.75 = $220.25.", "Check: item 1 in full ($80) + opened items less 15% ($140.25) = $220.25. ✓"];
-$("#s6-prob").textContent = "A customer returns three items priced $80, $45 and $120. Items 2 and 3 were opened, and opened items carry a 15% fee. What is the refund?";
-let N6 = 0;
-function r6() { const s = clear($("#s6-steps")); RS.slice(0, N6).forEach((t, i) => s.append(h("div", { class: "fb" + (i === RS.length - 1 ? " good" : i === N6 - 1 ? " acc" : "") }, "Step " + (i + 1) + ": " + t))); $("#s6-next").disabled = N6 >= RS.length; $("#s6-note").textContent = N6 === 0 ? "Nothing written yet." : N6 < RS.length ? "Each line is written token by token, then read back in as context for the next line." : "Writing out the working gives the model room to compute, and lets you check the logic. Even so, verify the arithmetic on anything important."; }
-$("#s6-next").onclick = () => { N6++; r6(); }; $("#s6-reset").onclick = () => { N6 = 0; r6(); }; r6();
-$("#q6").append(quick("Why does showing the working step by step help?", ["Each step is written out and becomes context for the next one, and a person can check it", "It makes the model faster", "It removes the need to check the answer"], 0, "Reasoning in text lets the model build on its own earlier steps. It still can make mistakes, so check key numbers."));
-
-// 7 agent
 const AG = [["Goal", "Goal: resolve ticket #4821, “laptop arrived cracked”.", "t"], ["Plan", "Plan: 1) look up the order, 2) check the warranty, 3) draft a refund, 4) get approval.", "t"], ["Tool: order lookup", "Tool call → orders.find(4821)\nResult ← $240 laptop, delivered Monday, under warranty", ""], ["Decide", "Decision: warranty applies, refund is allowed.", "t"], ["Tool: draft refund", "Tool call → refund.prepare($240)\nResult ← waiting for approval (over $200)", ""], ["Human check", "Human: approves. Agent sends the customer an email and closes the ticket.", "h"]];
-let N7 = 0;
-function r7() { const l = clear($("#s7-log")), st = clear($("#s7-stepper")); AG.forEach((a, i) => st.append(h("button", { class: i === N7 - 1 ? "on" : i < N7 ? "done" : "", disabled: true }, a[0]))); AG.slice(0, N7).forEach(a => l.style.whiteSpace = "pre-line") ; AG.slice(0, N7).forEach(a => l.append(h("div", { class: a[2], text: a[1] }))); if (!N7) l.append(h("div", { class: "hint", text: "Press Next step to start." })); $("#s7-next").disabled = N7 >= AG.length; $("#s7-note").textContent = N7 === 0 ? "" : N7 < AG.length ? "The model decides each next move after reading what the last tool returned." : "Note where the person sits: the agent can prepare an action, but a human approves the one that moves money."; }
-$("#s7-next").onclick = () => { N7++; r7(); }; $("#s7-reset").onclick = () => { N7 = 0; r7(); }; r7();
-$("#q7").append(quick("Why keep a human approval step in an agent that issues refunds?", ["Actions have real consequences, and are costly to undo", "Agents cannot read tickets", "It makes the model smarter"], 0, "The more an LLM acts on its own, the more it matters to place checks before irreversible steps."));
+const HOODS = {};
+function hood(id, prompt, seq, why) { HOODS[id] = { prompt, seq, why }; }
+hood("#h1", "Email: “Order 4821 arrived with a cracked screen. I need a refund before Friday.”\nCategory:", [[" Refund", [[" Refund", .78], [" Complaint", .12], [" Question", .06]]], [" request", [[" request", .9], [" order", .04]]], ["\n", [["\n", .85], [".", .08]]], ["Order", [["Order", .7], ["Item", .2]]], [":", [[":", .95]]], [" 4821", [[" 4821", .93], [" 4812", .02]]]], "Training text is full of labelled lists, so after “Category:” the likely next token is a label. The order number is copied because attention points at the “4821” already in the email. Labelling and extracting are just continuing a familiar pattern.");
+hood("#h2", "Original: Your refund is approved. It will reach your account in 5 days.\nIn Spanish:", [[" Su", [[" Su", .62], [" Tu", .2], [" El", .08]]], [" reembolso", [[" reembolso", .8], [" devolución", .12]]], [" ha", [[" ha", .72], [" fue", .15]]], [" sido", [[" sido", .96]]], [" aprobado", [[" aprobado", .9], [" autorizado", .05]]], [".", [[".", .82], [",", .12]]]], "The training text had countless sentences placed beside their translations. After “In Spanish:” the likeliest continuation is the same meaning in Spanish. Meaning carries across because words with the same sense, such as “refund” and “reembolso”, get similar embeddings.");
+hood("#h3", "Thread:\nCustomer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\nIn one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2], [" returned", .15]]], [":", [[":", .35], [" for", .25], [" (", .2]]], [" $240", [[" $240", .7], [" 240", .1]]], [".", [[".", .6], [" in", .2]]]], "Attention lets each new word look back across the whole thread and give more weight to the key facts: cracked, refund, $240. Training text is full of headlines, abstracts and “TL;DR” lines, which taught the model what usually gets kept and what is dropped.");
+hood("#h4", "Policy: Returns are accepted within 30 days of delivery. Opened items carry a 15% restocking fee.\nQuestion: How long do I have to return something?\nAnswer: You have", [[" 30", [[" 30", .92], [" 14", .03], [" 60", .02]]], [" days", [[" days", .97]]], [" from", [[" from", .8], [" after", .12]]], [" delivery", [[" delivery", .9], [" purchase", .06]]], [".", [[".", .9]]]], "The odds for “30” are very high because attention points at “30 days” in the policy that is in the prompt. If you remove the policy, “30” becomes one guess among many: “14”, “60”, “30” are all plausible. That is why supplying the document changes the answer.");
+hood("#h5", "Write a polite reply declining a late return.\nReply:", [[" Dear", [[" Dear", .42], [" Hi", .25], [" Hello", .18]]], [" customer", [[" customer", .38], [" Ms", .12], [" Sir", .1]]], [",", [[",", .8], ["!", .05]]], ["\n", [["\n", .9]]], ["Thank", [["Thank", .55], ["We", .2], ["I", .15]]], [" you", [[" you", .95]]]], "Creative writing is the same loop with more choice: many tokens are plausible, and the model samples among them (Lesson 4), so each run differs. Temperature sets how adventurous it is. Some image and video models also produce pieces one after another; others start from noise and clean it up step by step. Either way they learn their patterns from huge numbers of examples.");
+hood("#h6", "Q: Items cost $80, $45 and $120. Items 2 and 3 were opened, with a 15% fee. What is the refund?\nLet’s work step by step.\nStep 1:", [[" Total", [[" Total", .5], [" Add", .25], [" The", .15]]], [" the", [[" the", .4], [" is", .3]]], [" items", [[" items", .6]]], [":", [[":", .5], [" =", .3]]], [" $245", [[" $245", .82], [" $235", .04], [" $255", .03]]], [".", [[".", .7]]]], "Writing the steps first puts each intermediate result, such as $245, into the text. The next token can then use it. Without steps the model must produce the final number in one jump, which is where slips creep in. Reasoning here is written work, one token at a time.");
+hood("#h7", "Goal: resolve ticket #4821, “laptop arrived cracked”.\nTools: orders.find(id), refund.prepare(amount)\nNext action:", [[" orders", [[" orders", .72], [" refund", .18]]], [".", [[".", .96]]], ["find", [["find", .93]]], ["(", [["(", .98]]], ["4821", [["4821", .85], ["4812", .03]]], [")", [[")", .97]]]], "The model’s output is text shaped like a tool call. A normal program reads that text, runs the tool, and pastes the result back into the prompt. Then the model predicts the next action. The model never “does” anything itself: it writes, and software acts on what it writes.");
+const THR = "Customer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\n";
+const HD = [["No instruction", "", [["Customer", [["Customer", .46], ["Agent", .22], ["Thanks", .1]]], [":", [[":", .96]]], [" Thank", [[" Thank", .5], [" Great", .15], [" Can", .1]]], [" you", [[" you", .93]]]], "With no instruction there is nothing to steer it, so it just continues the conversation: the likeliest next text. A base model behaves like this all the time. An assistant has been trained to treat your text as a request."],
+["Summarize in one line", "In one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2]]], [":", [[":", .35], [" for", .25]]]], "After “In one line:” the likeliest text is a short version of the thread, so the odds favour its key facts. Attention connects each new word back to the thread."],
+["Translate to Spanish", "Translate to Spanish:", [["\n", [["\n", .6], [" Cliente", .2]]], ["Cliente", [["Cliente", .55], ["El", .15]]], [":", [[":", .92]]], [" Mi", [[" Mi", .62], [" El", .12]]]], "Text that follows a translation cue is the same meaning in the other language, so the odds jump to Spanish words, even though the thread itself is in English."],
+["List the action items", "List the action items:", [["\n", [["\n", .72]]], ["1", [["1", .62], ["-", .2], ["•", .1]]], [".", [[".", .9]]], [" Issue", [[" Issue", .5], [" Send", .2], [" Process", .15]]], [" a", [[" a", .55]]], [" refund", [[" refund", .8]]]], "A list cue makes a numbered list the likely start. The items come from the facts in the thread, found by attention."],
+["Is the customer satisfied?", "Is the customer satisfied? Answer:", [[" Yes", [[" Yes", .62], [" No", .18], [" Probably", .1]]], [",", [[",", .42], [".", .4]]], [" the", [[" the", .5], [" they", .2]]], [" refund", [[" refund", .45], [" customer", .3]]]], "A question followed by “Answer:” makes a short answer likely, and the facts in the thread (an approved refund) tilt the odds toward “Yes”."]];
 
-// under the hood
-function hood(id, prompt, seq, why) {
-  let n = 0; const root = $(id);
-  root.className = "widget hood";
+/* the "under the hood" panel: step through the first tokens the model writes */
+function hoodInto(host, key) {
+  const { prompt, seq, why } = HOODS[key]; let n = 0;
+  const root = h("div", { class: "widget hood" }); host.append(root);
   function draw() {
     clear(root);
     const doc = h("div", { class: "docbox" }, h("div", { style: { whiteSpace: "pre-wrap" } }, prompt, ...seq.slice(0, n).map(t => h("span", { class: "gen", text: t[0] }))));
@@ -199,21 +51,197 @@ function hood(id, prompt, seq, why) {
   }
   draw();
 }
-hood("#h1", "Email: “Order 4821 arrived with a cracked screen. I need a refund before Friday.”\nCategory:", [[" Refund", [[" Refund", .78], [" Complaint", .12], [" Question", .06]]], [" request", [[" request", .9], [" order", .04]]], ["\n", [["\n", .85], [".", .08]]], ["Order", [["Order", .7], ["Item", .2]]], [":", [[":", .95]]], [" 4821", [[" 4821", .93], [" 4812", .02]]]], "Training text is full of labelled lists, so after “Category:” the likely next token is a label. The order number is copied because attention points at the “4821” already in the email. Sorting and extracting are just continuing a familiar pattern.");
-hood("#h2", "Original: Your refund is approved. It will reach your account in 5 days.\nIn Spanish:", [[" Su", [[" Su", .62], [" Tu", .2], [" El", .08]]], [" reembolso", [[" reembolso", .8], [" devolución", .12]]], [" ha", [[" ha", .72], [" fue", .15]]], [" sido", [[" sido", .96]]], [" aprobado", [[" aprobado", .9], [" autorizado", .05]]], [".", [[".", .82], [",", .12]]]], "The training text had countless sentences placed beside their translations. After “In Spanish:” the likeliest continuation is the same meaning in Spanish. Meaning carries across because words with the same sense, such as “refund” and “reembolso”, get similar embeddings.");
-hood("#h3", "Thread:\nCustomer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\nIn one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2], [" returned", .15]]], [":", [[":", .35], [" for", .25], [" (", .2]]], [" $240", [[" $240", .7], [" 240", .1]]], [".", [[".", .6], [" in", .2]]]], "Attention lets each new word look back across the whole thread and give more weight to the key facts: cracked, refund, $240. Training text is full of headlines, abstracts and “TL;DR” lines, which taught the model what usually gets kept and what is dropped.");
-hood("#h4", "Policy: Returns are accepted within 30 days of delivery. Opened items carry a 15% restocking fee.\nQuestion: How long do I have to return something?\nAnswer: You have", [[" 30", [[" 30", .92], [" 14", .03], [" 60", .02]]], [" days", [[" days", .97]]], [" from", [[" from", .8], [" after", .12]]], [" delivery", [[" delivery", .9], [" purchase", .06]]], [".", [[".", .9]]]], "The odds for “30” are very high because attention points at “30 days” in the policy that is in the prompt. If you remove the policy, “30” becomes one guess among many: “14”, “60”, “30” are all plausible. That is why supplying the document changes the answer.");
-hood("#h5", "Write a polite reply declining a late return.\nReply:", [[" Dear", [[" Dear", .42], [" Hi", .25], [" Hello", .18]]], [" customer", [[" customer", .38], [" Ms", .12], [" Sir", .1]]], [",", [[",", .8], ["!", .05]]], ["\n", [["\n", .9]]], ["Thank", [["Thank", .55], ["We", .2], ["I", .15]]], [" you", [[" you", .95]]]], "Creative writing is the same loop with more choice: many tokens are plausible, and the model samples among them (Lesson 4), so each run differs. Temperature sets how adventurous it is. Some image and video models also produce pieces one after another; others start from noise and clean it up step by step. Either way they learn their patterns from huge numbers of examples.");
-hood("#h6", "Q: Items cost $80, $45 and $120. Items 2 and 3 were opened, with a 15% fee. What is the refund?\nLet’s work step by step.\nStep 1:", [[" Total", [[" Total", .5], [" Add", .25], [" The", .15]]], [" the", [[" the", .4], [" is", .3]]], [" items", [[" items", .6]]], [":", [[":", .5], [" =", .3]]], [" $245", [[" $245", .82], [" $235", .04], [" $255", .03]]], [".", [[".", .7]]]], "Writing the steps first puts each intermediate result, such as $245, into the text. The next token can then use it. Without steps the model must produce the final number in one jump, which is where slips creep in. Reasoning here is written work, one token at a time.");
-hood("#h7", "Goal: resolve ticket #4821, “laptop arrived cracked”.\nTools: orders.find(id), refund.prepare(amount)\nNext action:", [[" orders", [[" orders", .72], [" refund", .18]]], [".", [[".", .96]]], ["find", [["find", .93]]], ["(", [["(", .98]]], ["4821", [["4821", .85], ["4812", .03]]], [")", [[")", .97]]]], "The model’s output is text shaped like a tool call. A normal program reads that text, runs the tool, and pastes the result back into the prompt. Then the model predicts the next action. The model never “does” anything itself: it writes, and software acts on what it writes.");
-$("#hq").append(quick("An LLM only predicts the next token. How can it summarize a long document?", ["Summaries were common in its training text, so continuing “In one line:” with the key facts is the most likely next text", "It has a separate summarizing program inside", "It copies the first sentence"], 0, "Every task is a pattern in text. The request sets up the pattern, and the model continues it using attention over the whole document."));
+const hoodDeep = key => host => hoodInto(host, key);
 
-const THR = "Customer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\n";
-const HD = [["No instruction", "", [["Customer", [["Customer", .46], ["Agent", .22], ["Thanks", .1]]], [":", [[":", .96]]], [" Thank", [[" Thank", .5], [" Great", .15], [" Can", .1]]], [" you", [[" you", .93]]]], "With no instruction there is nothing to steer it, so it just continues the conversation: the likeliest next text. A base model behaves like this all the time. An assistant has been trained to treat your text as a request."],
-["Summarize in one line", "In one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2]]], [":", [[":", .35], [" for", .25]]]], "After “In one line:” the likeliest text is a short version of the thread, so the odds favour its key facts. Attention connects each new word back to the thread."],
-["Translate to Spanish", "Translate to Spanish:", [["\n", [["\n", .6], [" Cliente", .2]]], ["Cliente", [["Cliente", .55], ["El", .15]]], [":", [[":", .92]]], [" Mi", [[" Mi", .62], [" El", .12]]]], "Text that follows a translation cue is the same meaning in the other language, so the odds jump to Spanish words, even though the thread itself is in English."],
-["List the action items", "List the action items:", [["\n", [["\n", .72]]], ["1", [["1", .62], ["-", .2], ["•", .1]]], [".", [[".", .9]]], [" Issue", [[" Issue", .5], [" Send", .2], [" Process", .15]]], [" a", [[" a", .55]]], [" refund", [[" refund", .8]]]], "A list cue makes a numbered list the likely start. The items come from the facts in the thread, found by attention."],
-["Is the customer satisfied?", "Is the customer satisfied? Answer:", [[" Yes", [[" Yes", .62], [" No", .18], [" Probably", .1]]], [",", [[",", .42], [".", .4]]], [" the", [[" the", .5], [" they", .2]]], [" refund", [[" refund", .45], [" customer", .3]]]], "A question followed by “Answer:” makes a short answer likely, and the facts in the thread (an approved refund) tilt the odds toward “Yes”."]];
-seg("#hd-seg", HD.map(x => x[0]), 1, i => hood("#hd", THR + HD[i][1], HD[i][2], HD[i][3]));
-$("#qd").append(quick("The same article can be summarized or translated. What decides which?", ["The instruction in the prompt, plus what training taught the model about such instructions", "A separate program that picks the task", "The model searching its training data for a matching example"], 0, "The instruction is part of the text and shifts the odds. The model does not look up training examples. Training built the association into its parameters."));
+/* step 1: same text, different last line */
+function cueInit(host) {
+  host.innerHTML = `<div class="widget"><div class="docbox" id="cu-th" style="white-space:pre-line;font-size:.78rem;line-height:1.3;padding:5px 10px"></div><div class="row"><span class="hint">Same text, but the last line is:</span><div class="seg3" id="cu-seg"></div></div><div class="label">Odds for the first token of the reply</div><div id="cu-bars"></div><div class="note" id="cu-note" style="margin:0"></div></div>`;
+  seg("#cu-seg", HD.map(x => x[0]), 1, i => {
+    const e = HD[i], th = clear($("#cu-th"));
+    th.append(THR.trim(), "\n", h("span", { class: "gen", text: e[1] || "(nothing added)" }), "\n", h("div", { style: { marginTop: "3px" } }, h("span", { class: "hint", text: "Likely start of the reply: " }), h("b", { text: e[2].map(t => t[0].replace(/\n/g, " ")).join("") })));
+    const cur = e[2][0][1], rest = Math.max(0, 1 - cur.reduce((a, b) => a + b[1], 0));
+    const rows = cur.slice(0, 3).map((x, k) => ({ label: x[0].replace(/\n/g, "↵") || "·", p: x[1], cls: k === 0 ? "hit" : "" }));
+    clear($("#cu-bars")).append(bars(rows, { max: 1 }));
+    $("#cu-note").textContent = e[3];
+  });
+}
+
+/* step 2: teach the pattern in the request */
+const FS = [
+  { n: "No examples", p: "Label this email as Refund request, Complaint or Question.\nEmail: “Does the warranty cover accidental damage?”\nLabel:", ex: "", rows: [[" The", .31], [" This", .18], [" Yes", .14], [" Question", .09]], reply: " The email is asking whether…", note: "The model knows roughly what you want, but the form of the reply is open. Many continuations are plausible, so the answer may not be a clean label." },
+  { n: "Two examples", p: "Email: “Order 4821 arrived with a cracked screen.”\nLabel: Refund request\nEmail: “Third late delivery and nobody replies.”\nLabel: Complaint\nEmail: “Does the warranty cover accidental damage?”\nLabel:", ex: 4, rows: [[" Question", .84], [" Refund", .07], [" Complaint", .04]], reply: " Question", note: "The examples set up a pattern, so a label is by far the likeliest next token. The examples sit in the context, not in the training data." }
+];
+function shotInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Teach the pattern in your request:</span><div class="seg3" id="fs-seg"></div></div><div class="docbox" id="fs-p" style="white-space:pre-line;font-size:.84rem;padding:6px 10px"></div><div class="label">Odds for the next token</div><div id="fs-bars"></div><div class="note" id="fs-note" style="margin:0"></div></div>`;
+  seg("#fs-seg", FS.map(x => x.n), 1, i => {
+    const e = FS[i], d = clear($("#fs-p")), lines = e.p.split("\n");
+    lines.forEach((l, k) => { d.append(h("span", { class: e.ex !== "" && k < e.ex ? "gen" : "", text: l }), k < lines.length - 1 ? "\n" : ""); });
+    const rest = Math.max(0, 1 - e.rows.reduce((a, b) => a + b[1], 0));
+    const rows = e.rows.map((x, k) => ({ label: x[0], p: x[1], cls: k === 0 ? "hit" : "" })); if (rest > 0.005) rows.push({ label: "(everything else)", p: rest, cls: "dim" });
+    clear($("#fs-bars")).append(bars(rows, { max: 1 }));
+    $("#fs-note").textContent = e.ex === "" ? e.note : "Shaded lines are your examples. " + e.note;
+  });
+}
+
+/* steps 3 to 9: one widget each */
+function sortInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row" id="s1-pick"></div><div class="docbox" id="s1-msg"></div><div class="mini" id="s1-out"></div></div>`;
+seg("#s1-pick", MS.map(m => m[0]), 0, i => { $("#s1-msg").textContent = MS[i][1]; clear($("#s1-out")).append(cell("Category", MS[i][2]), cell("Key facts pulled out", MS[i][3]), cell("Urgency", MS[i][4])); });
+}
+function rewriteInit(host) {
+  host.innerHTML = `<div class="widget"><div class="label">Original</div><div class="docbox" id="s2-orig"></div><div class="row"><span class="hint">Rewrite as:</span><div class="seg3" id="s2-seg"></div></div><div class="label">Result</div><div class="docbox" id="s2-out"></div><p class="hint">Scripted examples for the demo. A real model produces these on demand for any text.</p></div>`;
+$("#s2-orig").textContent = ORIG;
+seg("#s2-seg", RW.map(r => r[0]), 1, i => $("#s2-out").textContent = RW[i][1]);
+}
+function sumInit(host) {
+  host.innerHTML = `<div class="widget"><div class="label">Original thread</div><div class="docbox" id="s3-orig" style="font-size:.82rem;padding:6px 10px"></div><div class="row"><span class="hint">Summary length:</span><div class="seg3" id="s3-seg"></div></div><div class="docbox" id="s3-out" style="padding:6px 10px"></div><div class="cmp"><div style="flex:1;min-width:160px"><div class="cbar" id="s3-bar"></div></div><span class="hint" id="s3-stat"></span></div></div>`;
+$("#s3-orig").style.whiteSpace = "pre-line"; $("#s3-out").style.whiteSpace = "pre-line"; $("#s3-orig").textContent = TH.join("\n");
+seg("#s3-seg", SM.map(s => s[0]), 0, i => { const t = SM[i][1], full = wc(TH.join(" ")), n = wc(t); $("#s3-out").textContent = t; $("#s3-bar").style.width = Math.round(n / full * 100) + "%"; $("#s3-stat").textContent = n + " of " + full + " words kept"; });
+}
+function docInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Document:</span><div class="seg3" id="s4-seg"></div></div><div class="docbox" id="s4-doc"></div><div class="label">Ask</div><div class="row" id="s4-q"></div><div id="s4-ans" class="stack"></div><p class="hint">Scripted. The unsupported answer is the kind of plausible guess a model can make when it has nothing to read.</p></div>`;
+let D4 = { on: true, q: 0 };
+function r4() {
+  const d = clear($("#s4-doc")); if (!D4.on) { d.append(h("div", { class: "hint", text: "(No document supplied.)" })); } else DOC.forEach((l, i) => d.append(h("div", { class: "ln" + (QS[D4.q][1] === i ? " used" : ""), text: l })));
+  const q = QS[D4.q], a = clear($("#s4-ans"));
+  if (D4.on) a.append(h("div", null, h("span", { class: "pill " + (q[1] >= 0 ? "good" : "info"), text: q[1] >= 0 ? "Answered from the document" : "Not in the document" })), h("p", { style: { margin: 0 }, text: q[2] }));
+  else a.append(h("div", null, h("span", { class: "pill warn", text: "Unsupported guess" })), h("p", { style: { margin: 0 }, text: q[3] || ("Probably: " + q[2] + " (but this may not match your policy.)") }));
+}
+$("#s4-q").append(...QS.map((q, i) => h("button", { class: "btn", onclick: () => { D4.q = i; r4(); } }, q[0])));
+seg("#s4-seg", ["On", "Off"], 0, i => { D4.on = i === 0; r4(); });
+}
+function createInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><div class="seg3" id="s5-seg"></div></div><div class="mini" id="s5-out"></div></div>`;
+seg("#s5-seg", CR.map(c => c[0]), 0, i => { const c = CR[i]; clear($("#s5-out")).append(cell("Example prompt", c[1]), cell("What you get", c[2]), cell("Made by", c[3]), cell("Business use", c[4])); });
+}
+function reasonInit(host) {
+  host.innerHTML = `<div class="widget"><div class="docbox" id="s6-prob"></div><div class="stepn" id="s6-steps"></div><div class="row"><button class="btn primary" id="s6-next">Show next step</button><button class="btn" id="s6-reset">Start over</button></div><div class="note" id="s6-note"></div></div>`;
+$("#s6-prob").textContent = "A customer returns three items priced $80, $45 and $120. Items 2 and 3 were opened, and opened items carry a 15% fee. What is the refund?";
+let N6 = 0;
+function r6() { const s = clear($("#s6-steps")); RS.slice(0, N6).forEach((t, i) => s.append(h("div", { class: "fb" + (i === RS.length - 1 ? " good" : i === N6 - 1 ? " acc" : "") }, "Step " + (i + 1) + ": " + t))); $("#s6-next").disabled = N6 >= RS.length; $("#s6-note").textContent = N6 === 0 ? "Nothing written yet." : N6 < RS.length ? "Each line is written token by token, then read back in as context for the next line." : "Writing out the working gives the model room to compute, and lets you check the logic. Even so, verify the arithmetic on anything important."; }
+$("#s6-next").onclick = () => { N6++; r6(); }; $("#s6-reset").onclick = () => { N6 = 0; r6(); }; r6();
+}
+function agentInit(host) {
+  host.innerHTML = `<div class="widget"><div class="stepper" id="s7-stepper"></div><div class="docbox log" id="s7-log"></div><div class="row"><button class="btn primary" id="s7-next">Next step</button><button class="btn" id="s7-reset">Start over</button></div><div class="note" id="s7-note"></div></div>`;
+let N7 = 0;
+function r7() { const l = clear($("#s7-log")), st = clear($("#s7-stepper")); AG.forEach((a, i) => st.append(h("button", { class: i === N7 - 1 ? "on" : i < N7 ? "done" : "", disabled: true }, a[0]))); AG.slice(0, N7).forEach(a => l.style.whiteSpace = "pre-line") ; AG.slice(0, N7).forEach(a => l.append(h("div", { class: a[2], text: a[1] }))); if (!N7) l.append(h("div", { class: "hint", text: "Press Next step to start." })); $("#s7-next").disabled = N7 >= AG.length; $("#s7-note").textContent = N7 === 0 ? "" : N7 < AG.length ? "The model decides each next move after reading what the last tool returned." : "Note where the person sits: the agent can prepare an action, but a human approves the one that moves money."; }
+$("#s7-next").onclick = () => { N7++; r7(); }; $("#s7-reset").onclick = () => { N7 = 0; r7(); }; r7();
+}
+
+const CHECK = [
+  { t: "Labelling thousands of incoming emails by topic", a: 0, why: "A slip is cheap and easy to spot, so checking a sample is enough." },
+  { t: "Summarizing an important contract", a: 1, why: "A summary leaves things out, and the missing part may matter, so compare it with the contract." },
+  { t: "A reply that quotes your return policy", a: 1, why: "Check the quoted terms against the policy before a customer sees them." },
+  { t: "An agent about to send a $240 refund", a: 2, why: "Actions that move money are costly to undo, so a person approves first." }
+];
+
+const learned = t => `<p class="learned"><b>Already learned</b>${t}</p>`;
+
+lesson({
+  title: "What LLMs are used for",
+  lede: "All of these uses come from one skill: predicting the next token. What changes from one to the next is how much the model has to do with the text, and how much a person needs to check the result. This lesson starts with why one skill covers so many tasks, then climbs from the simplest uses to the most demanding.",
+  learn: `<b>By the end you can</b>explain how a next-token predictor can do each task, name seven things an LLM does, and match the amount of checking to the task.`,
+  steps: [
+    {
+      stage: "Stage 1: One skill",
+      title: "Every task is text to continue",
+      main: `<p>In Lesson 4 you saw that the model only ever does one thing: given the text so far, choose the next token. Labelling emails, translating and reasoning do not sound like that. The link is that <b>every task can be written as text that needs continuing</b>.</p>
+<div class="flowd" style="margin:6px 0 12px"><div class="fb">Your request</div><span>→</span><div class="fb acc">Text that needs a continuation</div><span>→</span><div class="fb">Next token, again and again</div><span>→</span><div class="fb good">The result</div></div>
+<p>The model learned from a huge amount of writing, and that writing is full of tasks: emails followed by labels, articles followed by summaries, sentences beside their translations, questions followed by answers.</p>`,
+      interactive: cueInit,
+      deep: `<p>To predict the next token well on that text, the model had to pick up the pattern behind each task. It does not look those examples up later: what it learned is built into its parameters, the numbers that training adjusted. When your request sets up the same pattern, the most likely continuation is the answer.</p>
+<p>With no instruction at all, a model just continues the conversation. A base model behaves like this all the time. An assistant has been trained to treat your text as a request.</p>`,
+      quiz: [["An LLM only predicts the next token. How can it summarize a long document?", ["Summaries were common in its training text, so continuing “In one line:” with the key facts is the most likely next text", "It has a separate summarizing program inside", "It copies the first sentence"], 0, "Every task is a pattern in text. The request sets up the pattern, and the model continues it using attention over the whole document."]]
+    },
+    {
+      stage: "Stage 1: One skill",
+      title: "How it knows which task",
+      main: `<p>The model never decides which task to do. Your instruction is part of the text, and it changes which continuation is most likely. Words such as “In one line:” or “Translate to Spanish:” are cues, and the model has learned what usually comes after each one. It learned this in two stages:</p>
+<div class="cards two">
+  <div><b>Pre-training</b>Huge amounts of writing, where cues and results appear together: “TL;DR” followed by a short version, a sentence followed by its translation.</div>
+  <div><b>Instruction training</b>Practice on many requests paired with good responses (Lesson 3). This is why an assistant treats your message as a request to fulfil, not as text to continue.</div>
+</div>
+<p>It does not search its training examples when you ask. Like a person who has read thousands of summaries, it writes a new one because it has absorbed what a good one looks like.</p>`,
+      interactive: shotInit,
+      deep: `<p>The examples you add to a request sit in the context (Lesson 5), not in the training data, and they are gone when the chat ends. Showing a few examples is one of the most useful ways to get a consistent format.</p>`,
+      quiz: [["The same article can be summarized or translated. What decides which?", ["The instruction in the prompt, plus what training taught the model about such instructions", "A separate program that picks the task", "The model searching its training data for a matching example"], 0, "The instruction is part of the text and shifts the odds. The model does not look up training examples. Training built the association into its parameters."]]
+    },
+    {
+      stage: "Stage 2: Work on text",
+      title: "Label and extract",
+      main: `<p>The simplest use: read a piece of text, label it with a category, and pull out the key facts. These uses work on text you hand over.</p>` + learned("text of every kind that is sorted or labelled, such as reviews with star ratings, emails filed into folders, and forms with fields. The model has absorbed what categories and key facts look like."),
+      interactive: sortInit,
+      deep: hoodDeep("#h1"),
+      quiz: [["A firm gets 5,000 support emails a day. Which use fits best?", ["Label and extract: label each email and pull out order numbers", "Create images", "Plan and act with tools"], 0, "Labelling and extracting is the simplest, most reliable use, and it saves the most routine reading."]]
+    },
+    {
+      stage: "Stage 2: Work on text",
+      title: "Rewrite and translate",
+      main: `<p>Same meaning, new form. The model changes tone, length or language while keeping the facts.</p>` + learned("writing in many tones and registers, and text published in several languages side by side. The model has absorbed how the same meaning is expressed in different forms."),
+      interactive: rewriteInit,
+      deep: hoodDeep("#h2"),
+      quiz: [["What should stay the same when a model rewrites a message?", ["The facts: refund approved, 5 days", "The exact wording", "The number of tokens"], 0, "Rewriting changes the form and keeps the facts. Always check that no fact changed, especially numbers and dates."]]
+    },
+    {
+      stage: "Stage 2: Work on text",
+      title: "Summarize",
+      main: `<p>Shrink a long text and keep what matters. A summary is a choice about what to leave out.</p>` + learned("a huge number of summaries, such as headlines, abstracts and “TL;DR” lines. The model has learned what a summary looks like and which details usually get dropped."),
+      interactive: sumInit,
+      deep: hoodDeep("#h3"),
+      quiz: [["Why must a person still skim a summary of an important contract?", ["Summaries drop detail, and the dropped part may be the part that matters", "Summaries are always longer than the original", "Models cannot read contracts"], 0, "A summary is a choice about what to leave out. That choice can be wrong, so check it when stakes are high."]]
+    },
+    {
+      stage: "Stage 3: Answer and create",
+      title: "Answer questions from your documents",
+      main: `<p>Ask a question and let the model answer from a document you supply. This is grounding, from Lesson 5. Here the new thing is a question the document cannot answer: with the document the model says so, and without it, it guesses.</p>` + learned("question-and-answer pages, FAQs, exam questions with answers, and passages followed by questions about them. The model has learned to find the answer inside a passage."),
+      interactive: docInit,
+      deep: hoodDeep("#h4"),
+      quiz: [["What is the best defence against a confident but invented answer?", ["Give the model the source text and tell it to answer only from it", "Ask the question twice", "Use a longer prompt with no facts"], 0, "Grounding ties the answer to your documents, and lets you check it against the highlighted source."]]
+    },
+    {
+      stage: "Stage 3: Answer and create",
+      title: "Create new content",
+      main: `<p>Generation: write something that did not exist before. Text and code are what an LLM produces directly. Images, audio and video come from related generative models, often steered by an LLM that writes the brief.</p>` + learned("enormous amounts of stories, emails, articles and code. The model has learned how each kind of writing is put together, and it samples from that to produce something new."),
+      interactive: createInit,
+      deep: hoodDeep("#h5"),
+      quiz: [["Which output does a text-based LLM produce directly?", ["Text and code", "Video", "Music"], 0, "LLMs generate text and code themselves. Video, images and audio come from related models, which an LLM can help by writing the brief."]]
+    },
+    {
+      stage: "Stage 4: Reason and act",
+      title: "Reason and analyze",
+      main: `<p>Work through a problem with several steps. The model writes its working one token at a time, and each step becomes context for the next.</p>` + learned("textbooks, worked examples and forum answers that set out steps in order. It does not simply run a calculator: it writes working that resembles the worked solutions it learned from, and reasoning models get extra training that rewards correct step-by-step working. Some products also give the model a calculator or code tool."),
+      interactive: reasonInit,
+      deep: hoodDeep("#h6"),
+      quiz: [["Why does showing the working step by step help?", ["Each step is written out and becomes context for the next one, and a person can check it", "It makes the model faster", "It removes the need to check the answer"], 0, "Reasoning in text lets the model build on its own earlier steps. It still can make mistakes, so check key numbers."]]
+    },
+    {
+      stage: "Stage 4: Reason and act",
+      title: "Plan and act with tools",
+      main: `<p>The most demanding use: given a goal, the model plans, calls tools such as a database or email, reads the results and continues. This is called an agent. Each tool result is added to the context (Lesson 5), and the model reads it before choosing its next move.</p>` + learned("code, documentation and examples of tools being called, plus extra training on using tools. The model has learned what a tool call looks like. Software, not the model, carries out the action."),
+      interactive: agentInit,
+      deep: hoodDeep("#h7"),
+      quiz: [["Why keep a human approval step in an agent that issues refunds?", ["Actions have real consequences, and are costly to undo", "Agents cannot read tickets", "It makes the model smarter"], 0, "The more an LLM acts on its own, the more it matters to place checks before irreversible steps."]]
+    },
+    {
+      title: "Match the checking to the task",
+      main: `<p>As you climb from labelling to acting, the model does more than rephrase: it chooses, calculates and acts. Mistakes also cost more. Checking a summary is quick. Checking an action that moved money may mean undoing it.</p>
+<div class="cards three">
+  <div><b>Work on text</b>Label, rewrite, summarize. Usually quick to check, and a slip is cheap unless the text is high-stakes.</div>
+  <div><b>Answer and create</b>Answers from documents and new content. Check them against the source and your standards.</div>
+  <div><b>Reason and act</b>Reasoning and tools. Verify the logic, and have a person approve steps that are hard to undo.</div>
+</div>`,
+      interactive: host => { host.append(h("p", { class: "hint", style: { margin: "0 0 6px" }, text: "How much checking does each output need?" })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, CHECK, ["Spot-check a sample", "Check against the source", "A person approves first"]); },
+      deep: `<p>Higher is not better. Use the simplest use that does the job: a labelled email costs less and is easier to check than an agent that acts. The more the model decides on its own, the more it matters to put a check before any step that cannot be undone.</p><p>Lesson 7 looks at where models go wrong.</p>`,
+      quiz: [["Which use needs the strictest checking before it goes live?", ["Labelling emails by topic", "An agent that issues refunds", "Rewriting a note in a friendlier tone"], 1, "An agent acts, and actions such as refunds are costly to undo."]]
+    },
+    {
+      title: "What you’ve seen",
+      main: `<p><b>One skill.</b> Every task is text that needs continuing. Your instruction is a cue, and training taught the model what usually follows each cue.</p>
+<p><b>Seven uses.</b> Label and extract, rewrite and translate, summarize, answer from documents, create, reason, and plan and act with tools.</p>
+<p><b>What to do.</b> Choose the simplest use that does the job, give the model the facts it needs (Lesson 5), and match the checking to the cost of a mistake.</p>`,
+      deep: `<p>The odds, replies and steps in this lesson are scripted for illustration. A real model produces them on demand for any text, and can get them wrong.</p>`
+    }
+  ]
+});
+chrome(5);
 </script></body></html>

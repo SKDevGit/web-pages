@@ -109,30 +109,23 @@ const SORT6 = [
   { t: "Remove old, irrelevant messages before you ask", a: 0, why: "Less noise means the facts that matter stand out." },
   { t: "Repeat the same instruction five times", a: 1, why: "It adds noise and cost without making the instruction clearer." }
 ];
-const RDOCS = ["Returns: 30 days; damaged items qualify.", "Shipping: within the country only.", "Refunds: to the original payment method.", "Warranty: one year against defects.", "Gift cards: not exchangeable for cash.", "Support: messages answered on weekdays.", "Loyalty: points expire after twelve months.", "Privacy: we do not share customer details."];
 const ASK = [
-  { n: "A vague question", q: "What is your policy?", pick: [5, 6], own: null, off: "Most shops accept returns within a few weeks, so you can probably send it back.", on: "I cannot find a returns policy in the documents I was given. Which policy do you mean?", gOff: false },
-  { n: "A specific question", q: "Can I return a damaged product?", pick: [0, 2], own: null, off: "Yes. Damaged items qualify for return within 30 days.", on: "Yes. Damaged items qualify for return within 30 days (Returns policy).", gOff: true },
-  { n: "Paste the passage yourself", q: "[Policy pasted] Can I return a damaged product?", pick: [], own: "Pasted by you: “Items can be returned within 30 days, and damaged items qualify.”", off: "Yes. Damaged items qualify for return within 30 days.", on: "Yes. Damaged items qualify for return within 30 days (the policy you pasted).", gOff: true }
+  { n: "Option 1: Policy not provided", docs: [], reply: "Yes. Damaged items can be returned within 14 days, with the original receipt.", note: "Made up: nothing in the context said this, so the model guessed a plausible answer. The 14 days and the receipt are invented.", good: false },
+  { n: "Option 2: Policy provided", docs: ["Returns: 30 days; damaged items qualify."], reply: "Yes. Damaged items qualify for return within 30 days.", note: "Grounded: the reply rests on the policy text in the context, so it is correct.", good: true }
 ];
 function ragInit(host) {
-  hostOf(host, `<div class="widget"><div class="label">How you ask</div><div class="row"><div class="seg3" id="rg-q"></div><button class="btn sm" id="rg-rule"></button></div><div class="label">Your question</div><div class="docbox" id="rg-qs" style="padding:8px 12px;font-weight:600"></div><div class="label">Added to the context: green is pasted by you, blue is retrieved (two passages fit)</div><div id="rg-docs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(11.5rem,1fr));gap:4px"></div><div class="label">The reply</div><div class="docbox" id="rg-ans" style="padding:8px 12px"></div><div id="rg-g" class="hint" style="margin:0"></div></div>`);
-  let qi = 0, rule = false;
-  function draw() {
+  hostOf(host, `<div class="widget"><div class="label">Choose what the model is given</div><div class="seg3" id="rg-q"></div><div class="label">Your question</div><div class="docbox" style="padding:8px 12px;font-weight:600">Can I return a damaged product?</div><div class="label">Your policy text in the context (green means you supplied it)</div><div id="rg-docs"></div><div class="label">The reply</div><div class="docbox" id="rg-ans" style="padding:8px 12px"></div><div id="rg-g" class="hint" style="margin:0"></div></div>`);
+  function draw(qi) {
     const a = ASK[qi];
-    $("#rg-rule").textContent = rule ? "Rule ON: answer only from the documents" : "Rule OFF: answer only from the documents";
-    $("#rg-rule").className = "btn sm" + (rule ? " on" : "");
-    $("#rg-qs").textContent = a.q;
-    const d = clear($("#rg-docs")); RDOCS.forEach((t, i) => d.append(h("div", { class: "cl " + (a.pick.includes(i) ? "sup-lookup" : ""), style: { fontSize: ".78rem", padding: "3px 8px" }, text: t })));
-    if (a.own) d.prepend(h("div", { class: "cl sup-you", style: { gridColumn: "1 / -1", fontSize: ".78rem", padding: "3px 8px" }, text: a.own }));
-    $("#rg-ans").textContent = rule ? a.on : a.off;
-    const grounded = a.gOff || rule;
-    $("#rg-g").textContent = (a.pick.length || a.own) && a.gOff ? "Grounded: the reply rests on a passage the model was given." : rule ? "Safe: it admits it cannot find the answer, instead of guessing." : "Not grounded: the model had no matching passage, so this is a guess that may not match your policy.";
-    $("#rg-g").style.color = (a.gOff || rule) ? "var(--good)" : "var(--bad)";
+    const d = clear($("#rg-docs"));
+    if (a.docs.length) a.docs.forEach(t => d.append(h("div", { class: "cl sup-you", style: { fontSize: ".85rem", padding: "6px 10px" }, text: t })));
+    else d.append(h("div", { class: "docbox", style: { padding: "6px 10px", color: "var(--muted)" }, text: "Nothing. The model has only its built-in memory." }));
+    $("#rg-ans").textContent = a.reply;
+    $("#rg-g").textContent = a.note;
+    $("#rg-g").style.color = a.good ? "var(--good)" : "var(--bad)";
   }
-  seg("#rg-q", ASK.map(x => x.n), 0, i => { qi = i; draw(); });
-  $("#rg-rule").onclick = () => { rule = !rule; draw(); };
-  draw();
+  seg("#rg-q", ASK.map(x => x.n), 0, draw);
+  draw(0);
 }
 
 lesson({
@@ -207,16 +200,15 @@ lesson({
     {
       title: "Getting the right facts in",
       main: `<p>In step 4 you switched the policy document on yourself. In many products, retrieval (RAG) does it for you: it searches your documents and adds the best-matching passages. The window is limited, so only a few fit.</p>
-<p>Retrieval is automatic, but you still steer it:</p>
-<div class="cards three">
-  <div><b>Ask specifically</b>Use the words your documents use. A vague question retrieves vague passages.</div>
-  <div><b>Supply it yourself</b>Paste or attach the passage you want used, so nothing depends on the search.</div>
-  <div><b>Set the rule</b>Tell the model to answer only from the documents, and to say when it cannot find the answer.</div>
-</div>`,
+<p>Either way, the idea is the same: the model answers from what is in its context. Compare two cases for the same question:</p>
+<div class="cards">
+  <div><b>Not provided</b>The model has no policy text, so it fills the gap from general memory and may make up details.</div>
+  <div><b>Provided</b>The policy is in the context, so the model answers from it. This is called grounding.</div>
+</div></div>`,
       interactive: ragInit,
-      deep: `<p><b>Grounding</b> means tying the answer to source material you supply. It keeps the reply tied to your own sources, instead of the model’s general memory.</p>
+      deep: `<p><b>Grounding</b> means tying the answer to source material you supply. It keeps the reply tied to your own sources, instead of the model’s general memory. You can supply it by pasting or attaching the text, or a product can retrieve it for you. You can also tell the model to answer only from the documents and to say when it cannot find the answer.</p>
 <p>Behind the scenes, whoever builds the search decides how documents are split and kept up to date (Lesson 8). Some products let the model decide to search for itself, using a tool, before it answers. This is sometimes called agentic context. It costs more tokens, but it can find facts that were not in the context to begin with. Lesson 8 covers how a business sets this up.</p>`,
-      quiz: [["The search keeps returning the wrong passages. What can you do?", ["Wait for the model to improve", "Ask more specifically, or paste the passage yourself", "Type the question in capital letters"], 1, "You steer retrieval with specific wording, by supplying the passage yourself, and by telling the model to answer only from the documents."]]
+      quiz: [["You need the model to quote your return policy correctly. What helps most?", ["Hope the model remembers it", "Put the policy text in the context", "Ask the same question again"], 1, "Without the text in the context the model can make up details. With it, the model can answer from the source."]]
     },
     {
       title: "What you’ve seen",
