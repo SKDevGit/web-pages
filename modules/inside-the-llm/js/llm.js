@@ -35,7 +35,7 @@ function lossChart(M, floor) {
   return s + "</svg>";
 }
 
-const PAGES = [["prediction.html", "Start with a prediction", "How it works"], ["tokens.html", "What are tokens?", "How it works"], ["training.html", "Model development", "How it works"], ["inference.html", "Model usage", "How it works"], ["context-attention.html", "Context and attention", "How it works"], ["llm-uses.html", "What LLMs are used for", "What it does"], ["limits-risks.html", "Limits and risks", "What it does"], ["adapt-to-business.html", "Making it fit your business", "Using it at work"], ["cost-and-choice.html", "Cost, choice and where to start", "Using it at work"], ["put-it-together.html", "Put it all together", "Wrap-up"], ["key-terms.html", "Key terms", "Reference"]];
+const PAGES = [["prediction.html", "Start with a prediction", "How it works"], ["tokens.html", "What are tokens?", "How it works"], ["training.html", "Model development", "How it works"], ["inference.html", "Model usage", "How it works"], ["context-attention.html", "Context", "How it works"], ["llm-uses.html", "What LLMs are used for", "What it does"], ["limits-risks.html", "Limits and risks", "What it does"], ["adapt-to-business.html", "Making it fit your business", "Using it at work"], ["cost-and-choice.html", "Cost, choice and where to start", "Using it at work"], ["put-it-together.html", "Put it all together", "Wrap-up"], ["key-terms.html", "Key terms", "Reference"]];
 const NPARTS = PAGES.length - 1;
 
 // Keep the clicked exercise where it is on screen when other parts of the page re-draw and change height.

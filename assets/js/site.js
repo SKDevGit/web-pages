@@ -148,16 +148,19 @@ function initPresent(lesson) {
   const teaches = [...document.querySelectorAll(".slide")], steps = [];
   let cur = -1, browserFs = false;
   const ro = window.ResizeObserver ? new ResizeObserver(() => fit()) : null;
-  function fit() {
+  let lockK = null; // while a slide is on screen, only ever zoom out, so clicking does not make the page jump in and out
+  function fit(force) {
     if (cur < 0) return;
     const tin = teaches[cur].querySelector(".tin"), w = tin.offsetWidth, hh = tin.offsetHeight;
-    const k = Math.max(0.5, Math.min(2.6, (innerWidth - 80) / w, (innerHeight - 140) / hh));
+    let k = Math.max(0.5, Math.min(2.6, (innerWidth - 80) / w, (innerHeight - 140) / hh));
+    if (force !== true && lockK != null) k = Math.min(k, lockK);
+    lockK = k;
     tin.style.transform = "scale(" + k.toFixed(3) + ")";
   }
   function show(i) {
     if (cur >= 0) teaches[cur].querySelector(".tin").style.transform = "";
     if (cur >= 0) teaches[cur].classList.remove("fs");
-    cur = i; teaches[i].classList.add("fs"); document.body.classList.add("fsmode");
+    cur = i; lockK = null; teaches[i].classList.add("fs"); document.body.classList.add("fsmode");
     steps[i].scrollIntoView({ block: "start" });
     teaches[i].querySelector(".fscount").textContent = (typeof lesson === "number" ? "Lesson " + (lesson + 1) + " \u00b7 " : "") + "Step " + (+teaches[i].dataset.step + 1) + (teaches[i].dataset.both ? " \u00b7 " + LABELS[teaches[i].dataset.kind] : "");
     fit(); if (ro) { ro.disconnect(); ro.observe(teaches[i].querySelector(".tin")); }
@@ -198,7 +201,7 @@ function initPresent(lesson) {
     const fb = h("button", { class: "fsbtn", title: "Full screen (F)", "aria-label": "Show full screen", onclick: () => enter(i) }); fb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
     (isTry ? tin.querySelector(".trylabel") : st).append(fb);
   });
-  addEventListener("resize", fit);
+  const onResize = () => fit(true); addEventListener("resize", onResize);
   try {
     const arrive = window.__parrive || (/^#present-(first|last)$/.test(location.hash) ? location.hash.slice(9) : "");
     window.__parrive = ""; if (location.hash.indexOf("#present-") === 0) history.replaceState(null, "", location.pathname + location.search);
@@ -225,7 +228,7 @@ function initPresent(lesson) {
   };
   addEventListener("keydown", kd);
   if (window.__pcleanup) window.__pcleanup();
-  window.__pcleanup = () => { removeEventListener("resize", fit); document.removeEventListener("fullscreenchange", fsch); removeEventListener("keydown", kd); if (ro) ro.disconnect(); };
+  window.__pcleanup = () => { removeEventListener("resize", onResize); document.removeEventListener("fullscreenchange", fsch); removeEventListener("keydown", kd); if (ro) ro.disconnect(); };
 }
 /* load another lesson without reloading the page, so the browser stays full screen */
 function swapPage(html, href, where) {

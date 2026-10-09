@@ -1,90 +1,231 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Context and attention</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Context</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/css/site.css"></head><body>
 <header id="site-head"></header>
-<main class="col">
-<h1>Context and attention</h1>
-<p class="meta">3 exercises</p>
-<p class="lede">Everything a model knows about your situation arrives in the prompt. Change that text and the answer changes, even if your question stays word for word the same. Inside the model, a mechanism called attention decides which parts of the text matter for each word it writes.</p>
-<div class="learn"><b>By the end you can</b>show how a different brief changes an answer, and explain in one sentence what attention does.</div>
-
-<span class="step">Step 1 of 3</span>
-<h2>Change the brief, keep the question</h2>
-<p>Below is a fixed question about a refund. Change the facts in the brief and watch the answer move. The shaded lines are the facts the answer relied on.</p>
-<div class="widget">
-  <div class="row" id="br-presets"></div>
-  <div class="form" id="br-form"></div>
-  <div class="label">What the model receives</div>
-  <div class="docbox" id="br-doc"></div>
-  <div class="label">The answer</div>
-  <div id="br-ans" class="stack"></div>
-  <p class="hint" id="br-tokens"></p>
-  <p class="hint">This is a scripted illustration: the answers come from a small set of rules so the result stays predictable. A real model also draws on the facts you give it, but it learned from text rather than rules, so it can weigh them differently or get them wrong.</p>
-</div>
-<div id="q1"></div>
-
-<span class="step">Step 2 of 3</span>
-<h2>Attention: which words matter</h2>
-<p>When the model reads a word, it looks back at earlier words and gives each a weight. Click any word to see where it looks. Then swap the last word of the sentence and notice what changes.</p>
-<div class="widget">
-  <div class="row"><span class="hint">Last word:</span><div class="seg3" id="att-switch"></div></div>
-  <div class="att-toks" id="att-toks"></div>
-  <div id="att-bars"></div>
-  <div class="note" id="att-msg"></div>
-  <p class="hint">Weights are hand-set to illustrate the idea. Real models learn them, run many patterns in parallel, and stack them in many layers. A word can only look at words before it, so later words are dimmed.</p>
-</div>
-<div id="q2"></div>
-
-<span class="step">Step 3 of 3</span>
-<h2>Meaning as numbers</h2>
-<p>Before attention can work, each token becomes a list of numbers called an embedding. Words used in similar ways get nearby numbers. Click a word on the map to see its closest neighbors.</p>
-<div class="widget">
-  <div class="plot" id="em-map" style="position:relative;height:300px;background:var(--soft);border-radius:8px"></div>
-  <div class="note" id="em-msg"></div>
-  <p class="hint">A flattened, hand-placed picture. Real embeddings have hundreds or thousands of numbers per token.</p>
-</div>
-<div id="q3"></div>
-</main>
+<main class="col" id="lesson"></main>
 <nav id="pager"></nav>
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
+function hostOf(host, html) { host.innerHTML = html; }
+const CAP = 400;
+const WHO = { product: "Product builder", lookup: "Looked up for you", you: "You", model: "The model" };
+const LAYERS = [
+  { id: "sys", n: "System instructions", w: "product", size: 60, what: "Standing rules the product gives the model before your request.", ex: "“You are a support assistant. Follow the returns policy. Be polite and brief.”", ctl: "The product builder. You write these when you build or configure a tool." },
+  { id: "skills", n: "Skills and tool descriptions", w: "product", size: 50, what: "Packaged instructions and tool descriptions the product makes available, so the model knows what it can do.", ex: "A returns skill that explains the steps, and a description of an order-lookup tool.", ctl: "The product builder. Some products let you add your own skills." },
+  { id: "mem", n: "Saved notes", w: "lookup", size: 20, what: "Notes saved from earlier chats and loaded at the start of a new one, where the product supports it. This is how something from an earlier chat can reach working memory.", ex: "“The customer prefers email.”", ctl: "The product, usually with your permission and settings." },
+  { id: "docs", n: "Retrieved documents", w: "lookup", size: 70, what: "Passages the product searched for and added because they look relevant. This is retrieval, or RAG.", ex: "The returns policy: 30 days, and damaged items qualify.", ctl: "Whoever sets up the document search, which can be your firm." },
+  { id: "conv", n: "Conversation so far", w: "you", size: 60, what: "Earlier messages and replies in this chat. All of it is sent again with every new message.", ex: "The customer: “The product arrived damaged.”", ctl: "You, by how long you keep one chat going." },
+  { id: "tool", n: "Tool results", w: "lookup", size: 30, what: "What a tool returned when the model or the product asked it for something.", ex: "Order lookup: delivered, inside the return window.", ctl: "The product and its tools." },
+  { id: "req", n: "Your request", w: "you", size: 20, what: "The message you just sent.", ex: "“the customer returned the product because…”", ctl: "You." },
+  { id: "reply", n: "The model’s reply so far", w: "model", size: 25, what: "Tokens the model has already written. Each new token is added here, so the context grows as the model writes.", ex: "“…it was damaged.”", ctl: "Nobody directly. Asking for shorter replies keeps it small." }
+];
+const legend = () => h("div", { class: "legend" }, ...Object.entries(WHO).map(([k, v]) => h("span", { class: "l-" + k, text: v })));
+const segs = (list, cap) => { const m = h("div", { class: "meter" }); list.forEach(([w, size, t]) => m.append(h("i", { class: "sup-" + w, title: t, style: { width: size / cap * 100 + "%" } }))); return m; };
+function picture(host, click) {
+  const tot = LAYERS.reduce((a, l) => a + l.size, 0); let sel = 0;
+  const wrap = h("div"), map = h("div", { class: "ctxmap" }), left = h("div", { class: "cm-in" }), right = h("div", { class: "stack", style: { gap: "10px" } });
+  const detail = h("div", { style: { display: "grid" } }), dets = LAYERS.map(l => h("div", { class: "note", style: { gridArea: "1 / 1", margin: 0, visibility: "hidden" } }, h("b", { text: l.n + ". " }), l.what + " ", h("i", { text: "Example: " }), l.ex + " ", h("i", { text: "Who controls it: " }), l.ctl)); dets.forEach(d => detail.append(d));
+  const showDetail = () => { if (!click) return; dets.forEach((d, i) => d.style.visibility = i === sel ? "visible" : "hidden"); left.querySelectorAll(".cl").forEach((b, i) => b.classList.toggle("sel", i === sel)); };
+  left.append(h("div", { class: "cm-h", text: "Sent in with every request" }));
+  LAYERS.forEach((l, i) => left.append(h(click ? "button" : "div", { class: "cl sup-" + l.w, onclick: click ? () => { sel = i; showDetail(); } : null }, h("span", { text: l.n }), h("small", { text: l.id === "reply" ? "grows" : WHO[l.w] }))));
+  right.append(h("div", { class: "cm-model" }, h("b", { text: "The model" }), h("div", { class: "hint", style: { margin: 0 }, text: "Its working memory is the context window. It reads all of it every time it picks a token, and it is limited." }), segs(LAYERS.map(l => [l.w, l.size, l.n + ": " + l.size + " tokens"]), CAP), h("div", { class: "hint", style: { margin: 0 }, text: tot + " of " + CAP + " tokens used (toy numbers)" })),
+    h("div", { class: "cm-out", text: "Output: the next token" }), h("div", { class: "cm-loop", text: "↺ The new token is added to the context, then the model reads it all again." }));
+  if (click) right.append(detail);
+  map.append(left, right); wrap.append(map, legend()); host.append(wrap); showDetail();
+}
+const SORT1 = [
+  { t: "How to write a polite sentence", a: 0, why: "General language skill was learned in training and stored in the parameters." },
+  { t: "This company’s 30-day return rule", a: 1, why: "The model could not learn it in training. It has to be in working memory." },
+  { t: "What a refund is, in general", a: 0, why: "General knowledge comes from training." },
+  { t: "What the customer said earlier in the chat", a: 1, why: "Earlier messages are sent in again as part of the context." },
+  { t: "The order’s delivery status from a lookup", a: 1, why: "Current, specific facts have to be supplied, for example by a tool." }
+];
+function fillInit(host) {
+  hostOf(host, `<div class="widget"><div class="label">A chat with a toy window of ${CAP} tokens</div><div id="fl-meter"></div><div class="hint" id="fl-info"></div><div class="note" id="fl-note" style="min-height:3.6em;visibility:hidden"></div>
+<div class="row" style="margin-top:8px"><button class="btn primary" id="fl-send">Send another message</button><button class="btn" id="fl-compact">Compact the chat</button><button class="btn sm" id="fl-new">Start a new chat</button></div></div>`);
+  const FIX = LAYERS.filter(l => ["sys", "skills", "mem", "docs"].includes(l.id)).reduce((a, l) => a + l.size, 0), TURN = 55;
+  let turns = 0, summary = 0, note = "";
+  const used = () => FIX + summary + turns * TURN;
+  function draw() {
+    const parts = LAYERS.filter(l => ["sys", "skills", "mem", "docs"].includes(l.id)).map(l => [l.w, l.size, l.n]);
+    if (summary) parts.push(["model", summary, "Summary of the earlier chat"]);
+    for (let i = 0; i < turns; i++) parts.push([i % 2 ? "model" : "you", TURN, "Message " + (i + 1) + " and its reply"]);
+    const m = segs(parts, CAP); if (used() + TURN > CAP) m.classList.add("full");
+    clear($("#fl-meter")).append(m, legend());
+    $("#fl-info").textContent = "Sent to the model with the next message: " + (used() + 20) + " tokens of " + CAP + " (before it writes). Fixed layers: " + FIX + " tokens. Chat so far: " + (summary + turns * TURN) + " tokens.";
+    const full = used() + TURN > CAP;
+    $("#fl-send").disabled = full; $("#fl-compact").disabled = turns === 0;
+    const n = $("#fl-note"); n.style.visibility = (note || full) ? "visible" : "hidden"; n.textContent = note || (full ? "The window is nearly full. The next message would not fit, so the product must drop the oldest turns, compact the chat into a summary, or you start a new chat." : "");
+  }
+  $("#fl-send").onclick = () => { turns++; note = ""; draw(); };
+  $("#fl-compact").onclick = () => { turns = 0; summary = 30; note = "Compacted: the earlier turns were replaced by a short summary. This frees space, but details can be lost."; draw(); };
+  $("#fl-new").onclick = () => { turns = 0; summary = 0; note = ""; draw(); };
+  draw();
+}
+function answerFor(on) {
+  const pre = on.sys ? "Thank you for getting in touch. " : "";
+  let a;
+  if (on.docs && on.conv && on.tool) a = "Yes. Your policy allows returns within 30 days and damaged items qualify, and this order was delivered inside that window. Please send a prepaid return label.";
+  else if (on.docs && on.conv) a = "Your policy allows returns within 30 days, and a damaged item qualifies. I cannot see the order date, so please confirm it is inside the window.";
+  else if (on.docs) a = "Your policy allows returns within 30 days. Tell me which product it is and what is wrong with it.";
+  else if (on.conv) a = "I am sorry the product arrived damaged. I do not have your return policy, so I cannot say whether it can be returned.";
+  else a = "I cannot tell. I do not have your return policy or any details about the order.";
+  return pre + a + (on.sys ? " Is there anything else I can help with?" : "");
+}
+function toggleInit(host) {
+  hostOf(host, `<div class="widget"><div class="label">Switch layers on, one at a time</div><div class="row" id="tg-chips"></div><div class="label">The question, always the same</div><div class="docbox" style="padding:8px 12px;font-weight:600">Can this customer return the product?</div><div class="label">What else the model can see</div><div class="docbox" id="tg-seen" style="line-height:1.3;padding:8px 12px"></div><div class="label">The reply</div><div class="docbox" id="tg-ans" style="line-height:1.4;padding:8px 12px"></div><p class="hint" style="margin:0">A scripted illustration with simple rules, not a real model.</p></div>`);
+  const OPTS = [["sys", "System instructions", "“You are a support assistant. Be polite and brief.”"], ["docs", "Returns policy document", "“Returns: 30 days, and damaged items qualify.”"], ["conv", "Conversation so far", "Customer: “The product arrived damaged.”"], ["tool", "Order lookup result", "Order status: delivered, inside the return window."]];
+  const on = { sys: false, docs: false, conv: false, tool: false };
+  function draw() {
+    const c = clear($("#tg-chips")); OPTS.forEach(o => c.append(h("button", { class: "btn sm" + (on[o[0]] ? " on" : ""), onclick: () => { on[o[0]] = !on[o[0]]; draw(); } }, o[1])));
+    c.append(h("button", { class: "btn sm", onclick: () => { OPTS.forEach(o => on[o[0]] = false); draw(); } }, "Switch all off"), h("button", { class: "btn sm", onclick: () => { OPTS.forEach(o => on[o[0]] = true); draw(); } }, "Switch all on"));
+    const seen = clear($("#tg-seen")); const act = OPTS.filter(o => on[o[0]]); if (!act.length) seen.append(h("span", { class: "hint", text: "Nothing else. Only the question." })); act.forEach(o => seen.append(h("div", { text: o[2] })));
+    $("#tg-ans").textContent = answerFor(on);
+  }
+  draw();
+}
+const ATT_OPTS = [
+  { name: "Option 1: vague request", key: ["damaged,"], reply: "I am not sure what “it” refers to, or which policy you mean. Which product is this, and what is wrong with it?",
+    w: [["Hi,", 0.5], ["thanks", 0.4], ["for", 0.2], ["the", 0.15], ["update.", 0.6], ["Anyway,", 0.5], ["they", 0.9], ["sent", 0.8], ["it", 1.2], ["back", 0.7], ["because", 0.4], ["it", 1], ["was", 0.4], ["damaged,", 1.6], ["I", 0.6], ["think.", 0.5], ["Is", 0.6], ["it", 1.4]], q: "covered?" },
+  { name: "Option 2: clear request", key: ["customer", "returned", "product", "damaged.", "return", "policy", "damaged"], reply: "Yes. The return policy covers damaged products.",
+    w: [["The", 0.15], ["customer", 0.9], ["returned", 1.8], ["the", 0.15], ["product", 2], ["because", 0.4], ["it", 0.8], ["was", 0.3], ["damaged.", 3], ["Does", 0.3], ["the", 0.15], ["return", 1.8], ["policy", 2.4], ["cover", 0.9], ["damaged", 2.6]], q: "products?" }
+];
+function attInit(host) {
+  hostOf(host, `<div class="widget"><div class="row"><div class="seg3" id="att-seg"></div></div><div class="label">The request. Darker words get more attention from the last word. The words that matter have a green outline.</div><div class="att-toks" id="att-toks"></div><div id="att-share"></div><div class="label">The reply</div><div class="docbox" id="att-reply" style="padding:8px 12px"></div><p class="hint" style="margin:0">A scripted illustration with hand-set weights, not a real model.</p></div>`);
+  function draw(n) {
+    const o = ATT_OPTS[n], tot = o.w.reduce((a, x) => a + x[1], 0), keyW = o.w.filter(x => o.key.includes(x[0])).reduce((a, x) => a + x[1], 0), share = keyW / tot;
+    const tk = clear($("#att-toks"));
+    o.w.forEach(([t, wt]) => tk.append(h("span", { style: { border: "1px solid var(--line)", borderRadius: "5px", padding: "4px 9px", font: "500 .95rem var(--f-mono)", background: "color-mix(in srgb, var(--accent) " + Math.min(75, Math.round(wt / tot * 420)) + "%, var(--soft))", outline: o.key.includes(t) ? "2px solid var(--good)" : "none" }, text: t })));
+    tk.append(h("span", { style: { border: "1px dashed var(--ink)", borderRadius: "5px", padding: "4px 9px", font: "500 .95rem var(--f-mono)" }, text: o.q }));
+    clear($("#att-share")).append(bars([{ label: "Key words", p: share, cls: share > 0.5 ? "hit" : "" }], { max: 1 }));
+    $("#att-reply").textContent = o.reply;
+  }
+  seg("#att-seg", ATT_OPTS.map(o => o.name), 0, draw);
+  draw(0);
+}
+const SORT6 = [
+  { t: "State the return window in one clearly labelled line", a: 0, why: "Clear, specific facts are easy for the model to use." },
+  { t: "Paste a very long email thread and hope the model finds the window", a: 1, why: "A detail buried in a long input can be overlooked, and every token costs money." },
+  { t: "Remove old, irrelevant messages before you ask", a: 0, why: "Less noise means the facts that matter stand out." },
+  { t: "Repeat the same instruction five times", a: 1, why: "It adds noise and cost without making the instruction clearer." }
+];
+const RDOCS = ["Returns: 30 days; damaged items qualify.", "Shipping: within the country only.", "Refunds: to the original payment method.", "Warranty: one year against defects.", "Gift cards: not exchangeable for cash.", "Support: messages answered on weekdays.", "Loyalty: points expire after twelve months.", "Privacy: we do not share customer details."];
+const ASK = [
+  { n: "A vague question", q: "What is your policy?", pick: [5, 6], own: null, off: "Most shops accept returns within a few weeks, so you can probably send it back.", on: "I cannot find a returns policy in the documents I was given. Which policy do you mean?", gOff: false },
+  { n: "A specific question", q: "Can I return a damaged product?", pick: [0, 2], own: null, off: "Yes. Damaged items qualify for return within 30 days.", on: "Yes. Damaged items qualify for return within 30 days (Returns policy).", gOff: true },
+  { n: "Paste the passage yourself", q: "[Policy pasted] Can I return a damaged product?", pick: [], own: "Pasted by you: “Items can be returned within 30 days, and damaged items qualify.”", off: "Yes. Damaged items qualify for return within 30 days.", on: "Yes. Damaged items qualify for return within 30 days (the policy you pasted).", gOff: true }
+];
+function ragInit(host) {
+  hostOf(host, `<div class="widget"><div class="label">How you ask</div><div class="row"><div class="seg3" id="rg-q"></div><button class="btn sm" id="rg-rule"></button></div><div class="label">Your question</div><div class="docbox" id="rg-qs" style="padding:8px 12px;font-weight:600"></div><div class="label">Added to the context: green is pasted by you, blue is retrieved (two passages fit)</div><div id="rg-docs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(11.5rem,1fr));gap:4px"></div><div class="label">The reply</div><div class="docbox" id="rg-ans" style="padding:8px 12px"></div><div id="rg-g" class="hint" style="margin:0"></div></div>`);
+  let qi = 0, rule = false;
+  function draw() {
+    const a = ASK[qi];
+    $("#rg-rule").textContent = rule ? "Rule ON: answer only from the documents" : "Rule OFF: answer only from the documents";
+    $("#rg-rule").className = "btn sm" + (rule ? " on" : "");
+    $("#rg-qs").textContent = a.q;
+    const d = clear($("#rg-docs")); RDOCS.forEach((t, i) => d.append(h("div", { class: "cl " + (a.pick.includes(i) ? "sup-lookup" : ""), style: { fontSize: ".78rem", padding: "3px 8px" }, text: t })));
+    if (a.own) d.prepend(h("div", { class: "cl sup-you", style: { gridColumn: "1 / -1", fontSize: ".78rem", padding: "3px 8px" }, text: a.own }));
+    $("#rg-ans").textContent = rule ? a.on : a.off;
+    const grounded = a.gOff || rule;
+    $("#rg-g").textContent = (a.pick.length || a.own) && a.gOff ? "Grounded: the reply rests on a passage the model was given." : rule ? "Safe: it admits it cannot find the answer, instead of guessing." : "Not grounded: the model had no matching passage, so this is a guess that may not match your policy.";
+    $("#rg-g").style.color = (a.gOff || rule) ? "var(--good)" : "var(--bad)";
+  }
+  seg("#rg-q", ASK.map(x => x.n), 0, i => { qi = i; draw(); });
+  $("#rg-rule").onclick = () => { rule = !rule; draw(); };
+  draw();
+}
+
+lesson({
+  title: "Context",
+  lede: "A model has two kinds of memory: built-in memory from training, and working memory, which is what is in front of it right now. This lesson is about working memory. It shows everything that goes into the context, why the window is limited, and how to give the model the facts it needs.",
+  learn: `<b>By the end you can</b>list what goes into the context, explain why a long chat costs more, and say how supplying facts changes an answer.`,
+  steps: [
+    {
+      title: "Two kinds of memory",
+      main: `<p>A model answers from two kinds of memory.</p>
+<div class="cards two">
+  <div><b>Built-in memory</b>Knowledge learned in training and stored in the weights, also called <b>parametric memory</b>. It is general, fixed at release, and may be out of date or wrong on details.</div>
+  <div><b>Working memory</b>Everything in the window: the context. It is temporary and gone when the chat ends. It is specific and current, but the window has a limit.</div>
+</div>
+<p>Anything the model could not have learned in training has to be in its working memory.</p>`,
+      interactive: host => { host.append(h("p", { text: "Where does each piece of knowledge live?" })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, SORT1, ["Built-in memory", "Working memory"]); },
+      deep: `<p>Giving the model everything it might need is sometimes called context stuffing. It works, but it runs into the window limit and the cost of every token.</p>
+<p>Further reading: <a href="https://academy.claude.com/tutorials/parametric-memory-and-context" target="_blank" rel="noopener">Claude Academy, how context affects Claude’s performance and cost</a>.</p>`,
+      quiz: [["Which of these has to be in working memory, not built-in memory?", ["The customer’s order status", "How to write polite English", "What a refund is"], 0, "The model could not have learned a specific, current fact in training, so it has to be supplied."]]
+    },
+    {
+      title: "The picture: what goes into the context",
+      main: host => {
+        host.append(h("p", { text: "Many layers are sent in with every request. The model reads all of them, inside a window of limited size, and then writes one token. That token joins the context, and the model reads it all again." }));
+        host.append(h("div", { class: "loop" }, h("div", { class: "lp" }, h("span", { text: "1" }), "Everything is sent in", h("small", { class: "hint", text: "instructions, skills, notes, documents, the chat, tool results, your request" })), h("i", { text: "→" }), h("div", { class: "lp on" }, h("span", { text: "2" }), "The model reads its working memory", h("small", { class: "hint", text: "a window of limited size" })), h("i", { text: "→" }), h("div", { class: "lp" }, h("span", { text: "3" }), "It writes the next token", h("small", { class: "hint", text: "which joins the context" })), h("i", { text: "↺" }), h("div", { class: "lp back" }, h("span", { text: "↺" }), "Read it all again")));
+      },
+      interactive: host => { host.append(h("p", { text: "Click a layer to see what it is, an example, and who controls it. The colour shows who supplies it." })); picture(host, true); },
+      deep: `<p>The layers change from product to product. Some have no memory, no skills or no retrieval. The colours show who supplies each layer: the product builder, a lookup done for you, you, or the model itself.</p>
+<p>The product wraps the model (Lesson 4). Nothing in the context changes the weights.</p>`,
+      quiz: [["Who supplies the system instructions?", ["The customer", "The model itself", "The product builder"], 2, "Standing rules come from whoever builds or configures the product around the model."]]
+    },
+    {
+      title: "The window fills up",
+      main: `<p>The window has a fixed size. The fixed layers use space first. Then every message and every reply is added, and all of it is sent again with the next message.</p>
+<p>So a long chat fills the window, and costs more with each message, because every token sent in is counted.</p>`,
+      interactive: fillInit,
+      deep: `<p>Real windows are far larger than this toy one, but the same thing happens. When a chat gets long, a product can summarize it (this is called compaction), which frees space but can lose details. Some tools also save notes for later chats; Claude Code reads a CLAUDE.md file, for example.</p>
+<p>Source: <a href="https://academy.claude.com/tutorials/parametric-memory-and-context" target="_blank" rel="noopener">Claude Academy</a>.</p>`,
+      quiz: [["Why can a short question late in a long chat cost more than the same question in a new chat?", ["Short questions are harder to answer", "Every message sends the whole earlier conversation again", "The model charges for politeness"], 1, "The whole context is sent each time, so a longer chat means more tokens per message."]]
+    },
+    {
+      title: "Change the context, change the answer",
+      main: `<p>The question stays the same. What changes is what the model can see.</p>
+<p>Switch layers on and off and watch the reply move.</p>`,
+      interactive: toggleInit,
+      deep: `<p>Missing context is one of the most common causes of a vague or wrong answer. When a reply is poor, check first whether the model had the facts it needed.</p><p>This demo uses simple rules. A real model also uses what it learned in training, and can weigh the facts differently or get them wrong.</p>`,
+      quiz: [["Why did the reply become vague when the policy document was switched off?", ["Documents make replies shorter", "The model got tired", "The model had no source for the policy and could only guess"], 2, "The model can only use what it was given, plus what it learned in training. Your policy was in neither."]]
+    },
+    {
+      title: "Attention in one idea",
+      main: `<p>With all that text in the window, the model needs to decide which parts matter for the token it is writing. This is called <b>attention</b>.</p>
+<p>When it reads a word, it looks back at earlier words and gives each a weight. In Try it, compare two versions of the same request.</p>
+<p>You cannot set attention yourself, but you can make it easier for the model to land on the right words:</p>
+<div class="cards three">
+  <div><b>Be specific</b>Say exactly what you want and which facts matter.</div>
+  <div><b>Name things</b>Write “the return policy”, not “it” or “that”. Clear links are easier to follow.</div>
+  <div><b>Cut the noise</b>Remove old or irrelevant text so the important parts stand out.</div>
+</div>`,
+      interactive: attInit,
+      deep: `<p>Where you put key facts can matter too. Very long inputs can have parts that get less weight, and models differ, so test with your own material (see the next steps).</p>
+<p>The weights here are hand-set to illustrate the idea. Real models learn them, run many patterns in parallel and stack them in many layers. A word can only look at earlier words, so later words are dimmed. The toy model in Lesson 4 looks only at the last token.</p>`,
+      quiz: [["In one sentence, what does attention do?", ["It stores the customer’s account", "It lets the model weigh which earlier words matter for the word it is working on", "It decides the temperature"], 1, "Attention is how the model uses relationships between words in the context."]]
+    },
+    {
+      title: "Long inputs and overlooked details",
+      main: `<p>More context is not always better. A detail buried in a very long input can be overlooked, and every token costs money.</p>
+<p>Clear, specific, relevant context works best.</p>`,
+      interactive: host => { host.append(h("p", { text: "Does each habit help the model, or get in its way?" })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, SORT6, ["Helps the model", "Gets in the way"]); },
+      deep: `<p>How well a model uses a long input varies by model and by task, so test with your own material instead of assuming.</p>`,
+      quiz: [["Your input is very long. What is a good habit?", ["Hide the key fact in the middle", "State the key facts clearly and remove irrelevant text", "Repeat everything three times"], 1, "Less noise makes the facts that matter easier to use, and it costs less."]]
+    },
+    {
+      title: "Getting the right facts in",
+      main: `<p>In step 4 you switched the policy document on yourself. In many products, retrieval (RAG) does it for you: it searches your documents and adds the best-matching passages. The window is limited, so only a few fit.</p>
+<p>Retrieval is automatic, but you still steer it:</p>
+<div class="cards three">
+  <div><b>Ask specifically</b>Use the words your documents use. A vague question retrieves vague passages.</div>
+  <div><b>Supply it yourself</b>Paste or attach the passage you want used, so nothing depends on the search.</div>
+  <div><b>Set the rule</b>Tell the model to answer only from the documents, and to say when it cannot find the answer.</div>
+</div>`,
+      interactive: ragInit,
+      deep: `<p><b>Grounding</b> means tying the answer to source material you supply. It keeps the reply tied to your own sources, instead of the model’s general memory.</p>
+<p>Behind the scenes, whoever builds the search decides how documents are split and kept up to date (Lesson 8). Some products let the model decide to search for itself, using a tool, before it answers. This is sometimes called agentic context. It costs more tokens, but it can find facts that were not in the context to begin with. Lesson 8 covers how a business sets this up.</p>`,
+      quiz: [["The search keeps returning the wrong passages. What can you do?", ["Wait for the model to improve", "Ask more specifically, or paste the passage yourself", "Type the question in capital letters"], 1, "You steer retrieval with specific wording, by supplying the passage yourself, and by telling the model to answer only from the documents."]]
+    },
+    {
+      title: "What you’ve seen",
+      main: `<p><b>Two kinds of memory.</b> Answers come from built-in memory (the weights, from training) and from working memory (the window, which is the context).</p>
+<p><b>The picture.</b> System instructions, skills, memory, documents, the conversation, tool results, your request and the model’s own reply all fill a limited window. Each new token joins it.</p>
+<p><b>What to do.</b> Supply the facts the model needs, keep them clear and relevant, and remember that a longer context costs more.</p>`,
+      deep: `<p>Reference: <a href="https://academy.claude.com/tutorials/parametric-memory-and-context" target="_blank" rel="noopener">Claude Academy, how context affects Claude’s performance and cost</a>. The window sizes, token counts and replies in this lesson are toy numbers for illustration.</p>`
+    }
+  ]
+});
 chrome(4);
-const PRESETS = [["Clear the brief", { policy: "none", days: "none", cond: "none", cust: "none", value: "none" }], ["Scenario A", { policy: "free30", days: "d5", cond: "unopened", cust: "new", value: "low" }], ["Scenario B", { policy: "fee14", days: "d45", cond: "used", cust: "vip", value: "high" }], ["Scenario C", { policy: "final", days: "d25", cond: "defective", cust: "new", value: "high" }]];
-const facts = () => { const f = {}; Object.keys(BRIEF_OPTS).forEach(k => f[k] = $("#br-" + k).value); return f; };
-function brief() {
-  const f = facts(), a = advise(f), doc = clear($("#br-doc")); let text = "";
-  Object.keys(BRIEF_OPTS).forEach(k => { if (f[k] !== "none") { const ln = BRIEF_OPTS[k].line[f[k]]; text += ln + " "; doc.append(h("div", { class: "ln" + (a.used.includes(k) ? " used" : ""), text: ln })); } });
-  if (!text) doc.append(h("div", { class: "hint", text: "(No brief provided.)" }));
-  doc.append(h("div", { class: "q", text: BRIEF_Q }));
-  clear($("#br-ans")).append(h("div", null, h("span", { class: "pill " + a.tone, text: a.verdict })), h("p", { style: { margin: 0 }, text: a.text }));
-  $("#br-tokens").textContent = "Context used: " + tokenize(text + BRIEF_Q).length + " tokens.";
-}
-Object.entries(BRIEF_OPTS).forEach(([k, o]) => { const sel = h("select", { id: "br-" + k, onchange: brief }); Object.entries(o.opts).forEach(([v, t]) => sel.append(h("option", { value: v, text: t }))); $("#br-form").append(h("label", { class: "field", for: "br-" + k }, o.label, sel)); });
-PRESETS.forEach(([n, f]) => $("#br-presets").append(h("button", { class: "btn", onclick: () => { Object.entries(f).forEach(([k, v]) => $("#br-" + k).value = v); brief(); } }, n)));
-Object.entries(PRESETS[2][1]).forEach(([k, v]) => $("#br-" + k).value = v); brief();
-
-const AT = { last: "defective", q: 11 };
-const AT_MSG = { it: "“it” could mean the laptop or the store, and nothing after it is visible yet, so attention is split.", returned: "“returned” leans on its subject, “customer”: who did the returning.", laptop: "“laptop” leans on “returned”, the action it is the object of.", store: "“store” leans on “to” and “returned”: where the laptop went.", was: "“was” leans on the word just before it, “it”, which it is about to describe." };
-function att() {
-  const words = [...ATT_WORDS, AT.last], w = attention(words, AT.q), tk = clear($("#att-toks"));
-  words.forEach((x, j) => tk.append(h("button", { class: (j === AT.q ? "q " : "") + (j > AT.q ? "future" : ""), title: j > AT.q ? "Hidden: comes after the selected word" : "Show attention from this word", style: j <= AT.q ? { background: "color-mix(in srgb, var(--accent) " + Math.min(70, Math.round(w[j] * 140)) + "%, var(--soft))" } : {}, onclick: () => { AT.q = j; att(); } }, x)));
-  clear($("#att-bars")).append(bars(w.map((p, j) => ({ label: words[j], p, cls: p === Math.max(...w) ? "hit" : "" })), { max: Math.max(...w) }));
-  let m = AT_MSG[words[AT.q].toLowerCase()];
-  if (AT.q === words.length - 1) m = AT.last === "defective" ? "Reading “defective”, the model leans hardest on “laptop”: the thing that can be defective." : "Reading “closed”, the model leans hardest on “store”: stores close, laptops usually don’t. One word changed and a different relationship took over.";
-  $("#att-msg").textContent = m || "Most attention goes to nearby words and the words this one belongs with.";
-}
-["defective", "closed"].forEach(x => $("#att-switch").append(h("button", { class: x === AT.last ? "on" : "", onclick: () => { AT.last = x; AT.q = 11; $("#att-switch").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.textContent === x)); att(); } }, x)));
-att();
-$("#q1").append(quick("You get a poor answer from a model. What is the first thing to check?", ["Whether the brief contained the facts it needed", "Whether the model was retrained today", "The font of the prompt"], 0, "The model can only use what it was given. Missing context is a very common cause of a vague or wrong answer."));
-$("#q2").append(quick("In one sentence, what does attention do?", ["It lets the model weigh which earlier words matter for the word it is working on", "It stores the customer’s account", "It decides the temperature"], 0, "Attention is how the model uses relationships between words in the context."));
-
-const EM = [["refund", 20, 25], ["reimbursement", 28, 33], ["money back", 14, 38], ["laptop", 72, 70], ["notebook", 80, 62], ["computer", 66, 58], ["late", 45, 85], ["delayed", 54, 90], ["banana", 88, 15], ["apple", 78, 22]];
-let EMs = 0;
-function em() {
-  const m = clear($("#em-map")), s = EM[EMs], near = EM.map((e, i) => [i, Math.hypot(e[1] - s[1], e[2] - s[2])]).filter(x => x[0] !== EMs).sort((a, b) => a[1] - b[1]).slice(0, 2).map(x => x[0]);
-  EM.forEach((e, i) => m.append(h("button", { class: "btn" + (i === EMs ? " on" : ""), style: { position: "absolute", left: e[1] + "%", top: e[2] + "%", transform: "translate(-50%,-50%)", borderColor: near.includes(i) ? "var(--good)" : "", background: near.includes(i) ? "var(--good-soft)" : i === EMs ? "var(--accent-soft)" : "var(--surface)" }, onclick: () => { EMs = i; em(); } }, e[0])));
-  $("#em-msg").textContent = "Closest to “" + s[0] + "”: " + near.map(i => "“" + EM[i][0] + "”").join(" and ") + ". Similar use, similar numbers. A token ID would not show this: IDs are only labels.";
-}
-em();
-$("#q3").append(quick("What does an embedding capture that a token ID does not?", ["How similar in meaning two tokens are", "How many letters a token has", "How much a token costs"], 0, "IDs are arbitrary labels. Embeddings are numbers arranged so that tokens used in similar ways end up close together."));
 </script></body></html>

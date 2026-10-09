@@ -242,6 +242,7 @@ Course memory for the back link uses `sessionStorage`. All reads and writes are 
 | Introduction to AI, Lessons 1 to 8 | all converted to the four-part step layout, with present mode |
 | Inside the LLM, Lesson 3 "Model development" (`training.html`) | converted: 13 steps in three stages (build the base model; fine-tune and polish; package as a product), with present mode |
 | Inside the LLM, Lesson 4 "Model usage" (`inference.html`) | converted: 13 steps in three stages (prepare the input; the model generates; deliver the output), with present mode |
+| Inside the LLM, Lesson 5 "Context" (`context-attention.html`) | converted: 8 steps, with the context picture (layers colour-coded by who supplies them) and present mode |
 | Inside the LLM, other lessons | earlier layout; share `site.js`, so they show "Lesson" in the header and sidebar, but have no present mode |
 | AI for Marketing course page | live; lists Inside the LLM |
 

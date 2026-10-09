@@ -7,6 +7,7 @@ Content that changes quickly (model names, prices, context sizes, regulations, p
 ## Content added after Review 1
 
 - **Model development (Lesson 3) and Model usage (Lesson 4)**, written 9 October 2026. New claims to check at the next review: output tokens usually cost more than input tokens; real vocabularies hold tens of thousands to a few hundred thousand tokens; embeddings use hundreds to thousands of numbers; image generators often work by removing noise step by step; refund limits in the checks step are examples only.
+- **Context (Lesson 5)**, 9 October 2026, with reference to the Claude Academy tutorial on parametric memory and context (https://academy.claude.com/tutorials/parametric-memory-and-context). Claims to recheck: Claude Code reads a CLAUDE.md file for saved notes; compaction can lose details; window sizes and token counts in the lesson are toy numbers; how well models use very long input varies by model.
 
 ## Review 1 · 8 October 2026
 
