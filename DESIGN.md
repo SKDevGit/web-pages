@@ -245,6 +245,11 @@ Course memory for the back link uses `sessionStorage`. All reads and writes are 
 | Inside the LLM, Lesson 5 "Context" (`context-attention.html`) | converted: 8 steps, with the context picture (layers colour-coded by who supplies them) and present mode |
 | Inside the LLM, Lesson 6 "What LLMs are used for" (`llm-uses.html`) | converted: 11 steps in four stages (one skill; work on text; answer and create; reason and act), then matching checking to the task and a wrap-up. Each use has a Try it demo, with its token-odds panel in Go deeper |
 | Inside the LLM, Lesson 7 "Limits and risks" (`limits-risks.html`) | converted: 7 steps in three stages (wrong answers; unfair and exposed; using it safely), including a new step on prompt injection and agents; present mode |
+| Inside the LLM, Lesson 8 "Making it fit your business" (`adapt-to-business.html`) | converted: 6 steps (overview of where each option acts; Option 1 prompting; Option 2 retrieval; Option 3 fine-tuning; choose the right option; wrap-up), with present mode |
+| Inside the LLM, Lesson 9 "Cost, choice and where to start" (`cost-and-choice.html`) | converted: 6 steps in three stages (size and cost; kind and offer; where to start), with a new cost-drivers calculator; present mode |
+| Inside the LLM, Lesson 1 "Start with a prediction" (`prediction.html`) | converted: 4 steps (finish the sentence; see what a model produces; compare with the class; what you have seen), class sharing kept |
+| Inside the LLM, Lesson 2 "What are tokens?" (`tokens.html`) | converted: 4 steps; the cost inputs are now option buttons; wide option rows keep the statement readable |
+| Inside the LLM, Lesson 10 "Put it all together" (`put-it-together.html`) | converted: 3 steps (follow one prompt; training, inference or both; what this means for you), now covering the whole module |
 | Inside the LLM, other lessons | earlier layout; share `site.js`, so they show "Lesson" in the header and sidebar, but have no present mode |
 | AI for Marketing course page | live; lists Inside the LLM |
 
@@ -260,3 +265,11 @@ Course memory for the back link uses `sessionStorage`. All reads and writes are 
 - **Class access.** A static site cannot truly hide pages. A hard-to-guess class code in the address gives light separation; real restriction needs a server-side check at the edge (for example a CloudFront Function). The repository is currently public.
 - **A move to React or Vite** would not hide the content: bundled code is readable by anyone who can load the page.
 - Optional: a text-size control for projectors, and an authoring outline page that shows which parts each step has.
+
+
+## Exercise controls
+
+- Choosing between alternatives: labelled option buttons ("Option 1", "Option 2"), never a hidden colour change.
+- On or off choices: `switchRow(label, on, cb)` in `site.js`, which shows an explicit Off and On pair.
+- A few fixed values: buttons, not a slider. Use a slider only for a truly continuous value.
+- Multi-select chips: add the `multi` class to `.chips` so selected chips show a tick.

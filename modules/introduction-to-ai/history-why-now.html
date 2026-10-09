@@ -46,7 +46,7 @@ lesson({
       main: `<p>Three things came together: <b>data</b>, <b>compute</b> and <b>algorithms</b>.</p>
 <p><b>Capital is the fuel.</b> Hundreds of billions of dollars a year now go into data centres. Compute and data are costs, so AI is capital-intensive.</p>`,
       interactive: host => {
-        host.innerHTML = `<p>Switch each one on or off to see what happens without it.</p><div class="widget"><div class="row" id="why-sw"></div><div class="flow" id="why-flow"></div><div class="note" id="why-msg"></div></div>`;
+        host.innerHTML = `<p>Switch each one On or Off to see what happens without it.</p><div class="widget"><div class="swgrid" id="why-sw" style="grid-template-columns:1fr"></div><div class="flow" id="why-flow"></div><div class="note" id="why-msg"></div></div>`;
         const on = [true, true, true];
         function why() {
           const f = clear($("#why-flow"));
@@ -55,9 +55,8 @@ lesson({
           f.append(h("div", { class: "bx" + (all ? " out" : ""), style: all ? {} : { opacity: ".35" }, text: "Deep learning takes off" }));
           const missing = WH.filter((w, i) => !on[i]);
           $("#why-msg").textContent = all ? "All three together: large datasets, GPUs and improved training methods. Deep learning takes off." : "Without " + missing.map(m => m[0].toLowerCase()).join(" and ") + ": " + missing.map(m => m[2]).join(" ");
-          [...$("#why-sw").children].forEach((b, i) => b.classList.toggle("on", on[i]));
         }
-        WH.forEach((w, i) => $("#why-sw").append(h("button", { class: "btn on", title: w[1], onclick: () => { on[i] = !on[i]; why(); } }, w[0] + ": " + w[1].split(".")[0])));
+        WH.forEach((w, i) => $("#why-sw").append(switchRow(w[0] + ": " + w[1].split(".")[0], true, v => { on[i] = v; why(); })));
         why();
       },
       deep: `<p>AlexNet is the clean example: the ideas were not new. Large datasets, GPUs and improved training methods arrived together.</p>

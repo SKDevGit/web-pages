@@ -2,108 +2,147 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/css/site.css"></head><body>
 <header id="site-head"></header>
-<main class="col">
-<h1>Making it fit your business</h1>
-<p class="meta">4 exercises</p>
-<p class="lede">A general model knows nothing about your company. There are three ways to close that gap, and they differ a lot in cost and effort: write a better prompt, let the model look things up in your documents, or train it further on your examples.</p>
-<div class="learn"><b>By the end you can</b>describe prompting, retrieval and fine-tuning, and pick the right one for a given business need.</div>
-
-<span class="step">Step 1 of 4 · Option 1</span>
-<h2>Write a better prompt</h2>
-<p>The cheapest lever. Switch on parts of a prompt and see how the answer improves. Nothing about the model changes: only what it reads.</p>
-<div class="widget">
-  <div class="chips" id="a1-chips"></div>
-  <div class="label">The prompt</div><div class="docbox" id="a1-prompt" style="white-space:pre-line"></div>
-  <div class="label">The answer</div><div class="docbox" id="a1-ans" style="white-space:pre-line"></div>
-  <p class="hint">Scripted illustration of how each addition shapes the answer.</p>
-</div>
-<div id="q1"></div>
-
-<span class="step">Step 2 of 4 · Option 2</span>
-<h2>Let it look things up (retrieval)</h2>
-<p>Retrieval-augmented generation, or RAG, searches your own documents first, then adds the best passages to the prompt. Pick a question, or type your own, and see which passages are found.</p>
-<div class="widget">
-  <div class="row" id="a2-q"></div>
-  <div class="row"><input type="text" id="a2-in" placeholder="Or type a question about returns, shipping, warranty or support" style="flex:1;min-width:12rem"><button class="btn primary" id="a2-go">Search</button></div>
-  <div class="label">1. Search the company documents</div>
-  <div class="stack" id="a2-hits"></div>
-  <div class="label">2. The prompt the model receives</div>
-  <div class="docbox" id="a2-prompt" style="white-space:pre-line"></div>
-  <div class="label">3. The answer, with its source</div>
-  <div class="docbox" id="a2-ans"></div>
-  <p class="hint">The search here is a simple word match so you can see how it works. Real systems match on meaning, using embeddings.</p>
-</div>
-<div id="q2"></div>
-
-<span class="step">Step 3 of 4 · Option 3</span>
-<h2>Train it on your examples (fine-tuning)</h2>
-<p>Fine-tuning continues training on examples you supply, so the parameters themselves change. It is best for a consistent style or format. Drag to add examples of your company’s own replies.</p>
-<div class="widget">
-  <label class="field">Company examples used: <b id="a3-v"></b><input type="range" id="a3" min="0" max="3" value="0" step="1"></label>
-  <div class="label">Reply to “Where is my order?”</div>
-  <div class="docbox" id="a3-out"></div>
-  <div class="note" id="a3-note"></div>
-  <p class="hint">Scripted illustration.</p>
-</div>
-<div id="q3"></div>
-
-<span class="step">Step 4 of 4</span>
-<h2>Choose the right option</h2>
-<p>For each need, pick the best first move. The table shows how the three options compare.</p>
-<div class="widget">
-  <div style="overflow:auto"><table class="cmpt" id="a4-t"></table></div>
-  <div class="stack" id="a4-s"></div>
-</div>
-<div id="q4"></div>
-
-<h2>What to remember</h2>
-<p>Start with the cheapest option and move up only if it is not enough. Prompts first, retrieval when the model needs your facts, fine-tuning when you need a consistent behavior that prompts cannot give you.</p>
-</main>
+<main class="col" id="lesson"></main>
 <nav id="pager"></nav>
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
-chrome(7);
-// 1
-const PT = [["Role", "You are a support agent for Northwind.", "Hello,"], ["Facts", "Facts: the order is 12 days old and the item is unopened. Policy: 30-day returns.", "Because the order is 12 days old and unopened, it qualifies for a full refund."], ["Format", "Reply in three short lines: decision, reason, next step.", ""], ["Example", "Match the tone of this example: “Thanks for flagging this, we’ll sort it today.”", "Thanks for flagging this, we’ll sort it today."]];
-const ON1 = [false, false, false, false];
-function r1() {
-  const p = ["Task: Should we refund this customer?"]; PT.forEach((t, i) => { if (ON1[i]) p.unshift(t[1]); });
-  $("#a1-prompt").textContent = p.join("\n");
-  let a = ON1[1] ? "Yes, because the order is 12 days old and unopened, it qualifies for a full refund under the 30-day policy." : "It depends on your refund policy and the condition of the item. Please share more details.";
-  if (ON1[0]) a = a.replace(/^/, "");
-  if (ON1[3]) a = "Thanks for flagging this, we’ll sort it today. " + a;
-  if (ON1[2]) a = ON1[1] ? "Decision: Refund in full.\nReason: 12 days old, unopened, inside 30 days.\nNext step: We’ll send a prepaid return label." : "Decision: Needs more information.\nReason: No policy or order facts given.\nNext step: Please share the order details.";
-  if (ON1[0]) a = "As Northwind support:\n" + a;
-  $("#a1-ans").textContent = a;
+/* step 1: where each option acts */
+const LEV = [
+  { n: "Option 1: Prompting", box: 0, t: "Acts on your request. The model is not changed, and the effect lasts only for that request." },
+  { n: "Option 2: Retrieval", box: 1, t: "Acts on what is added to the context. The model is not changed, and updating a document updates the answers." },
+  { n: "Option 3: Fine-tuning", box: 2, t: "Acts on the model itself (Lesson 3). The change stays until you train again." }
+];
+function whereInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Pick an option:</span><div class="seg3" id="wh-seg"></div></div><div class="flowd" id="wh-flow" style="margin:6px 0"></div><div class="note" id="wh-note" style="margin:0"></div></div>`;
+  const names = ["Your request", "Passages from your documents", "The model", "The reply"];
+  seg("#wh-seg", LEV.map(x => x.n), 0, i => {
+    const f = clear($("#wh-flow"));
+    f.append(h("div", { class: "fb" + (i === 0 ? " acc" : "") }, names[0]), h("span", { text: "+" }), h("div", { class: "fb" + (i === 1 ? " acc" : "") }, names[1]), h("span", { text: "→" }), h("div", { class: "fb" + (i === 2 ? " acc" : "") }, names[2]), h("span", { text: "→" }), h("div", { class: "fb good" }, names[3]));
+    $("#wh-note").textContent = LEV[i].t;
+  });
 }
-PT.forEach((t, i) => $("#a1-chips").append(h("button", { class: "btn", onclick: e => { ON1[i] = !ON1[i]; e.currentTarget.classList.toggle("on", ON1[i]); r1(); } }, "+ " + t[0])));
-r1();
-$("#q1").append(quick("A reply ignores your refund policy. What is the cheapest first fix?", ["Add the policy to the prompt", "Retrain the model from scratch", "Switch off the model"], 0, "Missing facts is a prompt problem first. Supplying them is quick and free to try."));
-// 2
+
+/* step 2: prompting */
+const PT = [["Role", "You are a support agent for Northwind."], ["Facts", "Facts: the order is 12 days old and the item is unopened. Policy: 30-day returns."], ["Format", "Reply in three short lines: decision, reason, next step."], ["Example", "Match the tone of this example: “Thanks for flagging this, we’ll sort it today.”"]];
+function promptInit(host) {
+  host.innerHTML = `<div class="widget"><div class="label">Add each part to the prompt: On or Off</div><div class="swgrid" id="a1-chips"></div><div class="label">The prompt</div><div class="docbox" id="a1-prompt" style="white-space:pre-line;font-size:.86rem;padding:6px 10px"></div><div class="label">The answer</div><div class="docbox" id="a1-ans" style="white-space:pre-line;padding:6px 10px"></div><p class="hint">Scripted illustration of how each addition shapes the answer.</p></div>`;
+  const on = [false, false, false, false];
+  function draw() {
+    const p = PT.filter((t, i) => on[i]).map(t => t[1]); p.push("Task: Should we refund this customer?");
+    $("#a1-prompt").textContent = p.join("\n");
+    let a;
+    if (on[2]) a = on[1] ? "Decision: Refund in full.\nReason: 12 days old, unopened, inside 30 days.\nNext step: We’ll send a prepaid return label." : "Decision: Needs more information.\nReason: No policy or order facts given.\nNext step: Please share the order details.";
+    else a = on[1] ? "Yes, because the order is 12 days old and unopened, it qualifies for a full refund under the 30-day policy." : "It depends on your refund policy and the condition of the item. Please share more details.";
+    if (on[3]) a = "Thanks for flagging this, we’ll sort it today.\n" + a;
+    if (on[0]) a = "As Northwind support:\n" + a;
+    $("#a1-ans").textContent = a;
+  }
+  PT.forEach((t, i) => $("#a1-chips").append(switchRow(t[0], false, v => { on[i] = v; draw(); })));
+  draw();
+}
+
+/* step 3: retrieval */
 const KB = [["Returns policy", "Returns are accepted within 30 days of delivery. Opened items carry a 15% restocking fee."], ["Shipping policy", "Standard shipping takes 3 to 5 business days. Express shipping takes 1 to 2 business days."], ["Warranty", "All laptops carry a 1 year warranty covering defects, including a cracked screen on arrival."], ["Refund timing", "Refunds are paid to the original payment method within 5 business days."], ["Support hours", "Support is open weekdays 9am to 6pm. Weekend requests are answered on Monday."], ["Price matching", "We match a lower price from an authorised retailer within 14 days of purchase."]];
 const STOP = new Set("take long the a an is are do you i my to of for in on and or it what how when can we our me at be does".split(" "));
 const words = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(w => w && !STOP.has(w)).map(w => w.replace(/(ing|ed|s)$/, ""));
-function ask(q) {
-  $("#a2-in").value = q; const qw = new Set(words(q));
-  const sc = KB.map(d => [d, [...new Set(words(d[0] + " " + d[1]))].filter(w => qw.has(w)).length]).sort((a, b) => b[1] - a[1]), top = sc.filter(x => x[1] > 0).slice(0, 2);
-  const hits = clear($("#a2-hits")); sc.slice(0, 3).forEach(([d, n], i) => hits.append(h("div", { class: "fb " + (i < top.length ? "good" : ""), style: { textAlign: "left", opacity: n ? 1 : .55 } }, d[0] + " · " + n + (n === 1 ? " matching word" : " matching words") + (i < top.length ? " · used" : ""))));
-  $("#a2-prompt").textContent = (top.length ? "Answer using only these passages:\n" + top.map(t => "• " + t[0][1]).join("\n") + "\n\n" : "") + "Question: " + q;
-  clear($("#a2-ans")).append(top.length ? h("div", null, h("span", { class: "pill good", text: "Grounded" }), h("p", { style: { margin: "6px 0 0" } }, top[0][0][1], h("span", { class: "hint", text: "  Source: " + top[0][0][0] }))) : h("div", null, h("span", { class: "pill info", text: "No match" }), h("p", { style: { margin: "6px 0 0" }, text: "I can’t find that in the company documents." })));
+function ragInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row" id="a2-q"></div><div class="row"><input type="text" id="a2-in" placeholder="Or type a question about returns, shipping, warranty or support" style="flex:1;min-width:12rem"><button class="btn primary" id="a2-go">Search</button></div><div class="label">1. Search the company documents (a simple word match here)</div><div class="stack" id="a2-hits" style="gap:4px"></div><div class="label">2. The prompt the model receives</div><div class="docbox" id="a2-prompt" style="white-space:pre-line;font-size:.84rem;padding:6px 10px"></div><div class="label">3. The answer, with its source</div><div class="docbox" id="a2-ans" style="padding:6px 10px"></div></div>`;
+  function ask(q) {
+    $("#a2-in").value = q; const qw = new Set(words(q));
+    const sc = KB.map(d => [d, [...new Set(words(d[0] + " " + d[1]))].filter(w => qw.has(w)).length]).sort((a, b) => b[1] - a[1]), top = sc.filter(x => x[1] > 0).slice(0, 2);
+    const hits = clear($("#a2-hits")); sc.slice(0, 2).forEach(([d, n], i) => hits.append(h("div", { class: "fb " + (i < top.length ? "good" : ""), style: { textAlign: "left", opacity: n ? 1 : .55, padding: "4px 10px" } }, d[0] + " · " + n + (n === 1 ? " matching word" : " matching words") + (i < top.length ? " · used" : ""))));
+    $("#a2-prompt").textContent = (top.length ? "Answer using only these passages:\n" + top.map(t => "• " + t[0][1]).join("\n") + "\n\n" : "") + "Question: " + q;
+    clear($("#a2-ans")).append(top.length ? h("div", null, h("span", { class: "pill good", text: "Grounded" }), " ", top[0][0][1], h("span", { class: "hint", text: "  Source: " + top[0][0][0] })) : h("div", null, h("span", { class: "pill info", text: "No match" }), " I can’t find that in the company documents."));
+  }
+  ["How long do refunds take?", "What if the screen arrives cracked?", "Do you open on weekends?"].forEach(q => $("#a2-q").append(h("button", { class: "btn", onclick: () => ask(q) }, q)));
+  $("#a2-go").onclick = () => ask($("#a2-in").value || "returns"); $("#a2-in").addEventListener("keydown", e => { if (e.key === "Enter") $("#a2-go").click(); });
+  ask("What if the screen arrives cracked?");
 }
-["How long do refunds take?", "What if the screen arrives cracked?", "Do you open on weekends?"].forEach(q => $("#a2-q").append(h("button", { class: "btn", onclick: () => ask(q) }, q)));
-$("#a2-go").onclick = () => ask($("#a2-in").value || "returns"); $("#a2-in").addEventListener("keydown", e => { if (e.key === "Enter") $("#a2-go").click(); });
-ask("What if the screen arrives cracked?");
-$("#q2").append(quick("What does retrieval change?", ["It adds the relevant passages from your documents to the prompt, so the answer can cite them", "It retrains the model on your documents", "It lowers the temperature"], 0, "RAG changes what the model reads, not what it has learned. Update the documents and the answers update too."));
-// 3
+
+/* step 4: fine-tuning */
 const FT = [["Your order is currently in transit. Please check the tracking link for more information.", "Generic and polite. It could come from any company."], ["Thanks for getting in touch. Your order is on its way, and you can follow it with the tracking link.", "A few examples nudge the tone."], ["Hi there! Your parcel is on its way and should reach you soon. Track it here, and shout if it’s late.", "Starting to match the house voice."], ["Hi! Good news: your order is on its way. Track it here. If it doesn’t arrive when expected, reply to this and we’ll fix it.", "Consistent house style, with your standard promise included."]];
 const CT = ["0", "10", "100", "1,000"];
-function r3() { const i = +$("#a3").value; $("#a3-v").textContent = CT[i]; $("#a3-out").textContent = FT[i][0]; $("#a3-note").textContent = FT[i][1] + (i ? " Facts like today’s order status still need retrieval: fine-tuning shapes style, not live data." : ""); }
-$("#a3").oninput = r3; r3();
-$("#q3").append(quick("When is fine-tuning the right tool?", ["When you need a consistent style or format that prompts struggle to give", "When you need today’s stock levels", "When you have no examples"], 0, "Fine-tuning needs examples and effort, and it shapes behavior. For live or changing facts, use retrieval."));
-// 4
-const CM = [["", "Prompting", "Retrieval (RAG)", "Fine-tuning"], ["Changes the model?", "No", "No", "Yes"], ["Effort", "Low", "Medium", "High"], ["Needs", "Good instructions", "Searchable documents", "Many good examples"], ["Update when facts change", "Edit the prompt", "Update the documents", "Train again"]];
-CM.forEach((r, i) => $("#a4-t").append(h("tr", null, ...r.map((c, k) => h(i ? "td" : "th", { text: c, style: k ? {} : { fontWeight: 600 } })))));
-const SC = [["Answers must use this week’s price list, which changes often.", 1, "Retrieval keeps answers current: update the documents and nothing else."], ["All customer emails should sound like our brand, in a fixed layout.", 2, "A consistent style across thousands of replies is what fine-tuning is good at, once a strong prompt with examples has not held it."], ["One-off: summarize this contract for tomorrow’s meeting.", 0, "A single task needs nothing more than a clear prompt with the contract in it."]];
-SC.forEach((s, i) => { const row = h("div", { class: "stack", style: { gap: "6px" } }, h("div", { text: s[0] }), h("div", { class: "seg3" }, ...["Prompting", "Retrieval (RAG)", "Fine-tuning"].map((t, k) => h("button", { onclick: e => { const f = row.querySelector(".fbk"); f.className = "fbk pill " + (k === s[1] ? "good" : "warn"); f.textContent = (k === s[1] ? "Right. " : "Not quite. ") + s[2]; e.currentTarget.parentNode.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === k)); } }, t))), h("span", { class: "fbk" })); $("#a4-s").append(row); });
-$("#q4").append(quick("Which option would you try first for almost any new use case?", ["Prompting: it is the cheapest and fastest to test", "Fine-tuning", "Building a new model"], 0, "Climb only as far as you need to. Each step up costs more time, money and data."));
+function tuneInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Company examples used:</span><div class="seg3" id="a3-seg"></div></div><div class="label">Reply to “Where is my order?”</div><div class="docbox" id="a3-out"></div><div class="note" id="a3-note"></div><p class="hint">Scripted illustration. Real projects vary in how many examples they need.</p></div>`;
+  seg("#a3-seg", CT, 0, i => { $("#a3-out").textContent = FT[i][0]; $("#a3-note").textContent = FT[i][1] + (i ? " Facts like today’s order status still need retrieval: fine-tuning shapes style, not live data." : ""); });
+}
+
+/* step 5: choose */
+const SC = [
+  { t: "Answers must use this week’s price list, which changes often.", a: 1, why: "Retrieval keeps answers current: update the documents and nothing else." },
+  { t: "All customer emails should sound like our brand, in a fixed layout.", a: 2, why: "A consistent style across thousands of replies is what fine-tuning is good at, once a strong prompt with examples has not held it." },
+  { t: "One-off: summarize this contract for tomorrow’s meeting.", a: 0, why: "A single task needs nothing more than a clear prompt with the contract in it." },
+  { t: "Staff want answers from a 500-page policy manual, with the source named.", a: 1, why: "Retrieval finds the relevant passages, and the answer can point to them." }
+];
+
+lesson({
+  title: "Making it fit your business",
+  lede: "A general model knows nothing about your company. There are three ways to close that gap, and they differ a lot in cost and effort: write a better prompt, let the model look things up in your documents, or train it further on your examples.",
+  learn: `<b>By the end you can</b>describe prompting, retrieval and fine-tuning, say where each one acts, and pick the right one for a given business need.`,
+  steps: [
+    {
+      title: "Three ways to close the gap",
+      main: `<p>The model has never seen your prices, your policies or your tone. Lesson 5 showed how facts reach it through the context. There are three ways to make a model fit your business:</p>
+<div class="cards three">
+  <div><b>Option 1: Prompting</b>Write better instructions, and put the facts in the request.</div>
+  <div><b>Option 2: Retrieval</b>Let the model look things up in your documents before it answers.</div>
+  <div><b>Option 3: Fine-tuning</b>Train it further on your examples, so the model itself changes.</div>
+</div>
+<p>They differ in cost and effort, and in what they change.</p>`,
+      interactive: whereInit,
+      deep: `<p>Real products often combine all three. A support assistant might have a carefully written system prompt, search your help articles, and use a model tuned for its tone. The options are not rivals: you add the next one only when the earlier ones are not enough.</p>`,
+      quiz: [["Which option changes the model itself?", ["Fine-tuning", "Prompting", "Retrieval"], 0, "Prompting and retrieval change what the model reads. Fine-tuning continues training, so the weights change."]]
+    },
+    {
+      stage: "Stage 1: Change what it reads",
+      title: "Option 1: Write a better prompt",
+      main: `<p>The cheapest lever. Add parts to a prompt and the answer improves. Nothing about the model changes: only what it reads.</p>
+<p>A clear role, the facts it needs, the format you want and an example of the tone are four useful parts.</p>`,
+      interactive: promptInit,
+      deep: `<p>Everything in the prompt sits in working memory (Lesson 5), so it counts toward the window and the cost. Keep prompts clear and specific, and remove text that does not help.</p><p>Test a prompt on real examples, not just one. A change that fixes one case can break another.</p>`,
+      quiz: [["A reply ignores your refund policy. What is the cheapest first fix?", ["Add the policy to the prompt", "Retrain the model from scratch", "Switch off the model"], 0, "Missing facts is a prompt problem first. Supplying them is quick and free to try."]]
+    },
+    {
+      stage: "Stage 1: Change what it reads",
+      title: "Option 2: Let it look things up (retrieval)",
+      main: `<p>Retrieval-augmented generation, or RAG, searches your own documents first, then adds the best passages to the prompt. These become the retrieved documents layer in Lesson 5.</p>
+<p>The model still has not learned your documents. It reads the right passages each time, and can point to its source.</p>`,
+      interactive: ragInit,
+      deep: `<p>The search in the exercise is a simple word match so you can see how it works. Real systems split documents into passages and match on meaning, using embeddings (Lesson 4), often together with keyword search. The quality of the answer depends on the quality of the search: if the wrong passages are found, the answer is built on them.</p>
+<p>Retrieval reduces invented answers, but does not remove them, so keep the rule to answer only from the passages. In a company, also make sure the search only returns documents the person asking is allowed to see.</p>`,
+      quiz: [["What does retrieval change?", ["It adds the relevant passages from your documents to the prompt, so the answer can cite them", "It retrains the model on your documents", "It lowers the temperature"], 0, "RAG changes what the model reads, not what it has learned. Update the documents and the answers update too."]]
+    },
+    {
+      stage: "Stage 2: Change the model",
+      title: "Option 3: Train it on your examples (fine-tuning)",
+      main: `<p>Fine-tuning continues training on examples you supply (the fine-tuning stage from Lesson 3), so the model itself changes. It is best for a consistent style or format.</p>
+<p>It needs many good examples and effort, and it shapes how the model behaves, not what is true today.</p>`,
+      interactive: tuneInit,
+      deep: `<p>Not every model can be fine-tuned, and the method and cost differ by provider. Some methods train only a small add-on rather than every parameter. When facts change, a fine-tuned model has to be trained again, which is why changing facts belong in retrieval.</p>`,
+      quiz: [["When is fine-tuning the right tool?", ["When you need a consistent style or format that prompts struggle to give", "When you need today’s stock levels", "When you have no examples"], 0, "Fine-tuning needs examples and effort, and it shapes behavior. For live or changing facts, use retrieval."]]
+    },
+    {
+      title: "Choose the right option",
+      main: `<p>Start with the cheapest option and move up only if it is not enough.</p>
+<div style="overflow:auto"><table class="cmpt">
+<tr><th></th><th>Prompting</th><th>Retrieval (RAG)</th><th>Fine-tuning</th></tr>
+<tr><td><b>Changes the model?</b></td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td><b>Effort</b></td><td>Low</td><td>Medium</td><td>High</td></tr>
+<tr><td><b>Best for</b></td><td>Clear instructions, format, one-off tasks</td><td>Facts that change or are private, with sources</td><td>A consistent style or behavior at scale</td></tr>
+<tr><td><b>When facts change</b></td><td>Edit the prompt</td><td>Update the documents</td><td>Train again</td></tr>
+</table></div>`,
+      interactive: host => { host.append(h("p", { class: "hint", style: { margin: "0 0 6px" }, text: "For each need, pick the best first move." })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, SC, ["Prompting", "Retrieval", "Fine-tuning"]); },
+      deep: `<p>Before you climb a level, test the current one on a set of real examples. If prompting already gives answers your team accepts, you are done. The extra effort of retrieval or fine-tuning should buy something you can measure.</p>`,
+      quiz: [["Which option would you try first for almost any new use case?", ["Prompting: it is the cheapest and fastest to test", "Fine-tuning", "Building a new model"], 0, "Climb only as far as you need to. Each step up costs more time, money and data."]]
+    },
+    {
+      title: "What you’ve seen",
+      main: `<p><b>Three options.</b> Prompting changes the request, retrieval adds passages from your documents, and fine-tuning changes the model itself.</p>
+<p><b>Start cheap.</b> Prompts first, retrieval when the model needs your facts, and fine-tuning when you need a consistent behavior that prompts cannot give you.</p>
+<p><b>Combine them.</b> Real products often use all three, and each step up costs more effort, so test before you climb.</p>`,
+      deep: `<p>Next, Lesson 9 looks at cost and choosing a model. The replies and scores in this lesson are scripted for illustration.</p>`
+    }
+  ]
+});
+chrome(7);
 </script></body></html>

@@ -105,6 +105,14 @@ function chrome(i) {
 }
 
 function seg(id, items, on, cb) { const el = $(id); items.forEach((x, i) => el.append(h("button", { class: i === on ? "on" : "", onclick: () => { el.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i)); cb(i); } }, x))); cb(on); }
+/* a labelled Off / On switch, so the state is spelled out instead of hidden in a button colour */
+function switchRow(label, on, cb) {
+  const b0 = h("button", { class: on ? "" : "on" }, "Off"), b1 = h("button", { class: on ? "on" : "" }, "On");
+  const row = h("div", { class: "swrow" }, h("span", { text: label }), h("div", { class: "seg3" }, b0, b1));
+  row.set = v => { b0.classList.toggle("on", !v); b1.classList.toggle("on", v); };
+  b0.onclick = () => { row.set(false); cb(false); }; b1.onclick = () => { row.set(true); cb(true); };
+  return row;
+}
 function cell(k, v) { return h("div", null, h("b", { text: k }), v); }
 
 

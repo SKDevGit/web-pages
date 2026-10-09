@@ -2,40 +2,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/css/site.css"></head><body>
 <header id="site-head"></header>
-<main class="col">
-<h1>Put it all together</h1>
-<p class="meta">2 exercises</p>
-<p class="lede">You’ve now seen both halves. Training happens before you type anything, in a few big rounds, and produces the parameters. Inference happens every time you send a prompt, and uses those parameters together with your context.</p>
-<div class="learn"><b>By the end you can</b>trace one prompt from text to reply, and say for any step whether it belongs to training, inference, or both.</div>
-
-<span class="step">Step 1 of 2</span>
-<h2>Follow one prompt</h2>
-<p>Step through a full request. The highlighted boxes show where you are, in the training process that built the model and in the inference process that runs your prompt.</p>
-<div class="widget">
-  <div id="pipe-lanes" class="stack"></div>
-  <div id="pipe-view" class="stack"></div>
-  <div class="row"><button class="btn" id="pipe-back">Back</button><button class="btn primary" id="pipe-next">Next step</button><span class="hint" id="pipe-pos"></span></div>
-</div>
-<div id="q1"></div>
-
-<span class="step">Step 2 of 2</span>
-<h2>Training, inference, or both?</h2>
-<p>For each statement, choose when it happens, then check your answers.</p>
-<div class="widget">
-  <div class="stack" id="quiz"></div>
-  <div class="row"><button class="btn primary" id="quiz-check">Check my answers</button><span class="hint" id="quiz-score"></span></div>
-</div>
-
-<h2>What this means for you</h2>
-<p><b>Knowledge has a date.</b> What the model learned stops at its training cutoff. Anything current has to arrive in the prompt.</p>
-<p><b>Answers vary.</b> Sampling means two runs can differ. Test with many runs, and lower the temperature when you need consistency.</p>
-<p><b>Tokens are the meter.</b> Cost, speed, and the size of the brief you can supply are all measured in tokens.</p>
-<p><b>Context is your lever.</b> You can’t retrain a model in a meeting, but you can change what it reads before it answers.</p>
-</main>
+<main class="col" id="lesson"></main>
 <nav id="pager"></nav>
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
-chrome(9);
 const TEXT = "A customer says their laptop arrived with a cracked screen. Should we refund?";
 const RESP = "Yes, a cracked screen on arrival is a defect. Refund in full and send a prepaid return label.";
 const STEPS = ["Receive the prompt", "Split into tokens", "Weigh the context", "Predict the next token", "Pick one, add it, repeat", "Where the parameters came from"];
@@ -43,6 +13,11 @@ const LT = ["Collect text", "Guess next word", "Measure error", "Adjust paramete
 const ON = [{ i: [0] }, { i: [1] }, { i: [2] }, { i: [2, 3] }, { i: [4, 5] }, { t: [1, 2, 3, 4] }];
 const PA = [["cracked", 0.3], ["screen", 0.22], ["refund", 0.2], ["laptop", 0.1], ["Should", 0.08], ["we", 0.06], ["arrived", 0.04]], PP = [["Yes", 0.34], ["Based", 0.16], ["I", 0.13], ["Absolutely", 0.08], ["Because", 0.07], ["We", 0.07], ["A", 0.05], ["Refund", 0.04]];
 let k = 0, timer = null;
+function pipeInit(host) {
+  host.innerHTML = `<div class="widget"><div id="pipe-lanes" class="stack"></div><div id="pipe-view" class="stack"></div><div class="row"><button class="btn" id="pipe-back">Back</button><button class="btn primary" id="pipe-next">Next step</button><span class="hint" id="pipe-pos"></span></div></div>`;
+  k = 0;
+  $("#pipe-back").onclick = () => { k = Math.max(0, k - 1); pipe(); }; $("#pipe-next").onclick = () => { k = Math.min(STEPS.length - 1, k + 1); pipe(); }; pipe();
+}
 function pipe() {
   clearInterval(timer);
   const ln = clear($("#pipe-lanes")), on = ON[k];
@@ -53,13 +28,76 @@ function pipe() {
   if (k === 2) v.append(bars(PA.map(([l, p]) => ({ label: l, p }))), h("p", { class: "hint", text: "Illustrative: where the last token looks. The parameters set how words relate; your prompt supplies the words." }));
   if (k === 3) v.append(bars(PP.map(([l, p]) => ({ label: l, p }))), h("p", { class: "hint", text: "Illustrative odds for the first word of the reply, from the frozen parameters plus this exact context." }));
   if (k === 4) { const out = h("div", { class: "strip" }), w = RESP.split(" "); let n = w.length; const draw = () => { clear(out); w.slice(0, n).forEach(x => out.append(h("span", { class: "w g", text: x }))); if (n < w.length) out.append(h("span", { class: "cursor" })); }; draw(); v.append(out, h("div", null, h("button", { class: "btn", onclick: () => { clearInterval(timer); n = 0; draw(); timer = setInterval(() => { n++; draw(); if (n >= w.length) clearInterval(timer); }, 280); } }, "Replay"))); }
-  if (k === 5) v.append(h("p", { text: "Long before this prompt, the model read vast amounts of text, guessed the next token, measured its error, and nudged its parameters, repeating that loop an enormous number of times. That is the loop from the training page. The result is a fixed set of numbers that inference reads and never changes." }));
+  if (k === 5) v.append(h("p", { text: "Long before this prompt, the model read vast amounts of text, guessed the next token, measured its error, and nudged its parameters, repeating that loop an enormous number of times. That is the loop from Lesson 3. The result is a fixed set of numbers that inference reads and never changes." }));
   $("#pipe-back").disabled = k === 0; $("#pipe-next").disabled = k === STEPS.length - 1; $("#pipe-pos").textContent = "Step " + (k + 1) + " of " + STEPS.length;
 }
-$("#pipe-back").onclick = () => { k = Math.max(0, k - 1); pipe(); }; $("#pipe-next").onclick = () => { k = Math.min(STEPS.length - 1, k + 1); pipe(); }; pipe();
-$("#q1").append(quick("While the model writes a reply, do its parameters change?", ["Yes, it learns from every prompt", "No. They are fixed at inference time.", "Only if the temperature is high"], 1, "Parameters change only during training. Inference reads them and never edits them."));
-const QUIZ = [["Compare the guess with the real next word and compute the error", "T", "Measuring error needs a known right answer, which exists in training text."], ["Adjust billions of parameters to reduce the error", "T", "Parameters change only in training."], ["Split text into tokens", "B", "Training text and your prompt are both tokenized."], ["Turn probabilities into one chosen token using temperature", "I", "Sampling happens when generating an answer."], ["Feed each chosen token back in to predict the next one", "I", "This loop produces the reply one token at a time."], ["Read the brief you put in the prompt", "I", "Your context exists only at inference."], ["Learn how words should relate to each other (the attention parameters)", "T", "The relationships are learned in training."], ["Work out which words in your brief matter for this answer", "I", "The learned rules are applied afresh to every prompt."], ["Keep the parameters fixed", "I", "Inference reads the parameters and never edits them."]];
-const QA = {};
-QUIZ.forEach(([t], i) => { const seg = h("div", { class: "seg3" }); [["T", "Training"], ["I", "Inference"], ["B", "Both"]].forEach(([v, l]) => seg.append(h("button", { "data-v": v, onclick: () => { QA[i] = v; seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); } }, l))); $("#quiz").append(h("div", { class: "q-item", id: "qi" + i }, h("span", { text: t }), seg)); });
-$("#quiz-check").onclick = () => { let ok = 0; QUIZ.forEach(([, a, why], i) => { const el = $("#qi" + i); el.classList.remove("right", "wrong"); el.querySelectorAll(".why").forEach(x => x.remove()); if (!QA[i]) return; const good = QA[i] === a; if (good) ok++; el.classList.add(good ? "right" : "wrong"); el.append(h("div", { class: "why", text: (good ? "Correct. " : "Answer: " + { T: "Training", I: "Inference", B: "Both" }[a] + ". ") + why })); }); $("#quiz-score").textContent = ok + " of " + QUIZ.length + " correct"; };
+
+const TQ = [
+  { t: "Compare the guess with the real next word and compute the error", a: 0, why: "Measuring error needs a known right answer, which exists in training text." },
+  { t: "Turn probabilities into one chosen token using temperature", a: 1, why: "Sampling happens when generating an answer." },
+  { t: "Split text into tokens", a: 2, why: "Training text and your prompt are both tokenized." },
+  { t: "Read the brief you put in the prompt", a: 1, why: "Your context exists only at inference." },
+  { t: "Adjust billions of parameters to reduce the error", a: 0, why: "Parameters change only in training." }
+];
+const TQ2 = [
+  { t: "Feed each chosen token back in to predict the next one", a: 1, why: "This loop produces the reply one token at a time." },
+  { t: "Learn how words should relate to each other (the attention parameters)", a: 0, why: "The relationships are learned in training." },
+  { t: "Work out which words in your brief matter for this answer", a: 1, why: "The learned rules are applied afresh to every prompt." },
+  { t: "Keep the parameters fixed", a: 1, why: "Inference reads the parameters and never edits them." }
+];
+const TLAB = ["Training", "Inference", "Both"];
+const TAKE = [
+  ["Knowledge has a date", "What the model learned stops at its training cutoff. Anything current has to arrive in the prompt."],
+  ["Answers vary", "Sampling means two runs can differ. Test with many runs, and lower the temperature when you need consistency."],
+  ["Tokens are the meter", "Cost, speed and the size of the brief you can supply are all measured in tokens."],
+  ["Context is your lever", "You can’t retrain a model in a meeting, but you can change what it reads before it answers."],
+  ["Check in proportion to risk", "The more a model decides and acts on its own, the more you need a person to check before it is hard to undo."],
+  ["Start small and cheap", "Use the smallest model and the cheapest option that does the job: a prompt first, then retrieval, then fine-tuning."]
+];
+const SCEN = [
+  { t: "The assistant quotes last year’s price.", a: 0, why: "What the model learned stops at its training cutoff, so current facts must arrive in the prompt." },
+  { t: "Two runs of the same prompt gave different replies.", a: 1, why: "Sampling picks among likely tokens, so runs can differ." },
+  { t: "The bill doubled after the replies got longer.", a: 2, why: "You pay for tokens written as well as tokens read." },
+  { t: "The answer improved once the policy was pasted in.", a: 3, why: "Changing what the model reads is the lever you control." },
+  { t: "An agent is about to send a refund.", a: 4, why: "Actions that are costly to undo need a person to approve them first." },
+  { t: "You want to try AI on a new task.", a: 5, why: "Start with the cheapest option that works, and climb only if you need to." }
+];
+function sortWidget(items, labels) { return host => { const w = h("div", { class: "widget" }); host.append(w); sorter(w, items, labels); }; }
+
+lesson({
+  title: "Put it all together",
+  lede: "You’ve now seen both halves. Training happens before you type anything, in a few big rounds, and produces the parameters. Inference happens every time you send a prompt, and uses those parameters together with your context.",
+  learn: `<b>By the end you can</b>trace one prompt from text to reply, say for any step whether it belongs to training, inference or both, and name the main lessons for using a model at work.`,
+  steps: [
+    {
+      title: "Follow one prompt",
+      main: `<p>Step through a full request. The highlighted boxes show where you are, in the training process that built the model and in the inference process that runs your prompt.</p>
+<p>Training happened once, earlier. Inference happens every time you send a prompt.</p>`,
+      interactive: pipeInit,
+      deep: `<p>This is a simplified view. Lesson 4 shows the inference steps in detail, and Lesson 3 shows the training stages. In real products, instructions, documents and tool results are added to the context around your prompt (Lesson 5).</p>`,
+      quiz: [["While the model writes a reply, do its parameters change?", ["Yes, it learns from every prompt", "No. They are fixed at inference time.", "Only if the temperature is high"], 1, "Parameters change only during training. Inference reads them and never edits them."]]
+    },
+    {
+      title: "Training, inference, or both?",
+      main: `<p>For each statement, decide when it happens: in training, in inference, or in both.</p>
+<div class="cards three">
+  <div><b>Training</b>Happens once, before you type anything. It changes the parameters.</div>
+  <div><b>Inference</b>Happens with every prompt. It reads the parameters and your context.</div>
+  <div><b>Both</b>Used in each stage, such as splitting text into tokens.</div>
+</div>`,
+      interactive: sortWidget(TQ, TLAB),
+      deep: host => { host.append(h("p", { text: "Four more to try:" })); sortWidget(TQ2, TLAB)(host); },
+      quiz: [["Which stage can change what the model knows?", ["Training", "Inference", "Both"], 0, "Only training changes the parameters. At inference, new facts arrive through the context."]]
+    },
+    {
+      title: "What this means for you",
+      main: `<p>Six ideas to take back to work. In Try it, match each situation to the idea it shows.</p>
+<div class="cards two">${TAKE.map(t => `<div><b>${t[0]}</b>${t[1]}</div>`).join("")}</div>`,
+      interactive: sortWidget(SCEN, ["Date", "Varies", "Tokens", "Context", "Check", "Start small"]),
+      deep: `<p>Key terms for the whole module are in the Key terms page. The lessons build on each other: tokens (Lesson 2), training (Lesson 3), usage (Lesson 4), context (Lesson 5), uses (Lesson 6), limits and risks (Lesson 7), fitting a model to your business (Lesson 8), and cost and choice (Lesson 9).</p>`,
+      quiz: [["You can’t retrain a model in a meeting. What can you change?", ["What the model reads before it answers", "The parameters", "The training data"], 0, "Context is your lever: the prompt, the documents and the examples you supply."]]
+    }
+  ]
+});
+chrome(9);
 </script></body></html>

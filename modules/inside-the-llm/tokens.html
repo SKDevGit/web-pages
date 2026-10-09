@@ -2,72 +2,89 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/css/site.css"></head><body>
 <header id="site-head"></header>
-<main class="col">
-<h1>What are tokens?</h1>
-<p class="meta">3 exercises</p>
-<p class="lede">A model doesn’t read words the way you do. It reads tokens: small chunks of text. Knowing how text becomes tokens explains a surprising amount of model behavior, and it explains the bill.</p>
-<div class="learn"><b>By the end you can</b>say what a token is, predict which kinds of text use more tokens, and estimate what a model costs to run at volume.</div>
-
-<span class="step">Step 1 of 3</span>
-<h2>Split a sentence</h2>
-<p>Edit the text and watch it split. Common words are usually one token, and a space belongs to the word that follows it. Numbers split into short groups. Rare or unfamiliar words break into pieces.</p>
-<div class="widget">
-  <div class="row" id="presets"></div>
-  <label class="field" for="tok-in">Your text<textarea id="tok-in" rows="3"></textarea></label>
-  <div id="tok-out"></div>
-  <div class="stats" id="tok-stats"></div>
-  <p class="hint">This page uses a simplified tokenizer that follows the habits of real ones. Real vocabularies differ in detail, and the small number under each token is an illustrative ID.</p>
-</div>
-<div id="q1"></div>
-
-<span class="step">Step 2 of 3</span>
-<h2>Compare languages and formats</h2>
-<p>Tokens per word is not constant. Everyday English uses few tokens. Other scripts, long numbers, and product codes use more. Which of these three do you think needs the most tokens?</p>
-<div class="widget" id="cmp"></div>
-<div id="q2"></div>
-
-<span class="step">Step 3 of 3</span>
-<h2>Tokens are the meter</h2>
-<p>Usage is billed and limited in tokens: what you send in, and what the model writes back. A longer prompt and a longer reply both cost more, and the context window, how much text fits at once (your input plus the model’s reply), is also counted in tokens.</p>
-<div class="widget">
-  <div class="form">
-    <label class="field" for="tok-vol">Tickets per day<input type="text" id="tok-vol" value="5000" inputmode="numeric"></label>
-    <label class="field" for="tok-price">Example price per million tokens ($)<input type="text" id="tok-price" value="3" inputmode="decimal"></label>
-  </div>
-  <label class="field" for="tok-len">Tokens per ticket (prompt plus reply)<input type="text" id="tok-len" value="800" inputmode="numeric"></label>
-  <div class="stats" id="cost"></div>
-  <p class="hint">The price is a placeholder. Check your provider’s current rates, which usually differ for input and output tokens.</p>
-</div>
-<div id="q3"></div>
-</main>
+<main class="col" id="lesson"></main>
 <nav id="pager"></nav>
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
-chrome(1);
+/* step 1: split a sentence */
 const TPRE = [["Plain sentence", "The customer returned the product because it arrived late."], ["Numbers and money", "Refund of $1,249.50 for order #48213907 was issued on 2026-10-06."], ["Rare words", "Our Zorbitronics X9 unrefundable subscription was misconfigured."], ["Capitals and spaces", "customer Customer CUSTOMER  customer"], ["Hindi", "ग्राहक ने उत्पाद वापस कर दिया"]];
-const ta = $("#tok-in"); ta.value = TPRE[0][1];
-function view() {
-  const t = tokenize(ta.value), words = (ta.value.trim().match(/\S+/g) || []).length;
-  clear($("#tok-out")).append(tokChips(t.map(x => ({ t: x, id: tokId(x) }))));
-  clear($("#tok-stats")).append(...[[ta.value.length, "characters"], [words, "words"], [t.length, "tokens"], [words ? (t.length / words).toFixed(2) : "–", "tokens per word"]].map(([a, b]) => h("span", null, h("b", { text: a }), b)));
+function splitInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Try an example:</span></div><div class="row" id="presets"></div><label class="field" for="tok-in">Or edit the text<textarea id="tok-in" rows="2"></textarea></label><div id="tok-out"></div><div class="stats" id="tok-stats"></div></div>`;
+  const ta = $("#tok-in"); ta.value = TPRE[0][1];
+  function view() {
+    const t = tokenize(ta.value), words = (ta.value.trim().match(/\S+/g) || []).length;
+    clear($("#tok-out")).append(tokChips(t.map(x => ({ t: x, id: tokId(x) }))));
+    clear($("#tok-stats")).append(...[[ta.value.length, "characters"], [words, "words"], [t.length, "tokens"], [words ? (t.length / words).toFixed(2) : "–", "tokens per word"]].map(([a, b]) => h("span", null, h("b", { text: a }), b)));
+  }
+  TPRE.forEach(([n, t]) => $("#presets").append(h("button", { class: "btn", onclick: () => { ta.value = t; view(); } }, n)));
+  ta.oninput = view; view();
 }
-TPRE.forEach(([n, t]) => $("#presets").append(h("button", { class: "btn", onclick: () => { ta.value = t; view(); } }, n)));
-ta.oninput = view; view();
+
+/* step 2: compare languages and formats */
 const CMP = [["English", "The customer returned the product."], ["Hindi", "ग्राहक ने उत्पाद वापस कर दिया"], ["Product code", "SKU-48213907-XL-BLK"]];
-let cmpPick = null;
-function cmpRender() {
-  const w = clear($("#cmp")), counts = CMP.map(c => tokenize(c[1]).length), most = counts.indexOf(Math.max(...counts));
-  w.append(h("div", { class: "label", text: cmpPick == null ? "Tap the one you think uses the most tokens" : "Result" }));
-  CMP.forEach(([n, t], i) => { const k = tokenize(t); w.append(h("div", { class: "stack", style: { gap: "6px" } }, h("button", { class: "btn", style: cmpPick === i ? { borderColor: i === most ? "var(--good)" : "var(--bad)", background: i === most ? "var(--good-soft)" : "var(--bad-soft)" } : {}, onclick: () => { cmpPick = i; cmpRender(); } }, n + ": " + t), cmpPick != null ? h("div", null, tokChips(k.map(x => ({ t: x }))), h("span", { class: "hint", text: k.length + " tokens for " + t.length + " characters" })) : null)); });
-  if (cmpPick != null) w.append(h("p", { class: "hint", text: cmpPick === most ? "Right: " + CMP[most][0] + " needs the most." : CMP[most][0] + " needs the most, at " + counts[most] + " tokens." }));
+function cmpInit(host) {
+  host.innerHTML = `<div class="widget" id="cmp"></div>`;
+  let cmpPick = null;
+  function cmpRender() {
+    const w = clear($("#cmp")), counts = CMP.map(c => tokenize(c[1]).length), most = counts.indexOf(Math.max(...counts));
+    w.append(h("div", { class: "label", text: cmpPick == null ? "Which one uses the most tokens? Pick one." : "Result" }));
+    CMP.forEach(([n, t], i) => { const k = tokenize(t); w.append(h("div", { class: "stack", style: { gap: "6px" } }, h("button", { class: "btn", style: cmpPick === i ? { borderColor: i === most ? "var(--good)" : "var(--bad)", background: i === most ? "var(--good-soft)" : "var(--bad-soft)" } : {}, onclick: () => { cmpPick = i; cmpRender(); } }, "Option " + (i + 1) + ": " + n + ": " + t), cmpPick != null ? h("div", null, tokChips(k.map(x => ({ t: x }))), h("span", { class: "hint", text: k.length + " tokens for " + t.length + " characters" })) : null)); });
+    if (cmpPick != null) w.append(h("p", { class: "hint", text: cmpPick === most ? "Right: " + CMP[most][0] + " needs the most." : CMP[most][0] + " needs the most, at " + counts[most] + " tokens." }));
+  }
+  cmpRender();
 }
-cmpRender();
-function cost() {
-  const v = parseFloat($("#tok-vol").value.replace(/,/g, "")) || 0, p = parseFloat($("#tok-price").value) || 0, n = parseFloat($("#tok-len").value.replace(/,/g, "")) || 0;
-  const day = v * n / 1e6 * p; clear($("#cost")).append(h("span", null, h("b", { text: (v * n / 1e6).toFixed(1) + "M" }), "tokens a day"), h("span", null, h("b", { text: "$" + day.toFixed(0) }), "a day"), h("span", null, h("b", { text: "$" + (day * 30).toLocaleString(undefined, { maximumFractionDigits: 0 }) }), "a month (30 days)"));
+
+/* step 3: tokens are the meter */
+const TV = [1000, 5000, 20000], TL = [["Short ticket", 400], ["Typical ticket", 800], ["With a long document", 3200]], TP = [1, 3, 10];
+function meterInit(host) {
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Tickets per day:</span><div class="seg3" id="m-vol"></div></div><div class="row"><span class="hint">Each ticket (prompt plus reply):</span><div class="seg3" id="m-len"></div></div><div class="row"><span class="hint">Example price per million tokens:</span><div class="seg3" id="m-price"></div></div><div class="stats" id="cost"></div></div>`;
+  let vi = 1, li = 1, pi = 1;
+  const f = n => n.toLocaleString("en-US");
+  function cost() {
+    const v = TV[vi], n = TL[li][1], p = TP[pi], day = v * n / 1e6 * p;
+    clear($("#cost")).append(h("span", null, h("b", { text: (v * n / 1e6).toFixed(1) + "M" }), "tokens a day"), h("span", null, h("b", { text: "$" + f(Math.round(day)) }), "a day"), h("span", null, h("b", { text: "$" + f(Math.round(day * 30)) }), "a month (30 days)"));
+  }
+  seg("#m-vol", TV.map(f), vi, i => { vi = i; cost(); });
+  seg("#m-len", TL.map(x => x[0] + " (" + f(x[1]) + " tokens)"), li, i => { li = i; cost(); });
+  seg("#m-price", TP.map(x => "$" + x), pi, i => { pi = i; cost(); });
 }
-["#tok-vol", "#tok-price", "#tok-len"].forEach(s => $(s).oninput = cost); cost();
-$("#q1").append(quick("Which text is likely to use the most tokens per word?", ["Everyday English", "A long number or a product code", "A short common word"], 1, "Numbers and codes split into short groups, so one “word” can take several tokens."));
-$("#q2").append(quick("A model handles Hindi and English text. What might you expect for the same message?", ["Hindi uses more tokens, so it can cost more", "Identical token counts", "Hindi uses no tokens"], 0, "Many vocabularies were built from text dominated by English, so other scripts such as Hindi often split into more pieces. Newer vocabularies narrow the gap."));
-$("#q3").append(quick("Your replies are twice as long. What happens to cost?", ["It roughly doubles for the reply portion", "Nothing, cost is per request", "It halves"], 0, "You pay per token written as well as per token read."));
+
+lesson({
+  title: "What are tokens?",
+  lede: "A model doesn’t read words the way you do. It reads tokens: small chunks of text. Knowing how text becomes tokens explains a surprising amount of model behavior, and it explains the bill.",
+  learn: `<b>By the end you can</b>say what a token is, predict which kinds of text use more tokens, and see how tokens set the cost of running a model at volume.`,
+  steps: [
+    {
+      title: "Split a sentence",
+      main: `<p>A model reads tokens, not words. Common words are usually one token, and in many tokenizers a space belongs to the word that follows it.</p>
+<p>Numbers split into short groups. Rare or unfamiliar words break into pieces. Try the examples, or type your own text.</p>`,
+      interactive: splitInit,
+      deep: `<p>This page uses a simplified tokenizer that follows the habits of real ones. Real vocabularies differ in detail, and the small number under each token is an illustrative ID.</p><p>The model works with numbers, not letters: each token is looked up as an ID, and then as a list of numbers (Lesson 4).</p>`,
+      quiz: [["Which text is likely to use the most tokens per word?", ["Everyday English", "A long number or a product code", "A short common word"], 1, "Numbers and codes split into short groups, so one “word” can take several tokens."]]
+    },
+    {
+      title: "Compare languages and formats",
+      main: `<p>Tokens per word is not constant. Everyday English uses few tokens. Other scripts, long numbers and product codes use more.</p>
+<p>Take a guess before you look: which of the three do you think needs the most tokens?</p>`,
+      interactive: cmpInit,
+      deep: `<p>Many vocabularies were built from text dominated by English, so other scripts often split into more pieces. Newer vocabularies narrow the gap, but it is worth checking the token count for your own language and formats.</p>`,
+      quiz: [["A model handles Hindi and English text. What might you expect for the same message?", ["Hindi uses more tokens, so it can cost more", "Identical token counts", "Hindi uses no tokens"], 0, "Many vocabularies were built from text dominated by English, so other scripts such as Hindi often split into more pieces. Newer vocabularies narrow the gap."]]
+    },
+    {
+      title: "Tokens are the meter",
+      main: `<p>Usage is billed and limited in tokens: what you send in, and what the model writes back. A longer prompt and a longer reply both cost more.</p>
+<p>The context window, how much text fits at once (your input plus the model’s reply), is also counted in tokens (Lesson 5).</p>`,
+      interactive: meterInit,
+      deep: `<p>The price is a placeholder. Check your provider’s current rates, which usually differ for input and output tokens, with output often costing more. Lesson 9 looks at everything that drives cost.</p>`,
+      quiz: [["Your replies are twice as long. What happens to cost?", ["It roughly doubles for the reply portion", "Nothing, cost is per request", "It halves"], 0, "You pay per token written as well as per token read."]]
+    },
+    {
+      title: "What you’ve seen",
+      main: `<p><b>Tokens, not words.</b> A model reads small chunks of text, and common words are often one token.</p>
+<p><b>Some text costs more.</b> Numbers, codes and other scripts split into more tokens.</p>
+<p><b>Tokens are the meter.</b> Cost, speed and the size of the brief you can supply are all measured in tokens. Next, Lesson 3 shows how a model is built.</p>`
+    }
+  ]
+});
+chrome(1);
 </script></body></html>

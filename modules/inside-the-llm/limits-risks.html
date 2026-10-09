@@ -35,9 +35,10 @@ function staleInit(host) {
 
 /* step 3: where bias comes from */
 function biasInit(host) {
-  host.innerHTML = `<div class="widget"><label class="field">Share of training examples using “she”: <b id="r2-v"></b><input type="range" id="r2" min="0" max="100" value="80"></label><div class="label">Odds for the next word: “The nurse said that ___”</div><div id="r2-bars"></div><div class="note" id="r2-msg"></div><p class="hint">Illustrative. Real models learn from billions of sentences, and the same effect shows up across jobs, names, places and tones.</p></div>`;
-  function r2() { const s = +$("#r2").value, she = s, he = Math.round((100 - s) * 0.8), they = 100 - she - he; $("#r2-v").textContent = s + "%"; clear($("#r2-bars")).append(bars([{ label: "she", p: she / 100, cls: she >= he ? "hit" : "" }, { label: "he", p: he / 100, cls: he > she ? "hit" : "" }, { label: "they", p: they / 100 }])); $("#r2-msg").textContent = s > 60 ? "The model now expects “she” most of the time. Nothing in it is deciding that: it is copying the pattern in its data." : s < 40 ? "Now the pattern points the other way. Different data, different habit." : "More balanced data gives more balanced odds, though the model can still pick up other patterns."; }
-  $("#r2").oninput = r2; r2();
+  host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Share of training examples using “she” after “nurse”:</span><div class="seg3" id="r2-seg"></div></div><p class="hint" style="margin:0">Currently <b id="r2-v"></b></p><div class="label">Odds for the next word: “The nurse said that ___”</div><div id="r2-bars"></div><div class="note" id="r2-msg"></div><p class="hint">Illustrative. Real models learn from billions of sentences, and the same effect shows up across jobs, names, places and tones.</p></div>`;
+  function r2(s) { const she = s, he = Math.round((100 - s) * 0.8), they = 100 - she - he; $("#r2-v").textContent = s + "%"; clear($("#r2-bars")).append(bars([{ label: "she", p: she / 100, cls: she >= he ? "hit" : "" }, { label: "he", p: he / 100, cls: he > she ? "hit" : "" }, { label: "they", p: they / 100 }])); $("#r2-msg").textContent = s > 60 ? "The model now expects “she” most of the time. Nothing in it is deciding that: it is copying the pattern in its data." : s < 40 ? "Now the pattern points the other way. Different data, different habit." : "More balanced data gives more balanced odds, though the model can still pick up other patterns."; }
+  const SH = [20, 50, 80];
+  seg("#r2-seg", SH.map(x => x + "%"), 2, i => r2(SH[i]));
 }
 
 /* step 4: what not to paste */

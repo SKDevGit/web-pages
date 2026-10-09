@@ -382,3 +382,12 @@ button.cl:hover{border-color:var(--accent)}
 @media (max-width:640px){.ctxmap{grid-template-columns:1fr}}
 .slide.fs .ctxmap{gap:10px}.slide.fs .cl{padding:4px 10px}
 .ctxmap{margin-top:10px}
+
+.swgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:2px 28px}
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 0;font-size:.92rem}
+.swrow .seg3 button{padding:3px 12px}
+.chips.multi button.on::before{content:"\2713\00a0"}
+
+/* many option buttons: keep them small so the statement keeps room */
+.slide .sortrow:has(.row > .btn:nth-child(5)) .row{gap:4px}
+.slide .sortrow:has(.row > .btn:nth-child(5)) .btn{padding:3px 8px;font-size:.78rem}
