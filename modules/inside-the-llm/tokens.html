@@ -68,7 +68,7 @@ lesson({
 <p>Take a guess before you look: which of the three do you think needs the most tokens?</p>`,
       interactive: cmpInit,
       deep: `<p>Many vocabularies were built from text dominated by English, so other scripts often split into more pieces. Newer vocabularies narrow the gap, but it is worth checking the token count for your own language and formats.</p>`,
-      quiz: [["A model handles Hindi and English text. What might you expect for the same message?", ["Hindi uses more tokens, so it can cost more", "Identical token counts", "Hindi uses no tokens"], 0, "Many vocabularies were built from text dominated by English, so other scripts such as Hindi often split into more pieces. Newer vocabularies narrow the gap."]]
+      quiz: [["A model handles Hindi and English text. What might you expect for the same message?", ["Identical token counts", "Hindi uses no tokens", "Hindi uses more tokens, so it can cost more"], 2, "Many vocabularies were built from text dominated by English, so other scripts such as Hindi often split into more pieces. Newer vocabularies narrow the gap."]]
     },
     {
       title: "Tokens are the meter",
@@ -76,7 +76,7 @@ lesson({
 <p>The context window, how much text fits at once (your input plus the model’s reply), is also counted in tokens (Lesson 5).</p>`,
       interactive: meterInit,
       deep: `<p>The price is a placeholder. Check your provider’s current rates, which usually differ for input and output tokens, with output often costing more. Lesson 9 looks at everything that drives cost.</p>`,
-      quiz: [["Your replies are twice as long. What happens to cost?", ["It roughly doubles for the reply portion", "Nothing, cost is per request", "It halves"], 0, "You pay per token written as well as per token read."]]
+      quiz: [["Your replies are twice as long. What happens to cost?", ["Nothing, cost is per request", "It roughly doubles for the reply portion", "It halves"], 1, "You pay per token written as well as per token read."]]
     },
     {
       title: "What you’ve seen",

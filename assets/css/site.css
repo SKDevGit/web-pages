@@ -391,3 +391,4 @@ button.cl:hover{border-color:var(--accent)}
 /* many option buttons: keep them small so the statement keeps room */
 .slide .sortrow:has(.row > .btn:nth-child(5)) .row{gap:4px}
 .slide .sortrow:has(.row > .btn:nth-child(5)) .btn{padding:3px 8px;font-size:.78rem}
+@media (max-width:560px){.seg3{flex-wrap:wrap;max-width:100%}.seg3 button{flex:1 1 auto;border-bottom:1px solid var(--line)}}

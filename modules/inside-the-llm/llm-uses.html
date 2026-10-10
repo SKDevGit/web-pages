@@ -7,7 +7,7 @@
 <script src="../../assets/js/site.js"></script><script src="js/core.js"></script><script src="js/llm.js"></script>
 <script>
 /* scripted data for the demos */
-const MS = [["Return request", "Hi, order 4821 arrived with a cracked screen. I need a refund before Friday, I’m travelling.", "Refund request", "Order 4821 · cracked screen · deadline Friday", "High"], ["Question", "Does the extended warranty cover accidental damage? Thinking of buying the Pro model.", "Pre-sale question", "Product: Pro model · topic: warranty", "Low"], ["Complaint", "This is the third time my delivery is late. Nobody replies to my emails. Very disappointed.", "Complaint", "Issue: late delivery (3rd time) · no reply", "Medium"]];
+const MS = [["Return request", "Hi, order 4821 arrived with a cracked screen. I need a refund before Friday, I’m traveling.", "Refund request", "Order 4821 · cracked screen · deadline Friday", "High"], ["Question", "Does the extended warranty cover accidental damage? Thinking of buying the Pro model.", "Pre-sale question", "Product: Pro model · topic: warranty", "Low"], ["Complaint", "This is the third time my delivery is late. Nobody replies to my emails. Very disappointed.", "Complaint", "Issue: late delivery (3rd time) · no reply", "Medium"]];
 const ORIG = "Your refund is approved. It will reach your account in 5 days.";
 const RW = [["Formal", "We are pleased to confirm that your refund has been approved. Please allow five days for it to appear in your account."], ["Friendly", "Good news, your refund is approved. It should be in your account within about 5 days."], ["Shorter", "Refund approved. Arrives in 5 days."], ["Spanish", "Su reembolso ha sido aprobado. Llegará a su cuenta en 5 días."], ["Hindi", "आपका रिफ़ंड स्वीकृत हो गया है। यह 5 दिनों में आपके खाते में पहुँच जाएगा।"]];
 const TH = ["Customer: My laptop arrived with a cracked screen on Monday.", "Agent: Sorry to hear that. Can you send a photo and your order number?", "Customer: Photo attached. Order 4821.", "Agent: Thanks. It is under warranty, so we can replace it or refund it. Which do you prefer?", "Customer: A refund please. I need it before Friday for a trip.", "Agent: Approved. The refund of $240 will arrive in 5 business days."];
@@ -20,7 +20,7 @@ const RS = ["Three items: $80, $45, $120. Total $245.", "Items 2 and 3 were open
 const AG = [["Goal", "Goal: resolve ticket #4821, “laptop arrived cracked”.", "t"], ["Plan", "Plan: 1) look up the order, 2) check the warranty, 3) draft a refund, 4) get approval.", "t"], ["Tool: order lookup", "Tool call → orders.find(4821)\nResult ← $240 laptop, delivered Monday, under warranty", ""], ["Decide", "Decision: warranty applies, refund is allowed.", "t"], ["Tool: draft refund", "Tool call → refund.prepare($240)\nResult ← waiting for approval (over $200)", ""], ["Human check", "Human: approves. Agent sends the customer an email and closes the ticket.", "h"]];
 const HOODS = {};
 function hood(id, prompt, seq, why) { HOODS[id] = { prompt, seq, why }; }
-hood("#h1", "Email: “Order 4821 arrived with a cracked screen. I need a refund before Friday.”\nCategory:", [[" Refund", [[" Refund", .78], [" Complaint", .12], [" Question", .06]]], [" request", [[" request", .9], [" order", .04]]], ["\n", [["\n", .85], [".", .08]]], ["Order", [["Order", .7], ["Item", .2]]], [":", [[":", .95]]], [" 4821", [[" 4821", .93], [" 4812", .02]]]], "Training text is full of labelled lists, so after “Category:” the likely next token is a label. The order number is copied because attention points at the “4821” already in the email. Labelling and extracting are just continuing a familiar pattern.");
+hood("#h1", "Email: “Order 4821 arrived with a cracked screen. I need a refund before Friday.”\nCategory:", [[" Refund", [[" Refund", .78], [" Complaint", .12], [" Question", .06]]], [" request", [[" request", .9], [" order", .04]]], ["\n", [["\n", .85], [".", .08]]], ["Order", [["Order", .7], ["Item", .2]]], [":", [[":", .95]]], [" 4821", [[" 4821", .93], [" 4812", .02]]]], "Training text is full of labeled lists, so after “Category:” the likely next token is a label. The order number is copied because attention points at the “4821” already in the email. Labeling and extracting are just continuing a familiar pattern.");
 hood("#h2", "Original: Your refund is approved. It will reach your account in 5 days.\nIn Spanish:", [[" Su", [[" Su", .62], [" Tu", .2], [" El", .08]]], [" reembolso", [[" reembolso", .8], [" devolución", .12]]], [" ha", [[" ha", .72], [" fue", .15]]], [" sido", [[" sido", .96]]], [" aprobado", [[" aprobado", .9], [" autorizado", .05]]], [".", [[".", .82], [",", .12]]]], "The training text had countless sentences placed beside their translations. After “In Spanish:” the likeliest continuation is the same meaning in Spanish. Meaning carries across because words with the same sense, such as “refund” and “reembolso”, get similar embeddings.");
 hood("#h3", "Thread:\nCustomer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\nIn one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2], [" returned", .15]]], [":", [[":", .35], [" for", .25], [" (", .2]]], [" $240", [[" $240", .7], [" 240", .1]]], [".", [[".", .6], [" in", .2]]]], "Attention lets each new word look back across the whole thread and give more weight to the key facts: cracked, refund, $240. Training text is full of headlines, abstracts and “TL;DR” lines, which taught the model what usually gets kept and what is dropped.");
 hood("#h4", "Policy: Returns are accepted within 30 days of delivery. Opened items carry a 15% restocking fee.\nQuestion: How long do I have to return something?\nAnswer: You have", [[" 30", [[" 30", .92], [" 14", .03], [" 60", .02]]], [" days", [[" days", .97]]], [" from", [[" from", .8], [" after", .12]]], [" delivery", [[" delivery", .9], [" purchase", .06]]], [".", [[".", .9]]]], "The odds for “30” are very high because attention points at “30 days” in the policy that is in the prompt. If you remove the policy, “30” becomes one guess among many: “14”, “60”, “30” are all plausible. That is why supplying the document changes the answer.");
@@ -29,7 +29,7 @@ hood("#h6", "Q: Items cost $80, $45 and $120. Items 2 and 3 were opened, with a 
 hood("#h7", "Goal: resolve ticket #4821, “laptop arrived cracked”.\nTools: orders.find(id), refund.prepare(amount)\nNext action:", [[" orders", [[" orders", .72], [" refund", .18]]], [".", [[".", .96]]], ["find", [["find", .93]]], ["(", [["(", .98]]], ["4821", [["4821", .85], ["4812", .03]]], [")", [[")", .97]]]], "The model’s output is text shaped like a tool call. A normal program reads that text, runs the tool, and pastes the result back into the prompt. Then the model predicts the next action. The model never “does” anything itself: it writes, and software acts on what it writes.");
 const THR = "Customer: My laptop arrived with a cracked screen. Order 4821.\nAgent: We can replace it or refund it.\nCustomer: A refund please, before Friday.\nAgent: Approved. $240 in 5 business days.\n\n";
 const HD = [["No instruction", "", [["Customer", [["Customer", .46], ["Agent", .22], ["Thanks", .1]]], [":", [[":", .96]]], [" Thank", [[" Thank", .5], [" Great", .15], [" Can", .1]]], [" you", [[" you", .93]]]], "With no instruction there is nothing to steer it, so it just continues the conversation: the likeliest next text. A base model behaves like this all the time. An assistant has been trained to treat your text as a request."],
-["Summarize in one line", "In one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2]]], [":", [[":", .35], [" for", .25]]]], "After “In one line:” the likeliest text is a short version of the thread, so the odds favour its key facts. Attention connects each new word back to the thread."],
+["Summarize in one line", "In one line:", [[" Cracked", [[" Cracked", .34], [" Customer", .22], [" Laptop", .15]]], [" laptop", [[" laptop", .5], [" screen", .3]]], [" refunded", [[" refunded", .38], [" replaced", .2]]], [":", [[":", .35], [" for", .25]]]], "After “In one line:” the likeliest text is a short version of the thread, so the odds favor its key facts. Attention connects each new word back to the thread."],
 ["Translate to Spanish", "Translate to Spanish:", [["\n", [["\n", .6], [" Cliente", .2]]], ["Cliente", [["Cliente", .55], ["El", .15]]], [":", [[":", .92]]], [" Mi", [[" Mi", .62], [" El", .12]]]], "Text that follows a translation cue is the same meaning in the other language, so the odds jump to Spanish words, even though the thread itself is in English."],
 ["List the action items", "List the action items:", [["\n", [["\n", .72]]], ["1", [["1", .62], ["-", .2], ["•", .1]]], [".", [[".", .9]]], [" Issue", [[" Issue", .5], [" Send", .2], [" Process", .15]]], [" a", [[" a", .55]]], [" refund", [[" refund", .8]]]], "A list cue makes a numbered list the likely start. The items come from the facts in the thread, found by attention."],
 ["Is the customer satisfied?", "Is the customer satisfied? Answer:", [[" Yes", [[" Yes", .62], [" No", .18], [" Probably", .1]]], [",", [[",", .42], [".", .4]]], [" the", [[" the", .5], [" they", .2]]], [" refund", [[" refund", .45], [" customer", .3]]]], "A question followed by “Answer:” makes a short answer likely, and the facts in the thread (an approved refund) tilt the odds toward “Yes”."]];
@@ -129,7 +129,7 @@ $("#s7-next").onclick = () => { N7++; r7(); }; $("#s7-reset").onclick = () => { 
 }
 
 const CHECK = [
-  { t: "Labelling thousands of incoming emails by topic", a: 0, why: "A slip is cheap and easy to spot, so checking a sample is enough." },
+  { t: "Labeling thousands of incoming emails by topic", a: 0, why: "A slip is cheap and easy to spot, so checking a sample is enough." },
   { t: "Summarizing an important contract", a: 1, why: "A summary leaves things out, and the missing part may matter, so compare it with the contract." },
   { t: "A reply that quotes your return policy", a: 1, why: "Check the quoted terms against the policy before a customer sees them." },
   { t: "An agent about to send a $240 refund", a: 2, why: "Actions that move money are costly to undo, so a person approves first." }
@@ -145,13 +145,13 @@ lesson({
     {
       stage: "Stage 1: One skill",
       title: "Every task is text to continue",
-      main: `<p>In Lesson 4 you saw that the model only ever does one thing: given the text so far, choose the next token. Labelling emails, translating and reasoning do not sound like that. The link is that <b>every task can be written as text that needs continuing</b>.</p>
+      main: `<p>In Lesson 4 you saw that the model only ever does one thing: given the text so far, choose the next token. Labeling emails, translating and reasoning do not sound like that. The link is that <b>every task can be written as text that needs continuing</b>.</p>
 <div class="flowd" style="margin:6px 0 12px"><div class="fb">Your request</div><span>→</span><div class="fb acc">Text that needs a continuation</div><span>→</span><div class="fb">Next token, again and again</div><span>→</span><div class="fb good">The result</div></div>
 <p>The model learned from a huge amount of writing, and that writing is full of tasks: emails followed by labels, articles followed by summaries, sentences beside their translations, questions followed by answers.</p>`,
       interactive: cueInit,
       deep: `<p>To predict the next token well on that text, the model had to pick up the pattern behind each task. It does not look those examples up later: what it learned is built into its parameters, the numbers that training adjusted. When your request sets up the same pattern, the most likely continuation is the answer.</p>
 <p>With no instruction at all, a model just continues the conversation. A base model behaves like this all the time. An assistant has been trained to treat your text as a request.</p>`,
-      quiz: [["An LLM only predicts the next token. How can it summarize a long document?", ["Summaries were common in its training text, so continuing “In one line:” with the key facts is the most likely next text", "It has a separate summarizing program inside", "It copies the first sentence"], 0, "Every task is a pattern in text. The request sets up the pattern, and the model continues it using attention over the whole document."]]
+      quiz: [["An LLM only predicts the next token. How can it summarize a long document?", ["It has a separate summarizing program inside", "It copies the first sentence", "Summaries were common in its training text, so continuing “In one line:” with the key facts is the most likely next text"], 2, "Every task is a pattern in text. The request sets up the pattern, and the model continues it using attention over the whole document."]]
     },
     {
       stage: "Stage 1: One skill",
@@ -159,20 +159,20 @@ lesson({
       main: `<p>The model never decides which task to do. Your instruction is part of the text, and it changes which continuation is most likely. Words such as “In one line:” or “Translate to Spanish:” are cues, and the model has learned what usually comes after each one. It learned this in two stages:</p>
 <div class="cards two">
   <div><b>Pre-training</b>Huge amounts of writing, where cues and results appear together: “TL;DR” followed by a short version, a sentence followed by its translation.</div>
-  <div><b>Instruction training</b>Practice on many requests paired with good responses (Lesson 3). This is why an assistant treats your message as a request to fulfil, not as text to continue.</div>
+  <div><b>Instruction training</b>Practice on many requests paired with good responses (Lesson 3). This is why an assistant treats your message as a request to fulfill, not as text to continue.</div>
 </div>
 <p>It does not search its training examples when you ask. Like a person who has read thousands of summaries, it writes a new one because it has absorbed what a good one looks like.</p>`,
       interactive: shotInit,
       deep: `<p>The examples you add to a request sit in the context (Lesson 5), not in the training data, and they are gone when the chat ends. Showing a few examples is one of the most useful ways to get a consistent format.</p>`,
-      quiz: [["The same article can be summarized or translated. What decides which?", ["The instruction in the prompt, plus what training taught the model about such instructions", "A separate program that picks the task", "The model searching its training data for a matching example"], 0, "The instruction is part of the text and shifts the odds. The model does not look up training examples. Training built the association into its parameters."]]
+      quiz: [["The same article can be summarized or translated. What decides which?", ["A separate program that picks the task", "The instruction in the prompt, plus what training taught the model about such instructions", "The model searching its training data for a matching example"], 1, "The instruction is part of the text and shifts the odds. The model does not look up training examples. Training built the association into its parameters."]]
     },
     {
       stage: "Stage 2: Work on text",
       title: "Label and extract",
-      main: `<p>The simplest use: read a piece of text, label it with a category, and pull out the key facts. These uses work on text you hand over.</p>` + learned("text of every kind that is sorted or labelled, such as reviews with star ratings, emails filed into folders, and forms with fields. The model has absorbed what categories and key facts look like."),
+      main: `<p>The simplest use: read a piece of text, label it with a category, and pull out the key facts. These uses work on text you hand over.</p>` + learned("text of every kind that is sorted or labeled, such as reviews with star ratings, emails filed into folders, and forms with fields. The model has absorbed what categories and key facts look like."),
       interactive: sortInit,
       deep: hoodDeep("#h1"),
-      quiz: [["A firm gets 5,000 support emails a day. Which use fits best?", ["Label and extract: label each email and pull out order numbers", "Create images", "Plan and act with tools"], 0, "Labelling and extracting is the simplest, most reliable use, and it saves the most routine reading."]]
+      quiz: [["A firm gets 5,000 support emails a day. Which use fits best?", ["Label and extract: label each email and pull out order numbers", "Create images", "Plan and act with tools"], 0, "Labeling and extracting is the simplest, most reliable use, and it saves the most routine reading."]]
     },
     {
       stage: "Stage 2: Work on text",
@@ -180,7 +180,7 @@ lesson({
       main: `<p>Same meaning, new form. The model changes tone, length or language while keeping the facts.</p>` + learned("writing in many tones and registers, and text published in several languages side by side. The model has absorbed how the same meaning is expressed in different forms."),
       interactive: rewriteInit,
       deep: hoodDeep("#h2"),
-      quiz: [["What should stay the same when a model rewrites a message?", ["The facts: refund approved, 5 days", "The exact wording", "The number of tokens"], 0, "Rewriting changes the form and keeps the facts. Always check that no fact changed, especially numbers and dates."]]
+      quiz: [["What should stay the same when a model rewrites a message?", ["The exact wording", "The number of tokens", "The facts: refund approved, 5 days"], 2, "Rewriting changes the form and keeps the facts. Always check that no fact changed, especially numbers and dates."]]
     },
     {
       stage: "Stage 2: Work on text",
@@ -188,7 +188,7 @@ lesson({
       main: `<p>Shrink a long text and keep what matters. A summary is a choice about what to leave out.</p>` + learned("a huge number of summaries, such as headlines, abstracts and “TL;DR” lines. The model has learned what a summary looks like and which details usually get dropped."),
       interactive: sumInit,
       deep: hoodDeep("#h3"),
-      quiz: [["Why must a person still skim a summary of an important contract?", ["Summaries drop detail, and the dropped part may be the part that matters", "Summaries are always longer than the original", "Models cannot read contracts"], 0, "A summary is a choice about what to leave out. That choice can be wrong, so check it when stakes are high."]]
+      quiz: [["Why must a person still skim a summary of an important contract?", ["Summaries are always longer than the original", "Summaries drop detail, and the dropped part may be the part that matters", "Models cannot read contracts"], 1, "A summary is a choice about what to leave out. That choice can be wrong, so check it when stakes are high."]]
     },
     {
       stage: "Stage 3: Answer and create",
@@ -196,7 +196,7 @@ lesson({
       main: `<p>Ask a question and let the model answer from a document you supply. This is grounding, from Lesson 5. Here the new thing is a question the document cannot answer: with the document the model says so, and without it, it guesses.</p>` + learned("question-and-answer pages, FAQs, exam questions with answers, and passages followed by questions about them. The model has learned to find the answer inside a passage."),
       interactive: docInit,
       deep: hoodDeep("#h4"),
-      quiz: [["What is the best defence against a confident but invented answer?", ["Give the model the source text and tell it to answer only from it", "Ask the question twice", "Use a longer prompt with no facts"], 0, "Grounding ties the answer to your documents, and lets you check it against the highlighted source."]]
+      quiz: [["What is the best defense against a confident but invented answer?", ["Give the model the source text and tell it to answer only from it", "Ask the question twice", "Use a longer prompt with no facts"], 0, "Grounding ties the answer to your documents, and lets you check it against the highlighted source."]]
     },
     {
       stage: "Stage 3: Answer and create",
@@ -204,7 +204,7 @@ lesson({
       main: `<p>Generation: write something that did not exist before. Text and code are what an LLM produces directly. Images, audio and video come from related generative models, often steered by an LLM that writes the brief.</p>` + learned("enormous amounts of stories, emails, articles and code. The model has learned how each kind of writing is put together, and it samples from that to produce something new."),
       interactive: createInit,
       deep: hoodDeep("#h5"),
-      quiz: [["Which output does a text-based LLM produce directly?", ["Text and code", "Video", "Music"], 0, "LLMs generate text and code themselves. Video, images and audio come from related models, which an LLM can help by writing the brief."]]
+      quiz: [["Which output does a text-based LLM produce directly?", ["Video", "Text and code", "Music"], 1, "LLMs generate text and code themselves. Video, images and audio come from related models, which an LLM can help by writing the brief."]]
     },
     {
       stage: "Stage 4: Reason and act",
@@ -212,7 +212,7 @@ lesson({
       main: `<p>Work through a problem with several steps. The model writes its working one token at a time, and each step becomes context for the next.</p>` + learned("textbooks, worked examples and forum answers that set out steps in order. It does not simply run a calculator: it writes working that resembles the worked solutions it learned from, and reasoning models get extra training that rewards correct step-by-step working. Some products also give the model a calculator or code tool."),
       interactive: reasonInit,
       deep: hoodDeep("#h6"),
-      quiz: [["Why does showing the working step by step help?", ["Each step is written out and becomes context for the next one, and a person can check it", "It makes the model faster", "It removes the need to check the answer"], 0, "Reasoning in text lets the model build on its own earlier steps. It still can make mistakes, so check key numbers."]]
+      quiz: [["Why does showing the working step by step help?", ["It makes the model faster", "It removes the need to check the answer", "Each step is written out and becomes context for the next one, and a person can check it"], 2, "Reasoning in text lets the model build on its own earlier steps. It still can make mistakes, so check key numbers."]]
     },
     {
       stage: "Stage 4: Reason and act",
@@ -224,15 +224,15 @@ lesson({
     },
     {
       title: "Match the checking to the task",
-      main: `<p>As you climb from labelling to acting, the model does more than rephrase: it chooses, calculates and acts. Mistakes also cost more. Checking a summary is quick. Checking an action that moved money may mean undoing it.</p>
+      main: `<p>As you climb from labeling to acting, the model does more than rephrase: it chooses, calculates and acts. Mistakes also cost more. Checking a summary is quick. Checking an action that moved money may mean undoing it.</p>
 <div class="cards three">
   <div><b>Work on text</b>Label, rewrite, summarize. Usually quick to check, and a slip is cheap unless the text is high-stakes.</div>
   <div><b>Answer and create</b>Answers from documents and new content. Check them against the source and your standards.</div>
   <div><b>Reason and act</b>Reasoning and tools. Verify the logic, and have a person approve steps that are hard to undo.</div>
 </div>`,
       interactive: host => { host.append(h("p", { class: "hint", style: { margin: "0 0 6px" }, text: "How much checking does each output need?" })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, CHECK, ["Spot-check a sample", "Check against the source", "A person approves first"]); },
-      deep: `<p>Higher is not better. Use the simplest use that does the job: a labelled email costs less and is easier to check than an agent that acts. The more the model decides on its own, the more it matters to put a check before any step that cannot be undone.</p><p>Lesson 7 looks at where models go wrong.</p>`,
-      quiz: [["Which use needs the strictest checking before it goes live?", ["Labelling emails by topic", "An agent that issues refunds", "Rewriting a note in a friendlier tone"], 1, "An agent acts, and actions such as refunds are costly to undo."]]
+      deep: `<p>Higher is not better. Use the simplest use that does the job: a labeled email costs less and is easier to check than an agent that acts. The more the model decides on its own, the more it matters to put a check before any step that cannot be undone.</p><p>Lesson 7 looks at where models go wrong.</p>`,
+      quiz: [["Which use needs the strictest checking before it goes live?", ["Labeling emails by topic", "An agent that issues refunds", "Rewriting a note in a friendlier tone"], 1, "An agent acts, and actions such as refunds are costly to undo."]]
     },
     {
       title: "What you’ve seen",

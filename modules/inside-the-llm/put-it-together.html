@@ -87,7 +87,7 @@ lesson({
 </div>`,
       interactive: sortWidget(TQ, TLAB),
       deep: host => { host.append(h("p", { text: "Four more to try:" })); sortWidget(TQ2, TLAB)(host); },
-      quiz: [["Which stage can change what the model knows?", ["Training", "Inference", "Both"], 0, "Only training changes the parameters. At inference, new facts arrive through the context."]]
+      quiz: [["Which stage can change what the model knows?", ["Inference", "Both", "Training"], 2, "Only training changes the parameters. At inference, new facts arrive through the context."]]
     },
     {
       title: "What this means for you",
@@ -95,7 +95,7 @@ lesson({
 <div class="cards two">${TAKE.map(t => `<div><b>${t[0]}</b>${t[1]}</div>`).join("")}</div>`,
       interactive: sortWidget(SCEN, ["Date", "Varies", "Tokens", "Context", "Check", "Start small"]),
       deep: `<p>Key terms for the whole module are in the Key terms page. The lessons build on each other: tokens (Lesson 2), training (Lesson 3), usage (Lesson 4), context (Lesson 5), uses (Lesson 6), limits and risks (Lesson 7), fitting a model to your business (Lesson 8), and cost and choice (Lesson 9).</p>`,
-      quiz: [["You can’t retrain a model in a meeting. What can you change?", ["What the model reads before it answers", "The parameters", "The training data"], 0, "Context is your lever: the prompt, the documents and the examples you supply."]]
+      quiz: [["You can’t retrain a model in a meeting. What can you change?", ["The parameters", "What the model reads before it answers", "The training data"], 1, "Context is your lever: the prompt, the documents and the examples you supply."]]
     }
   ]
 });

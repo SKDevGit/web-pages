@@ -93,7 +93,7 @@ lesson({
 </div>`,
       interactive: spotInit,
       deep: `<p>You cannot rely on asking the model whether it is sure. Its reply is also generated text, so it is not a dependable check. A source you can open is.</p><p>Hallucinations are more likely when the model has no source for the fact, or when the question asks for something very specific, such as a quote, a number or a reference.</p>`,
-      quiz: [["What is the most reliable way to catch a hallucination?", ["Compare the claim with the source it should come from", "Check whether the sentence sounds confident", "Ask the model if it is sure"], 0, "Confidence and fluency say nothing about truth. Only a source can confirm a claim."]]
+      quiz: [["What is the most reliable way to catch a hallucination?", ["Check whether the sentence sounds confident", "Ask the model if it is sure", "Compare the claim with the source it should come from"], 2, "Confidence and fluency say nothing about truth. Only a source can confirm a claim."]]
     },
     {
       stage: "Stage 1: Wrong answers",
@@ -102,7 +102,7 @@ lesson({
 <p>The fix is the one you saw in Lesson 5: put the current facts in working memory, in the prompt or by retrieving them from your own documents.</p>`,
       interactive: staleInit,
       deep: `<p>Models differ in their cutoff, and a model does not always know its own. Some products can search the web or your documents before answering, which brings recent facts into the context. Even then, check that the source it used is the right one.</p>`,
-      quiz: [["A model quotes a price that changed last week. Which risk is this?", ["Out-of-date knowledge", "Bias", "Copyright"], 0, "The model only knows what it was trained on. Supply the new price in the prompt, or let it look the price up."]]
+      quiz: [["A model quotes a price that changed last week. Which risk is this?", ["Bias", "Out-of-date knowledge", "Copyright"], 1, "The model only knows what it was trained on. Supply the new price in the prompt, or let it look the price up."]]
     },
     {
       stage: "Stage 2: Unfair and exposed",
@@ -120,7 +120,7 @@ lesson({
 <p>Rule of thumb: keep personal, confidential and client data out of any tool your firm has not approved.</p>`,
       interactive: host => { host.append(h("p", { class: "hint", style: { margin: "0 0 6px" }, text: "Is it fine to paste into a public chatbot?" })); const w = h("div", { class: "widget" }); host.append(w); sorter(w, PS, ["Fine to paste", "Do not paste"]); },
       deep: `<p>Many companies license a private, enterprise version with different terms. Always follow your firm’s rules about which tool to use. If you must work with sensitive text, mask names, numbers and identifiers first, or use an approved tool.</p>`,
-      quiz: [["Which is the safest habit with an unapproved public AI tool?", ["Never include personal, confidential or client data", "Remove only the names", "Only mention the client’s first name"], 0, "Once data is submitted you may not control where it goes. Keep private data out unless your firm approved the tool."]]
+      quiz: [["Which is the safest habit with an unapproved public AI tool?", ["Remove only the names", "Only mention the client’s first name", "Never include personal, confidential or client data"], 2, "Once data is submitted you may not control where it goes. Keep private data out unless your firm approved the tool."]]
     },
     {
       stage: "Stage 3: Using it safely",
@@ -130,7 +130,7 @@ lesson({
       interactive: injInit,
       deep: `<p>There is no foolproof way to stop a model from being fooled, so the safeguards work on the impact. The security community’s guidance (OWASP) recommends least privilege, which means giving the model only the access it needs, and a human in the loop for sensitive actions.</p>
 <p>Source: <a href="https://genai.owasp.org/llm01/" target="_blank" rel="noopener">OWASP, LLM01: Prompt Injection</a>.</p>`,
-      quiz: [["Why does a person approving refunds help against hidden instructions?", ["A person can spot a request that nobody asked for before it goes out", "It stops the model reading emails", "It makes the model smarter"], 0, "The model may be fooled, so a check before the irreversible step limits the damage."]]
+      quiz: [["Why does a person approving refunds help against hidden instructions?", ["It stops the model reading emails", "A person can spot a request that nobody asked for before it goes out", "It makes the model smarter"], 1, "The model may be fooled, so a check before the irreversible step limits the damage."]]
     },
     {
       stage: "Stage 3: Using it safely",

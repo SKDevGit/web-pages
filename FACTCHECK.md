@@ -4,6 +4,18 @@ A record of each content review: what was checked, what was fixed, and what is s
 
 Content that changes quickly (model names, prices, context sizes, regulations, product features) should be rechecked before each new class, even if it is listed as verified here.
 
+## Review 2 · 9 October 2026 (Inside the LLM, all 10 lessons)
+
+**Method.** Every lesson read in full (all steps, Try it, Go deeper and quizzes). Claims checked against primary sources where they exist; toy arithmetic recomputed.
+
+**Verified against sources:** Claude Code reads CLAUDE.md files at the start of each session, and also keeps auto-memory notes (Claude Code docs, memory page). Output tokens cost more than input tokens, cache reads cost a fraction of input, and batch processing is discounted 50% (Claude pricing page); thinking tokens are billed as output tokens (extended thinking docs). Function calling launched 13 June 2023 (OpenAI). Human feedback: labelers write demonstrations and rank outputs, rankings then tune the model (InstructGPT, arXiv 2203.02155). Fine-tuning is positioned for format, tone and behavior, while outside knowledge goes in the prompt (OpenAI model optimization guide). Detail buried in the middle of long input is used less reliably (Liu et al., Lost in the Middle, arXiv 2307.03172). OWASP LLM01:2025 prompt injection, least privilege and human-in-the-loop (rechecked, still current). Vocabulary sizes of roughly 32,000 to 256,000 tokens (GPT-4 about 100,000; Gemma 256,000). The refund working in Lesson 6 ($220.25), the cost calculator figures in Lessons 2 and 9, the 12 of 71 words in the summary demo, and the Lesson 1 odds (sum to 100%) all recompute correctly.
+
+**Fixed:** Lesson 4 pointed to Lesson 8 for who approves risky actions; changed to Lessons 6 and 7. Lesson 4 quiz on temperature 0 now says "In this demo" and the feedback notes that real systems are close to repeatable but not always exact.
+
+**Left as simplifications (not errors):** the base model "does not answer requests" (real base models can be coaxed with examples); fine-tuning "shapes behavior, not what is true today" (a fine-tuned model can pick up some facts, but it is the wrong tool for changing facts); toy-model numbers, scripted odds and example prices are labelled illustrative on each page.
+
+**Not independently verified:** digit grouping in tokenizers ("numbers split into short groups") is hedged on the page; tiktoken could not be downloaded here to confirm exact splits.
+
 ## Content added after Review 1
 
 - **Model development (Lesson 3) and Model usage (Lesson 4)**, written 9 October 2026. New claims to check at the next review: output tokens usually cost more than input tokens; real vocabularies hold tens of thousands to a few hundred thousand tokens; embeddings use hundreds to thousands of numbers; image generators often work by removing noise step by step; refund limits in the checks step are examples only.

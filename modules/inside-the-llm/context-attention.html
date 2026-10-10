@@ -106,7 +106,7 @@ function attInit(host) {
   draw(0);
 }
 const SORT6 = [
-  { t: "State the return window in one clearly labelled line", a: 0, why: "Clear, specific facts are easy for the model to use." },
+  { t: "State the return window in one clearly labeled line", a: 0, why: "Clear, specific facts are easy for the model to use." },
   { t: "Paste a very long email thread and hope the model finds the window", a: 1, why: "A detail buried in a long input can be overlooked, and every token costs money." },
   { t: "Remove old, irrelevant messages before you ask", a: 0, why: "Less noise means the facts that matter stand out." },
   { t: "Repeat the same instruction five times", a: 1, why: "It adds noise and cost without making the instruction clearer." }
@@ -154,8 +154,8 @@ lesson({
         host.append(h("p", { text: "Many layers are sent in with every request. The model reads all of them, inside a window of limited size, and then writes one token. That token joins the context, and the model reads it all again." }));
         host.append(h("div", { class: "loop" }, h("div", { class: "lp" }, h("span", { text: "1" }), "Everything is sent in", h("small", { class: "hint", text: "instructions, skills, notes, documents, the chat, tool results, your request" })), h("i", { text: "→" }), h("div", { class: "lp on" }, h("span", { text: "2" }), "The model reads its working memory", h("small", { class: "hint", text: "a window of limited size" })), h("i", { text: "→" }), h("div", { class: "lp" }, h("span", { text: "3" }), "It writes the next token", h("small", { class: "hint", text: "which joins the context" })), h("i", { text: "↺" }), h("div", { class: "lp back" }, h("span", { text: "↺" }), "Read it all again")));
       },
-      interactive: host => { host.append(h("p", { text: "Click a layer to see what it is, an example, and who controls it. The colour shows who supplies it." })); picture(host, true); },
-      deep: `<p>The layers change from product to product. Some have no memory, no skills or no retrieval. The colours show who supplies each layer: the product builder, a lookup done for you, you, or the model itself.</p>
+      interactive: host => { host.append(h("p", { text: "Click a layer to see what it is, an example, and who controls it. The color shows who supplies it." })); picture(host, true); },
+      deep: `<p>The layers change from product to product. Some have no memory, no skills or no retrieval. The colors show who supplies each layer: the product builder, a lookup done for you, you, or the model itself.</p>
 <p>The product wraps the model (Lesson 4). Nothing in the context changes the weights.</p>`,
       quiz: [["Who supplies the system instructions?", ["The customer", "The model itself", "The product builder"], 2, "Standing rules come from whoever builds or configures the product around the model."]]
     },

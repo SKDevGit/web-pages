@@ -46,7 +46,7 @@ function kindsInit(host) {
 }
 
 /* step 4: how models are offered */
-const KD = [["Hosted by a vendor", "You use it over the internet, and the provider runs it.", "Quick start, strong models, little setup.", "Your data goes to the vendor, under their terms, so check retention and training settings. Prices and terms are theirs."], ["Open weights", "The parameters are published, so you can run it yourself.", "More control over data and customisation.", "You need the people and hardware to run it."], ["Specialized", "Tuned for one area, such as code, law or medicine.", "Can be better on its home turf, but test it against a general model.", "Narrower, and still needs review."]];
+const KD = [["Hosted by a vendor", "You use it over the internet, and the provider runs it.", "Quick start, strong models, little setup.", "Your data goes to the vendor, under their terms, so check retention and training settings. Prices and terms are theirs."], ["Open weights", "The parameters are published, so you can run it yourself.", "More control over data and customization.", "You need the people and hardware to run it."], ["Specialized", "Tuned for one area, such as code, law or medicine.", "Can be better on its home turf, but test it against a general model.", "Narrower, and still needs review."]];
 function offerInit(host) {
   host.innerHTML = `<div class="widget"><div class="row"><span class="hint">Pick an option:</span></div><div class="chips" id="b2-chips"></div><div class="mini" id="b2-out"></div></div>`;
   function show(i) { const k = KD[i]; clear($("#b2-out")).append(cell("What it is", k[1]), cell("Good for", k[2]), cell("Watch out for", k[3])); }
@@ -81,10 +81,10 @@ lesson({
       stage: "Stage 1: Size and cost",
       title: "Pick the smallest model that is good enough",
       main: `<p>Bigger models are more capable, but they cost more and respond more slowly. So the question is not which model is best, but which is the <b>smallest one that does the job</b>.</p>
-<p>In Lesson 6 you saw that some tasks are simple, such as labelling an email, and others are demanding, such as multi-step analysis. Simple tasks rarely need the biggest model.</p>`,
+<p>In Lesson 6 you saw that some tasks are simple, such as labeling an email, and others are demanding, such as multi-step analysis. Simple tasks rarely need the biggest model.</p>`,
       interactive: sizeInit,
       deep: `<p>Providers sell several sizes of the same model family, and the names vary. The reliable way to choose is to test: run the same fifty or so real examples through each size, and pick the smallest one whose answers your team accepts.</p><p>Some products use a small model for most requests and pass only the hard ones to a larger model.</p>`,
-      quiz: [["A company labels 100,000 support emails a day. What is the sensible choice?", ["A small model, if it labels accurately enough", "The largest model available", "No model"], 0, "Cost and delay multiply with volume. Choose the smallest model that passes your accuracy test."]]
+      quiz: [["A company labels 100,000 support emails a day. What is the sensible choice?", ["The largest model available", "No model", "A small model, if it labels accurately enough"], 2, "Cost and delay multiply with volume. Choose the smallest model that passes your accuracy test."]]
     },
     {
       stage: "Stage 1: Size and cost",
@@ -98,7 +98,7 @@ lesson({
 </div>`,
       interactive: costInit,
       deep: `<p>Reasoning models (Lesson 6) may write a lot of working before they answer, and those tokens are typically billed as output. Some providers also discount repeated or batched input, so ask what is available.</p><p>Prices change often and differ by provider. Estimate with your own request sizes and your provider’s current price list before you commit.</p>`,
-      quiz: [["Which change cuts the cost of a high-volume task the most?", ["Use a smaller model and send only the text the task needs", "Use the biggest model for better answers", "Attach the whole manual to every request"], 0, "Model size and the amount of text sent each time both multiply across volume."]]
+      quiz: [["Which change cuts the cost of a high-volume task the most?", ["Use the biggest model for better answers", "Use a smaller model and send only the text the task needs", "Attach the whole manual to every request"], 1, "Model size and the amount of text sent each time both multiply across volume."]]
     },
     {
       stage: "Stage 2: Kind and offer",
@@ -116,7 +116,7 @@ lesson({
       interactive: offerInit,
       deep: `<p>A short history of how we got here:</p>
 <p><b>2017</b> The transformer design is introduced, built around attention. <b>2020</b> Models grow much larger, trained on far more text. <b>2022</b> Chat assistants put the technology in front of millions of people. <b>2023</b> Models begin to handle images and sound, and to call tools. <b>2024 to 2025</b> Reasoning models work through a problem before answering. <b>Now</b> Agents take multi-step actions, and companies embed models in their own products.</p>`,
-      quiz: [["Why might a bank choose an open-weights model it runs itself?", ["To keep sensitive data inside its own systems", "Because it is always smarter", "Because it needs no staff"], 0, "Running a model yourself gives control over data and customisation. In return, you take on the work of running it."]]
+      quiz: [["Why might a bank choose an open-weights model it runs itself?", ["Because it is always smarter", "Because it needs no staff", "To keep sensitive data inside its own systems"], 2, "Running a model yourself gives control over data and customization. In return, you take on the work of running it."]]
     },
     {
       stage: "Stage 3: Start well",
@@ -125,7 +125,7 @@ lesson({
 <p>Answer the three questions for each use case to see how they rank. A use case with three Yes answers is a good place to start. The starting answers are suggestions: change them to match your own business.</p>`,
       interactive: startInit,
       deep: `<p>Start with a task that is frequent, forgiving and easy to review, learn from it, and then move to harder work. As you climb, add the safeguards from Lesson 7, and use the option from Lesson 8 that the task needs.</p>`,
-      quiz: [["Which first project is best?", ["Drafting replies that an agent reviews before sending", "Sending refunds with no human check", "Giving legal advice to clients"], 0, "It is frequent, forgiving and easy to review. A person catches mistakes before they reach a customer."]]
+      quiz: [["Which first project is best?", ["Sending refunds with no human check", "Drafting replies that an agent reviews before sending", "Giving legal advice to clients"], 1, "It is frequent, forgiving and easy to review. A person catches mistakes before they reach a customer."]]
     },
     {
       title: "What you’ve seen",

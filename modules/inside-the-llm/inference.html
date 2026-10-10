@@ -25,7 +25,7 @@ const pick = (p, T) => { const r = Math.random(); let c = 0, k0 = p.order[0]; if
 function reset(p) { if (p != null) S.prompt = p; S.gen = []; S.picked = null; S.rev = {}; renderAll(); }
 
 function r2() {
-  const x = clear($("#x2")); x.append(h("div", { class: "label", text: "Your request, used in every step of this lesson" }), promptLine(), h("p", { class: "hint", text: "Grey is your request. Orange is anything the model adds later." }));
+  const x = clear($("#x2")); x.append(h("div", { class: "label", text: "Your request, used in every step of this lesson" }), promptLine(), h("p", { class: "hint", text: "Gray is your request. Orange is anything the model adds later." }));
 }
 function r3() {
   const x = clear($("#x3"));
@@ -191,7 +191,7 @@ lesson({
 <p><b>Temperature</b> sets how adventurous the roll is. At 0 the top token always wins.</p>`,
       interactive: mk("x8"),
       deep: `<p>Real products usually fix a sensible temperature, and some expose it as a setting. A less likely pick can send the whole reply in a different direction.</p>`,
-      quiz: [["At temperature 0, how many different replies would you expect from ten runs of the same request?", ["Ten", "One", "About five"], 1, "With no dice roll, the top token is always taken, so the reply is the same every time in this demo."]]
+      quiz: [["In this demo at temperature 0, how many different replies would you expect from ten runs of the same request?", ["Ten", "One", "About five"], 1, "With no dice roll, the top token is always taken, so the reply is the same every time in this demo. Real systems are close to repeatable at temperature 0, but not always exactly."]]
     },
     {
       stage: "Stage 2",
@@ -209,7 +209,7 @@ lesson({
 <p>Run it ten times at the temperature you chose and see how much they vary.</p>`,
       interactive: mk("x10"),
       deep: `<p>Even at temperature 0, real systems are close to repeatable but not always exactly, so do not promise identical wording from any vendor.</p>`,
-      quiz: [["Your team needs consistent wording from the model each time. Which setting would you lean towards?", ["A high temperature", "It makes no difference", "A low temperature"], 2, "Lower temperatures cut down on random variety, though they do not guarantee identical replies on every system."]]
+      quiz: [["Your team needs consistent wording from the model each time. Which setting would you lean toward?", ["A high temperature", "It makes no difference", "A low temperature"], 2, "Lower temperatures cut down on random variety, though they do not guarantee identical replies on every system."]]
     },
     {
       stage: "Stage 3",
@@ -226,7 +226,7 @@ lesson({
       main: `<p>The product may check the text before you see it. Then it shows you the reply, or takes an action.</p>
 <p>This is where human review belongs. With no review, errors reach customers.</p>`,
       interactive: ckInit,
-      deep: `<p>Which requests need a person’s approval, and which can run automatically, is the firm’s decision (Lesson 8). The model only writes text, and the product decides what to do with it.</p>`,
+      deep: `<p>Which requests need a person’s approval, and which can run automatically, is the firm’s decision (Lessons 6 and 7). The model only writes text, and the product decides what to do with it.</p>`,
       quiz: [["Where should a person approve a very risky action?", ["Never. The model decides", "In the product, before the action happens", "After the customer complains"], 1, "The check belongs between the model’s text and the action, not after it."]]
     },
     {
